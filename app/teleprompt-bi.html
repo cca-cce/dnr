@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Markdown Teleprompter (Bidirectional)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root{
+      --bg:#2f2f2f; --fg:#ffffff; --accent:#7dd3fc;
+      --form-bg:#111827; --form-fg:#e5e7eb; --max-width: 900px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:#0b0b0b; color:#e5e7eb;}
+    /* Form view */
+    #formView{min-height:100%; display:grid; place-items:center; padding:24px;}
+    .card{width:min(100%,var(--max-width)); background:var(--form-bg); border:1px solid #1f2937;
+      border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.35);}
+    .row{margin-block:14px}
+    label{display:block; margin-bottom:8px; font-weight:600}
+    textarea{width:100%; height:45vh; resize:vertical; border-radius:12px; border:1px solid #374151;
+      background:#0b1220; color:var(--form-fg); padding:14px; font:15px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono";}
+    .sliderRow{display:flex; align-items:center; gap:12px;}
+    input[type="range"]{width:100%; accent-color:var(--accent);}
+    .hint{opacity:.8; font-size:.9rem}
+    .btn{appearance:none; border:0; padding:12px 16px; border-radius:12px;
+      background:linear-gradient(180deg,#60a5fa,#2563eb); color:white; font-weight:700; cursor:pointer;
+      box-shadow:0 8px 20px rgba(37,99,235,.35);}
+    .btn:active{transform:translateY(1px)}
+    /* Prompt view */
+    #promptView{position:fixed; inset:0; display:none; background:var(--bg); color:var(--fg);}
+    #hud{position:fixed; top:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.35);
+      padding:6px 10px; border-radius:999px; font-size:12px; letter-spacing:.02em;
+      border:1px solid rgba(255,255,255,.15)}
+    #teleprompterOuter{position:absolute; inset:0; overflow:auto; scroll-behavior:auto; padding:10vh 6vw 20vh;}
+    #teleprompterInner{margin:0 auto; max-width:72ch; font-size:clamp(34px,6vw,60px); line-height:1.45;}
+    #teleprompterInner h1,#teleprompterInner h2,#teleprompterInner h3{margin:0 0 .2em 0; line-height:1.1; font-weight:800;}
+    #teleprompterInner p, #teleprompterInner ul, #teleprompterInner ol, #teleprompterInner blockquote{margin:0 0 .8em 0;}
+    #teleprompterInner blockquote{border-left:.15em solid rgba(255,255,255,.25); padding-left:.6em; opacity:.9;}
+    :focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  </style>
+</head>
+<body>
+
+<main id="formView" aria-hidden="false">
+  <div class="card" role="form" aria-label="Teleprompter setup">
+    <h1 style="margin:0 0 8px 0; font-size:1.6rem;">Markdown Teleprompter (Bidirectional)</h1>
+    <p class="hint">Center the slider for still text. Move left to scroll <strong>up</strong>, right to scroll <strong>down</strong>. Use ↑ / ↓ to nudge speed, Esc to exit.</p>
+
+    <div class="row">
+      <label for="mdInput">Markdown text</label>
+      <textarea id="mdInput" placeholder="# Title\n\nWrite your script here..."></textarea>
+    </div>
+
+    <div class="row sliderRow">
+      <label for="speedSlider" style="margin:0; white-space:nowrap;">Speed</label>
+      <span aria-hidden="true">⬆️</span>
+      <input id="speedSlider" type="range" min="0" max="100" value="50" />
+      <span aria-hidden="true">⬇️</span>
+      <span id="speedValue" class="hint" style="min-width:10ch; text-align:right;">0 (still)</span>
+    </div>
+
+    <div class="row" style="display:flex; gap:10px; justify-content:flex-end;">
+      <button id="startBtn" class="btn">Start Teleprompter</button>
+    </div>
+  </div>
+</main>
+
+<section id="promptView" aria-hidden="true">
+  <div id="hud" aria-live="polite">
+    Speed: <span id="hudSpeed">0</span> · Dir: <span id="hudDir">still</span> · ↑ up · ↓ down · Esc exit
+  </div>
+  <div id="teleprompterOuter">
+    <div id="teleprompterInner" class="content"></div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const formView = document.getElementById('formView');
+  const promptView = document.getElementById('promptView');
+  const mdInput = document.getElementById('mdInput');
+  const startBtn = document.getElementById('startBtn');
+  const speedSlider = document.getElementById('speedSlider');
+  const speedValue = document.getElementById('speedValue');
+  const hudSpeed = document.getElementById('hudSpeed');
+  const hudDir = document.getElementById('hudDir');
+  const teleOuter = document.getElementById('teleprompterOuter');
+  const teleInner = document.getElementById('teleprompterInner');
+
+  // Signed speed model:
+  // slider 0..100, midpoint 50 -> 0 px/s (still)
+  // <50 => negative speed (scroll up), >50 => positive speed (scroll down)
+  // Nonlinear curve for nicer control.
+  const MAX_PX_S = 1200;
+  const MID = 50;
+
+  function curve(mag){ // mag = 0..50
+    // Map 0..50 -> 0..MAX_PX_S using a gentle power curve
+    const n = Math.pow(mag/50, 1.35); // 0..1
+    return Math.min(MAX_PX_S, 10 + n * (MAX_PX_S - 10));
+  }
+
+  function sliderToSignedPxPerSec(v){
+    const s = Math.max(0, Math.min(100, Number(v)||MID));
+    const diff = s - MID; // -50..+50
+    if (diff === 0) return 0;
+    const mag = Math.abs(diff);
+    const speed = curve(mag);
+    return diff < 0 ? -speed : speed;
+  }
+
+  function signedPxPerSecToDisplay(v){
+    // Convert signed px/s back to a -50..+50 "logical" display value for HUD (approximate)
+    // Not exact inverse; just for user feedback.
+    if (v === 0) return 0;
+    const sign = v < 0 ? -1 : 1;
+    const k = Math.max(0, Math.min(MAX_PX_S, Math.abs(v)));
+    // rough inverse of curve: mag ≈ 50 * ((k-10)/(MAX-10))^(1/1.35)
+    const mag = 50 * Math.pow(Math.max(0,(k-10))/(MAX_PX_S-10), 1/1.35);
+    return Math.round(sign * mag);
+  }
+
+  function updateHudFromSlider(){
+    const signed = sliderToSignedPxPerSec(speedSlider.value);
+    const disp = signedPxPerSecToDisplay(signed);
+    speedValue.textContent = (disp === 0) ? "0 (still)" : (disp>0 ? `+${disp}` : `${disp}`);
+    hudSpeed.textContent = disp === 0 ? "0" : (disp>0 ? `+${disp}` : `${disp}`);
+    hudDir.textContent = disp === 0 ? "still" : (disp>0 ? "down" : "up");
+  }
+
+  let signedPxPerSec = 0;
+  updateHudFromSlider();
+
+  speedSlider.addEventListener('input', () => {
+    signedPxPerSec = sliderToSignedPxPerSec(speedSlider.value);
+    updateHudFromSlider();
+    if (signedPxPerSec !== 0 && !running){ startScroll(); }
+    if (signedPxPerSec === 0 && running){ stopScroll(); }
+  });
+
+  // Animation loop
+  let rafId = null;
+  let lastT = null;
+  let running = false;
+
+  function step(t){
+    if(!running) return;
+    if(lastT == null){ lastT = t; rafId = requestAnimationFrame(step); return; }
+    const dt = (t - lastT) / 1000;
+    lastT = t;
+
+    const deltaPx = signedPxPerSec * dt;
+    const maxScroll = teleOuter.scrollHeight - teleOuter.clientHeight;
+    let next = teleOuter.scrollTop + deltaPx;
+
+    if(next <= 0){
+      teleOuter.scrollTop = 0;
+      // If we're trying to scroll further up at top, just keep running (user may increase speed later)
+    } else if (next >= maxScroll){
+      teleOuter.scrollTop = maxScroll;
+      // If we're at bottom and scrolling down, stop to avoid runaway
+      if (signedPxPerSec > 0) { stopScroll(); return; }
+    } else {
+      teleOuter.scrollTop = next;
+    }
+    rafId = requestAnimationFrame(step);
+  }
+
+  function startScroll(){
+    if(running) return;
+    if (signedPxPerSec === 0) return; // don't start when still
+    running = true;
+    lastT = null;
+    rafId = requestAnimationFrame(step);
+  }
+
+  function stopScroll(){
+    running = false;
+    if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  function enterPrompt(){
+    const raw = mdInput.value.trim() || "# Hello!\n\nAdd some Markdown in the form to start.";
+    teleInner.innerHTML = marked.parse(raw, { breaks:true, gfm:true });
+
+    teleOuter.scrollTop = 0;
+
+    // Start with STILL text
+    speedSlider.value = MID;
+    signedPxPerSec = 0;
+    updateHudFromSlider();
+    stopScroll();
+
+    formView.style.display = 'none';
+    formView.setAttribute('aria-hidden','true');
+    promptView.style.display = 'block';
+    promptView.setAttribute('aria-hidden','false');
+    promptView.tabIndex = -1;
+    promptView.focus();
+  }
+
+  function exitPrompt(){
+    stopScroll();
+    promptView.style.display = 'none';
+    promptView.setAttribute('aria-hidden','true');
+    formView.style.display = 'grid';
+    formView.setAttribute('aria-hidden','false');
+    mdInput.focus();
+  }
+
+  startBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    enterPrompt();
+  });
+
+  // Keyboard controls within prompt view:
+  // ↑ move slider toward 0 (more up / negative); ↓ move slider toward 100 (more down / positive)
+  // Small nudge = 2 slider units; hold Shift for larger steps (6 units)
+  function nudgeSlider(delta){
+    const cur = Number(speedSlider.value);
+    const next = Math.max(0, Math.min(100, cur + delta));
+    speedSlider.value = String(next);
+    signedPxPerSec = sliderToSignedPxPerSec(next);
+    updateHudFromSlider();
+    if (signedPxPerSec === 0){ stopScroll(); }
+    else if (!running){ startScroll(); }
+  }
+
+  window.addEventListener('keydown', (e)=>{
+    const inPrompt = promptView.style.display === 'block';
+    if(!inPrompt) return;
+
+    if(e.key === 'Escape'){
+      e.preventDefault();
+      exitPrompt();
+      return;
+    }
+
+    const step = e.shiftKey ? 6 : 2;
+
+    if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      // Move toward 0 (left) by step units
+      nudgeSlider(-step);
+    } else if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      // Move toward 100 (right) by step units
+      nudgeSlider(+step);
+    }
+  }, {passive:false});
+
+  // Optional: pause/resume after manual wheel/touch
+  let manualTimeout = null;
+  function pauseAndResume(){
+    // When user manually scrolls, pause; resume after inactivity if speed ≠ 0
+    if(running){ stopScroll(); }
+    clearTimeout(manualTimeout);
+    manualTimeout = setTimeout(()=>{ if(signedPxPerSec !== 0) startScroll(); }, 900);
+  }
+  teleOuter.addEventListener('wheel', pauseAndResume, {passive:true});
+  teleOuter.addEventListener('touchmove', pauseAndResume, {passive:true});
+})();
+</script>
+</body>
+</html>
+

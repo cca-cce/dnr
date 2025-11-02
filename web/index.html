@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple & Readable Page Layout</title>
+
+    <style>
+        /* Your provided CSS is embedded here */
+        html {
+            box-sizing: border-box;
+            max-width: 70ch; /* Limits content width for readability */
+            margin: auto; /* Centers the content column */
+            font-size: 1.25em; /* Larger base font for comfort */
+            color: #333; /* A soft, dark gray instead of pure black */
+            line-height: 1.4; /* Increases space between lines of text */
+        }
+
+        /* All elements will inherit the box-sizing rule */
+        * {
+            box-sizing: inherit;
+        }
+
+        /* Headings use a clean, standard sans-serif font */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: sans-serif;
+        }
+
+        /* Makes images responsive: they will never be wider than their container */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Links will not have an underline by default */
+        a:link {
+            text-decoration: none;
+        }
+
+        /* An underline will appear only when you hover over a link */
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>A Clean & Readable Web Page</h1>
+    </header>
+
+    <main>
+        <p>
+            This is an example of a web page styled with simple, effective CSS. The entire content area is centered and has a maximum width, which makes long-form text much easier to read. The font is slightly larger and the line spacing is increased for comfort.
+        </p>
+
+        <!-- This image will automatically scale to fit the content width
+        <img src="https://via.placeholder.com/800x300" alt="A gray placeholder image">
+	convert -size 800x300 canvas:#cccccc -gravity Center -pointsize 60 -fill black -draw "text 0,0 '800 x 300'" placeholder.png
+	-->
+        <img src="placeholder.png" alt="A gray placeholder image">
+        
+        <h2>Key Features of This Layout</h2>
+        
+        <p>
+            The styling for this page demonstrates several key principles. The main text block is constrained to a comfortable reading width, and all images are fluid, meaning they will scale down to fit the layout without overflowing.
+        </p>
+        
+        <p>
+            Notice the links. By default, <a href="#">this is a sample link</a> that has no underline. However, if you move your mouse over it, the underline will appear, providing clear visual feedback to the user. This is a common and user-friendly design pattern.
+        </p>
+    </main>
+
+</body>
+</html>
