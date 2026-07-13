@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mandelbrot Dot Painter</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --axis: #8b949e;
+    --grid: #21262d;
+    --text: #c9d1d9;
+    --accent: #58a6ff;
+    --dot: #000000;
+    --plotbg: #37404e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  header {
+    padding: 10px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--grid);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 15px; font-weight: 600; }
+  header p { font-size: 12.5px; color: var(--axis); flex: 1; min-width: 220px; }
+  header .stats { font-size: 12.5px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  button, select {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--axis);
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  button:hover, select:hover { border-color: var(--accent); color: var(--accent); }
+  select { padding: 5px 8px; }
+  select option { background: var(--panel); color: var(--text); }
+  #wrap { flex: 1; position: relative; background: var(--plotbg); }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #plot { cursor: crosshair; }
+  #plot.panning { cursor: grab; }
+  #plot.panning:active { cursor: grabbing; }
+  #readout {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    background: rgba(22, 27, 34, 0.85);
+    border: 1px solid var(--grid);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--axis);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mandelbrot Dot Painter</h1>
+  <p>Left-drag to paint. Black = in the Mandelbrot set; outside dots run blue → cyan → gold → white the closer they lie to the boundary. Scroll to zoom at the cursor; right-drag (or hold <kbd>Space</kbd> and drag) to pan.</p>
+  <span class="stats" id="stats">0 dots</span>
+  <select id="tourSelect" title="Choose a zoom tour destination">
+    <option value="seahorse">Seahorse Valley</option>
+    <option value="elephant">Elephant Valley</option>
+    <option value="antenna">Antenna Island</option>
+    <option value="north">North Island</option>
+    <option value="spiral">Triple Spiral</option>
+    <option value="feigenbaum">Feigenbaum Point</option>
+  </select>
+  <button id="tourBtn">Zoom tour</button>
+  <button id="resetViewBtn">Reset view</button>
+  <button id="clearBtn">Clear dots</button>
+</header>
+<div id="wrap">
+  <canvas id="axes"></canvas>
+  <canvas id="plot"></canvas>
+  <div id="readout">c = —</div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const axesCanvas = document.getElementById("axes");
+  const plotCanvas = document.getElementById("plot");
+  const axesCtx = axesCanvas.getContext("2d");
+  const plotCtx = plotCanvas.getContext("2d");
+  const statsEl = document.getElementById("stats");
+  const readoutEl = document.getElementById("readout");
+
+  // View = center of the visible complex plane + scale (complex units per CSS pixel).
+  const HOME = { cre: -0.6, cim: 0, halfHeight: 1.4 }; // frames the whole set
+  let view = { cre: HOME.cre, cim: HOME.cim, scale: 0 };
+
+  const BASE_ITER = 300;
+  const MAX_ITER_CAP = 4000;
+  const BRUSH_RADIUS_PX = 22;   // spray radius around the cursor
+  const SAMPLES_PER_EVENT = 60; // points tested per mouse event
+  const MIN_SCALE = 1e-13;      // deepest zoom before float64 precision runs out
+  const MAX_SCALE = 0.05;
+
+  let dpr = 1;
+  let width = 0, height = 0;    // CSS pixel size
+  let painting = false;
+  let panPointer = null;        // { x, y } of last pan position, or null
+  let spaceHeld = false;
+  let lastPos = null;
+
+  // Dots stored in complex coordinates so they survive zoom, pan, and resize.
+  // Flat array [re, im, t, ...] where t = -1 for points in the set, otherwise
+  // closeness to the set's boundary (0 = far away, 1 = touching).
+  let dots = [];
+  let insideCount = 0, outsideCount = 0;
+
+  function resize() {
+    const wrap = document.getElementById("wrap");
+    dpr = window.devicePixelRatio || 1;
+    const keepScale = width > 0 ? view.scale : null;
+    width = wrap.clientWidth;
+    height = wrap.clientHeight;
+
+    for (const c of [axesCanvas, plotCanvas]) {
+      c.width = Math.round(width * dpr);
+      c.height = Math.round(height * dpr);
+    }
+    axesCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    plotCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    view.scale = keepScale !== null ? keepScale : (2 * HOME.halfHeight) / height;
+    redrawAll();
+  }
+
+  function resetView() {
+    view.cre = HOME.cre;
+    view.cim = HOME.cim;
+    view.scale = (2 * HOME.halfHeight) / height;
+    redrawAll();
+  }
+
+  function toRe(x) { return view.cre + (x - width / 2) * view.scale; }
+  function toIm(y) { return view.cim - (y - height / 2) * view.scale; }
+  function toX(re) { return (re - view.cre) / view.scale + width / 2; }
+  function toY(im) { return (view.cim - im) / view.scale + height / 2; }
+
+  // Zoom level relative to the home view (1 = fully zoomed out).
+  function zoomFactor() {
+    return ((2 * HOME.halfHeight) / height) / view.scale;
+  }
+
+  // More iterations when zoomed in, so the boundary stays accurate at depth.
+  function maxIter() {
+    const z = Math.max(1, zoomFactor());
+    return Math.min(MAX_ITER_CAP, Math.round(BASE_ITER + 120 * Math.log2(z)));
+  }
+
+  // Pick a "nice" grid step (1, 2, or 5 × 10^n) that is >= ~70px on screen.
+  function gridStep() {
+    const minUnits = 70 * view.scale;
+    const pow = Math.pow(10, Math.floor(Math.log10(minUnits)));
+    for (const m of [1, 2, 5, 10]) {
+      if (m * pow >= minUnits) return m * pow;
+    }
+    return 10 * pow;
+  }
+
+  function drawAxes() {
+    axesCtx.clearRect(0, 0, width, height);
+
+    const style = getComputedStyle(document.documentElement);
+    const gridColor = style.getPropertyValue("--grid").trim();
+    const axisColor = style.getPropertyValue("--axis").trim();
+
+    const step = gridStep();
+    const decimals = Math.max(0, -Math.floor(Math.log10(step)) + 1);
+    const reMin = toRe(0), reMax = toRe(width);
+    const imMin = toIm(height), imMax = toIm(0);
+    axesCtx.font = "11px system-ui, sans-serif";
+
+    // Grid lines
+    axesCtx.strokeStyle = gridColor;
+    axesCtx.lineWidth = 1;
+    for (let re = Math.ceil(reMin / step) * step; re <= reMax; re += step) {
+      const x = toX(re);
+      axesCtx.beginPath();
+      axesCtx.moveTo(x, 0);
+      axesCtx.lineTo(x, height);
+      axesCtx.stroke();
+    }
+    for (let im = Math.ceil(imMin / step) * step; im <= imMax; im += step) {
+      const y = toY(im);
+      axesCtx.beginPath();
+      axesCtx.moveTo(0, y);
+      axesCtx.lineTo(width, y);
+      axesCtx.stroke();
+    }
+
+    // Main axes (drawn only if on screen)
+    const x0 = toX(0), y0 = toY(0);
+    axesCtx.strokeStyle = axisColor;
+    axesCtx.lineWidth = 1.5;
+    axesCtx.beginPath();
+    if (x0 >= 0 && x0 <= width) { axesCtx.moveTo(x0, 0); axesCtx.lineTo(x0, height); }
+    if (y0 >= 0 && y0 <= height) { axesCtx.moveTo(0, y0); axesCtx.lineTo(width, y0); }
+    axesCtx.stroke();
+
+    // Tick labels — pinned to the axes when visible, else to the canvas edge.
+    const labelY = (y0 >= 0 && y0 <= height - 20) ? y0 + 4 : height - 16;
+    const labelX = (x0 >= 0 && x0 <= width - 60) ? x0 + 6 : 8;
+    axesCtx.fillStyle = axisColor;
+    axesCtx.textAlign = "center";
+    axesCtx.textBaseline = "top";
+    for (let re = Math.ceil(reMin / step) * step; re <= reMax; re += step) {
+      if (Math.abs(re) < step / 2 && x0 >= 0 && x0 <= width) continue;
+      axesCtx.fillText(formatTick(re, decimals), toX(re), labelY);
+    }
+    axesCtx.textAlign = "left";
+    axesCtx.textBaseline = "middle";
+    for (let im = Math.ceil(imMin / step) * step; im <= imMax; im += step) {
+      if (Math.abs(im) < step / 2 && y0 >= 0 && y0 <= height) continue;
+      axesCtx.fillText(formatTick(im, decimals) + "i", labelX, toY(im));
+    }
+
+    // Axis names
+    if (y0 >= 0 && y0 <= height) {
+      axesCtx.textAlign = "right";
+      axesCtx.textBaseline = "bottom";
+      axesCtx.fillText("Re", width - 8, y0 - 6);
+    }
+    if (x0 >= 0 && x0 <= width) {
+      axesCtx.textAlign = "left";
+      axesCtx.textBaseline = "top";
+      axesCtx.fillText("Im", x0 + 6, 8);
+    }
+  }
+
+  function formatTick(v, decimals) {
+    const s = v.toFixed(decimals);
+    return s === "-" + (0).toFixed(decimals) ? (0).toFixed(decimals) : s;
+  }
+
+  // Gradient stops for outside points: cold blue (far) → cyan → gold → white
+  // (touching the boundary). Quantized into buckets so redraws reuse cached
+  // strings instead of building one per dot.
+  const RAMP = [
+    [0.00,  24,  44, 110],
+    [0.35,   0, 165, 215],
+    [0.70, 255, 200,  60],
+    [1.00, 255, 255, 255],
+  ];
+  const OUTSIDE_BUCKETS = 64;
+  let colorCache = null;
+  function colorFor(t) {
+    if (!colorCache) {
+      colorCache = [];
+      for (let b = 0; b < OUTSIDE_BUCKETS; b++) {
+        const u = b / (OUTSIDE_BUCKETS - 1);
+        let k = 0;
+        while (k < RAMP.length - 2 && u > RAMP[k + 1][0]) k++;
+        const f = (u - RAMP[k][0]) / (RAMP[k + 1][0] - RAMP[k][0]);
+        const ch = [1, 2, 3].map((j) =>
+          Math.round(RAMP[k][j] + (RAMP[k + 1][j] - RAMP[k][j]) * f));
+        colorCache.push("rgb(" + ch.join(",") + ")");
+      }
+    }
+    if (t < 0) return "#000";
+    return colorCache[Math.min(OUTSIDE_BUCKETS - 1, Math.floor(t * OUTSIDE_BUCKETS))];
+  }
+
+  function redrawDots() {
+    plotCtx.clearRect(0, 0, width, height);
+    for (let i = 0; i < dots.length; i += 3) {
+      const x = toX(dots[i]);
+      const y = toY(dots[i + 1]);
+      if (x < -2 || y < -2 || x > width + 2 || y > height + 2) continue;
+      plotCtx.fillStyle = colorFor(dots[i + 2]);
+      plotCtx.fillRect(x - 1, y - 1, 2.2, 2.2);
+    }
+  }
+
+  function redrawAll() {
+    drawAxes();
+    redrawDots();
+    updateStats();
+  }
+
+  // -1 if c = re + im·i is (numerically) in the Mandelbrot set. Otherwise a
+  // 0..1 closeness value from the exterior distance estimate
+  // d ≈ |z|·ln|z| / |dz/dc|, mapped so 0 = far away and 1 = within ~1e-14 of
+  // the boundary. Absolute distance is used, so colors mean the same thing at
+  // every zoom level.
+  function closeness(cre, cim, iterLimit) {
+    // Fast interior checks: main cardioid and period-2 bulb.
+    const q = (cre - 0.25) * (cre - 0.25) + cim * cim;
+    if (q * (q + (cre - 0.25)) <= 0.25 * cim * cim) return -1;
+    if ((cre + 1) * (cre + 1) + cim * cim <= 0.0625) return -1;
+
+    let zr = 0, zi = 0, dzr = 0, dzi = 0;
+    for (let i = 0; i < iterLimit; i++) {
+      const zr2 = zr * zr, zi2 = zi * zi;
+      // Large escape radius makes the distance estimate accurate.
+      if (zr2 + zi2 > 1e10) {
+        const zmag = Math.sqrt(zr2 + zi2);
+        const d = zmag * Math.log(zmag) / Math.hypot(dzr, dzi);
+        if (!isFinite(d) || d <= 0) return 1;
+        return Math.sqrt(Math.min(1, Math.max(0, -Math.log10(d) / 14)));
+      }
+      const ndzr = 2 * (zr * dzr - zi * dzi) + 1;
+      dzi = 2 * (zr * dzi + zi * dzr);
+      dzr = ndzr;
+      zi = 2 * zr * zi + cim;
+      zr = zr2 - zi2 + cre;
+    }
+    return -1;
+  }
+
+  function paintAt(px, py) {
+    const iterLimit = maxIter();
+
+    for (let i = 0; i < SAMPLES_PER_EVENT; i++) {
+      // Uniform sample in a disc around the cursor
+      const angle = Math.random() * Math.PI * 2;
+      const r = BRUSH_RADIUS_PX * Math.sqrt(Math.random());
+      const x = px + r * Math.cos(angle);
+      const y = py + r * Math.sin(angle);
+      if (x < 0 || y < 0 || x >= width || y >= height) continue;
+
+      const cre = toRe(x), cim = toIm(y);
+      const t = closeness(cre, cim, iterLimit);
+      if (t < 0) insideCount++; else outsideCount++;
+      dots.push(cre, cim, t);
+      plotCtx.fillStyle = colorFor(t);
+      plotCtx.fillRect(x - 1, y - 1, 2.2, 2.2);
+    }
+    updateStats();
+  }
+
+  function updateStats() {
+    const z = zoomFactor();
+    const zoomTxt = z >= 1.05 ? " · zoom " + (z >= 100 ? z.toExponential(1) : z.toFixed(1)) + "×" : "";
+    statsEl.textContent = insideCount.toLocaleString() + " in · " +
+      outsideCount.toLocaleString() + " out" + zoomTxt;
+  }
+
+  function eventPos(ev) {
+    const rect = plotCanvas.getBoundingClientRect();
+    return { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
+  }
+
+  function updateReadout(p) {
+    const digits = Math.max(4, Math.min(14, -Math.floor(Math.log10(view.scale)) + 2));
+    const im = toIm(p.y);
+    readoutEl.textContent =
+      "c = " + toRe(p.x).toFixed(digits) + (im < 0 ? " − " : " + ") +
+      Math.abs(im).toFixed(digits) + "i";
+  }
+
+  // --- Preprogrammed zoom tours: dive into a named landmark, painting as we go ---
+  // zoom = final magnification relative to the home view, sized to each spot.
+  const TOURS = {
+    seahorse:   { re: -0.74543,          im: 0.11301,   zoom: 25000 },
+    elephant:   { re: 0.2760,            im: 0.00485,   zoom: 15000 },
+    antenna:    { re: -1.7548776662467,  im: 0,         zoom: 400 },
+    north:      { re: -0.1592,           im: 1.0317,    zoom: 4000 },
+    spiral:     { re: -0.088,            im: 0.654,     zoom: 8000 },
+    feigenbaum: { re: -1.4011551890,     im: 0,         zoom: 50000 },
+  };
+  const TOUR_DURATION = 10000;      // ms
+  const TOUR_SAMPLES_PER_FRAME = 250;
+  let tour = null;
+  const tourBtn = document.getElementById("tourBtn");
+  const tourSelect = document.getElementById("tourSelect");
+
+  function startTour() {
+    resetView();
+    const dest = TOURS[tourSelect.value] || TOURS.seahorse;
+    tour = {
+      start: performance.now(),
+      s0: view.scale,
+      s1: view.scale / dest.zoom,
+      c0re: view.cre,
+      c0im: view.cim,
+      tre: dest.re,
+      tim: dest.im,
+    };
+    tourBtn.textContent = "Stop tour";
+    requestAnimationFrame(tourFrame);
+  }
+
+  function stopTour() {
+    tour = null;
+    tourBtn.textContent = "Zoom tour";
+  }
+
+  function tourFrame(now) {
+    if (!tour) return;
+    const p = Math.min(1, (now - tour.start) / TOUR_DURATION);
+    const e = p * p * (3 - 2 * p); // smoothstep: gentle start and landing
+
+    // Zoom exponentially (constant perceived speed); slide the center toward
+    // the target in proportion to scale so the target stays in view throughout.
+    view.scale = tour.s0 * Math.pow(tour.s1 / tour.s0, e);
+    const w = (view.scale - tour.s1) / (tour.s0 - tour.s1);
+    view.cre = tour.tre + (tour.c0re - tour.tre) * w;
+    view.cim = tour.tim + (tour.c0im - tour.tim) * w;
+
+    // Spray random samples across the viewport so the dive paints itself.
+    const iterLimit = maxIter();
+    for (let i = 0; i < TOUR_SAMPLES_PER_FRAME; i++) {
+      const cre = toRe(Math.random() * width);
+      const cim = toIm(Math.random() * height);
+      const t = closeness(cre, cim, iterLimit);
+      if (t < 0) insideCount++; else outsideCount++;
+      dots.push(cre, cim, t);
+    }
+    redrawAll();
+
+    if (p >= 1) stopTour();
+    else requestAnimationFrame(tourFrame);
+  }
+
+  tourBtn.addEventListener("click", () => (tour ? stopTour() : startTour()));
+
+  // --- Zoom (wheel, centered on cursor) ---
+  plotCanvas.addEventListener("wheel", (ev) => {
+    ev.preventDefault();
+    if (tour) stopTour();
+    const p = eventPos(ev);
+    const factor = Math.pow(1.0015, ev.deltaY); // >1 zooms out, <1 zooms in
+    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, view.scale * factor));
+
+    // Keep the complex number under the cursor fixed while scale changes.
+    const re = toRe(p.x), im = toIm(p.y);
+    view.scale = newScale;
+    view.cre = re - (p.x - width / 2) * view.scale;
+    view.cim = im + (p.y - height / 2) * view.scale;
+
+    redrawAll();
+    updateReadout(p);
+  }, { passive: false });
+
+  // --- Paint (left button) and pan (right button or Space + left) ---
+  plotCanvas.addEventListener("pointerdown", (ev) => {
+    if (tour) stopTour();
+    const p = eventPos(ev);
+    plotCanvas.setPointerCapture(ev.pointerId);
+    if (ev.button === 2 || ev.button === 1 || spaceHeld) {
+      panPointer = p;
+    } else if (ev.button === 0) {
+      painting = true;
+      lastPos = p;
+      paintAt(p.x, p.y);
+    }
+  });
+
+  plotCanvas.addEventListener("pointermove", (ev) => {
+    const p = eventPos(ev);
+    updateReadout(p);
+
+    if (panPointer) {
+      view.cre -= (p.x - panPointer.x) * view.scale;
+      view.cim += (p.y - panPointer.y) * view.scale;
+      panPointer = p;
+      redrawAll();
+      return;
+    }
+
+    if (!painting) return;
+    // Interpolate along the drag path so fast strokes leave no gaps.
+    const dist = Math.hypot(p.x - lastPos.x, p.y - lastPos.y);
+    const steps = Math.max(1, Math.ceil(dist / (BRUSH_RADIUS_PX / 2)));
+    for (let s = 1; s <= steps; s++) {
+      const t = s / steps;
+      paintAt(lastPos.x + (p.x - lastPos.x) * t, lastPos.y + (p.y - lastPos.y) * t);
+    }
+    lastPos = p;
+  });
+
+  const stopPointer = () => { painting = false; panPointer = null; lastPos = null; };
+  plotCanvas.addEventListener("pointerup", stopPointer);
+  plotCanvas.addEventListener("pointercancel", stopPointer);
+  plotCanvas.addEventListener("contextmenu", (ev) => ev.preventDefault());
+
+  window.addEventListener("keydown", (ev) => {
+    if (ev.code === "Space" && ev.target === document.body) {
+      ev.preventDefault();
+      spaceHeld = true;
+      plotCanvas.classList.add("panning");
+    }
+  });
+  window.addEventListener("keyup", (ev) => {
+    if (ev.code === "Space") {
+      spaceHeld = false;
+      plotCanvas.classList.remove("panning");
+    }
+  });
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    dots = [];
+    insideCount = 0;
+    outsideCount = 0;
+    plotCtx.clearRect(0, 0, width, height);
+    updateStats();
+  });
+  document.getElementById("resetViewBtn").addEventListener("click", resetView);
+
+  window.addEventListener("resize", resize);
+  resize();
+})();
+</script>
+</body>
+</html>
