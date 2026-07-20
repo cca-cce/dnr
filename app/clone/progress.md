@@ -584,6 +584,32 @@ asserts all four rules headlessly against the real `Game`; plus
 The test harnesses were updated to load `runner.html` (this repo's name for
 the consolidated file) so the repo is self-contained.
 
+### Guard pit physics reverted to classic (2026-07-20, fourth session)
+
+The house rules above were judged a mistake and **reverted to the
+reference-faithful behavior** (`lodeRunner.guard.js` in
+`/tmp/comm/LodeRunner_TotalRecall`):
+
+1. **Any dug hole pins a falling guard**, regardless of what is below
+   (reference lines 92–94 force `stayCurrPos = 1` whenever a falling guard
+   with `yOffset < 0` occupies a `base == BLOCK_T` cell). The former rule 2
+   (clean fall-through of open-bottomed pits) and rule 3 (fill-phase-only
+   pinning) are gone; `stepActor` now forces `stay` for any guard settling
+   into a hole, and the `INHOLE`-commit escape plus the `moveGuards`
+   mid-settle fall-out branch were removed as dead code.
+2. **Carried gold is released while the guard is still falling in**
+   (reference AI v4, lines 217–225: drop onto the cell above if empty, else
+   written off via `decGold`). Implemented as `releaseGuardGold(g)`, called
+   from `moveGuards` on the tick the fall converts to `INHOLE`;
+   `guardTrapped()` calls it too as a safety net (v3-timing equivalent).
+3. Trap score, shake, climb-out, refill burial, and mid-run gold drop
+   (12–37 crossings) are unchanged.
+
+`test-guard-gold.js` was updated accordingly: rule B now asserts the guard
+is pinned over open space, never falls through, releases gold before
+landing, and climbs out. All checks pass, plus `audit-clone.js` (30/30)
+and `simtest-clone.js`.
+
 ### Known gaps
 
 - Solvability is proven statically, not under guard pressure or hole timing;

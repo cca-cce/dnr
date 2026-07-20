@@ -297,16 +297,14 @@ class Game {
       if (yo <= 0 && stay) action = A.STOP;
     } else if (action === A.DOWN || action === A.FALL || action === A.INHOLE) {
       stay = y >= Profile.rows - 1 || this.hardBelow(actor);
-      // a refilling hole pins a guard even over open space: the closing
-      // brick catches it, so it traps (and releases gold) instead of
-      // passing through
-      if (isGuard && !stay && curBase === T.BRICK) {
-        const h = this.holeAt(x, y);
-        if (h && h.phase === "fill") stay = true;
-      }
+      // classic rule (reference guardMoveStep): any dug hole pins a falling
+      // guard, regardless of what is below — it settles, traps, and either
+      // climbs out or is buried by the refill
+      if (isGuard && curBase === T.BRICK &&
+          (action === A.INHOLE || (action === A.FALL && yo < 0)))
+        stay = true;
       if (action === A.FALL && yo < 0 && curBase === T.BRICK && stay) {
-        action = A.INHOLE;  // settling into a dug hole that has a floor;
-                            // open-bottomed holes are fallen straight through
+        action = A.INHOLE;  // settling into a dug hole
       } else if (action !== A.INHOLE && yo >= 0 && stay) action = A.STOP;
     } else if (action === A.LEFT) {
       stay = this.blockedCell(x - 1, y, isGuard);
@@ -343,8 +341,7 @@ class Game {
       }
       yo += Profile.moveY;
       if (holdBar && yo >= 0) { yo = 0; action = A.FALLBAR; }
-      if (stay && action !== A.INHOLE && yo > 0) yo = 0;
-      else if (stay && action === A.INHOLE && yo > 0) yo = 0;
+      if (stay && yo > 0) yo = 0;
       else if (yo > HH) { y++; yo -= Profile.tileH; commitStep = true; }
       // falling past a bar catches it exactly at center
       if (action === A.FALL && m.baseAt(x, y) === T.BAR && yo >= 0 && yo < Profile.moveY) {
@@ -364,7 +361,6 @@ class Game {
 
     if (action === A.LEFT) actor.facing = A.LEFT;
     if (action === A.RIGHT) actor.facing = A.RIGHT;
-    if (action === A.INHOLE && commitStep) action = A.FALL; // hole had no floor
 
     actor.x = x; actor.y = y; actor.xo = xo; actor.yo = yo;
     if (action !== A.STOP) { actor.animT++; }
@@ -555,22 +551,29 @@ class Game {
         if (g.yo < 0) {          // still settling into the hole
           this.stepActor(g, A.INHOLE);
           if (g.action === A.INHOLE && g.yo === 0) this.guardTrapped(g);
-        } else if (g.yo === 0) this.tickTrapped(g);
-        else g.action = A.FALL;  // hole floor was dug away mid-settle
+        } else this.tickTrapped(g);
         continue;
       }
       const act = this.bestMove(g);
       const crossed = this.stepActor(g, act);   // tile boundary crossed?
       if (crossed && g.hasGold) this.tickCarriedGold(g);
-      if (g.action === A.INHOLE && g.yo === 0) this.guardTrapped(g);
+      if (g.action === A.INHOLE) {
+        this.releaseGuardGold(g);  // classic AI v4: gold drops on the way in
+        if (g.yo === 0) this.guardTrapped(g);
+      }
     }
   }
 
   guardTrapped(g) {
     g.yo = 0; g.shakeT = 0; g.shakeIdx = -1;
     g.holeX = g.x; g.holeY = g.y;
-    // gold falls out onto the cell above the hole, or is destroyed —
-    // destroyed gold is written off so it can't block the exit forever
+    this.releaseGuardGold(g); // usually a no-op: released while falling in
+    this.addScore(Profile.scoreTrap);
+    Audio.trap();
+  }
+  // gold falls out onto the cell above the hole, or is destroyed —
+  // destroyed gold is written off so it can't block the exit forever
+  releaseGuardGold(g) {
     if (g.hasGold > 0) {
       const m = this.model;
       if (g.y > 0 && m.baseAt(g.x, g.y - 1) === T.EMPTY && m.actAt(g.x, g.y - 1) === T.EMPTY)
@@ -578,8 +581,6 @@ class Game {
       else { m.goldCount--; this.checkGoldDone(); }
     }
     g.hasGold = 0;
-    this.addScore(Profile.scoreTrap);
-    Audio.trap();
   }
   tickTrapped(g) {
     g.shakeT++;

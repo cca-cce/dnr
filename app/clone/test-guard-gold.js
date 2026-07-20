@@ -1,10 +1,13 @@
 // Guard/gold/pit behavior test: drives the real engine headlessly and asserts
-// the intended pit physics (see progress.md, "Guard pit physics"):
+// the classic (reference-faithful) pit physics — any dug hole pins a falling
+// guard regardless of what is below, and carried gold is released while the
+// guard is still falling in (reference AI v4):
 //   A. pit with a hard floor below   -> guard traps, gold is force-released
-//   B. open-bottomed pit, hole open  -> guard falls straight through, keeps gold
+//   B. open-bottomed pit, hole open  -> guard is pinned anyway: gold released
+//                                       on the way in, trap score, climbs out
 //   C. carried gold                  -> dropped mid-run after 12-37 crossings
-//   D. open-bottomed pit, refilling  -> closing brick pins the guard: trap,
-//                                       gold released, guard buried on refill
+//   D. hole refills while trapped    -> guard buried and respawns; gold was
+//                                       already released above the hole
 "use strict";
 const fs = require("fs");
 const vm = require("vm");
@@ -79,21 +82,25 @@ console.log("A: pit with hard floor below -> trap + forced gold release");
   check(game.score - score0 === 75, `trap score awarded (+${game.score - score0})`);
 }
 
-console.log("B: open-bottomed pit, hole open -> clean fall-through, gold kept");
+console.log("B: open-bottomed pit, hole open -> guard pinned anyway, gold released while falling in");
 {
   const { g } = setup(PIERCED);
   const score0 = game.score;
-  let sawInHole = false;
-  for (let t = 0; t < 120; t++) {
+  let trapped = false, earlyRelease = false, fellThrough = false, climbed = false;
+  for (let t = 0; t < 400 && !climbed; t++) {
     game.tick();
-    if (g.action === A.INHOLE) sawInHole = true;
-    if (g.y > HOLE.y && g.yo === 0 && g.action !== A.FALL) break; // landed below
+    if (!trapped && goldAboveHole() && g.yo < 0) earlyRelease = true;
+    if (g.action === A.INHOLE && g.yo === 0) trapped = true;
+    if (g.y > HOLE.y) fellThrough = true;
+    if (g.action === A.CLIMB) climbed = true;
   }
-  check(!sawInHole, "guard never enters the trapped state");
-  check(g.y > HOLE.y, `guard fell through to row ${g.y}`);
-  check(g.hasGold > 0, `guard kept its gold (hasGold=${g.hasGold})`);
-  check(!goldAboveHole(), "no gold released above the hole");
-  check(game.score === score0, "no trap score awarded");
+  check(trapped, "guard trapped despite open space below the hole");
+  check(!fellThrough, "guard never fell through the hole");
+  check(earlyRelease, "gold released while the guard was still falling in");
+  check(goldAboveHole(), "gold is on the map above the hole");
+  check(g.hasGold === 0, `guard no longer carries gold (hasGold=${g.hasGold})`);
+  check(game.score - score0 === 75, `trap score awarded (+${game.score - score0})`);
+  check(climbed, "guard climbs out afterwards");
 }
 
 console.log("C: carried gold is dropped mid-run after 12-37 crossings");
@@ -119,7 +126,7 @@ console.log("C: carried gold is dropped mid-run after 12-37 crossings");
   check(dropOnMap, "dropped gold landed on the map");
 }
 
-console.log("D: open-bottomed pit that starts refilling -> guard pinned, gold released");
+console.log("D: hole refills while guard trapped -> gold already released, guard buried + respawns");
 {
   const { g, hole } = setup(PIERCED);
   const score0 = game.score;
