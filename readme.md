@@ -7,6 +7,7 @@
 # development and research
 
 - develop first, research later
+- clone runner [web app](https://cca-cce.github.io/dnr/app/clone/runner.html) or local
 
 ---
 
