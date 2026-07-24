@@ -6,10 +6,10 @@
 <title>Hyperbolic {4,5} Square Tiling — Poincaré Disk</title>
 <style>
   :root {
-    --bg: #faf7f2;
-    --panel: #ffffff;
-    --ink: #3b3a38;
-    --muted: #8a8580;
+    --bg: #16141a;
+    --panel: #232028;
+    --ink: #e9e5ee;
+    --muted: #9d97a8;
     --accent: #b8a9d9;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,13 +36,15 @@
   #stage {
     background: var(--panel);
     border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(60, 50, 40, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     touch-action: none;
+    cursor: grab;
   }
+  #stage.dragging { cursor: grabbing; }
   #controls {
     background: var(--panel);
     border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(60, 50, 40, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     padding: 1.25rem;
     display: grid;
     grid-template-columns: 1fr auto;
@@ -80,14 +82,14 @@
     padding: 0.45rem 1.4rem;
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--ink);
+    color: #3b3a38;
     background: linear-gradient(135deg, #f6d6e0, #d6e5f6);
-    border: 1px solid rgba(60, 50, 40, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.25);
     border-radius: 999px;
     cursor: pointer;
     transition: transform 0.1s ease, box-shadow 0.1s ease;
   }
-  #resetBtn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(60,50,40,0.12); }
+  #resetBtn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
   #resetBtn:active { transform: translateY(0); box-shadow: none; }
 </style>
 </head>
@@ -115,9 +117,11 @@ impossible in Euclidean space — and the tiling continues in ever-smaller squar
 
     <button id="resetBtn">Reset</button>
 
-    <p class="hint">Panning slides the hyperbolic plane itself (a Möbius
-    translation), so the tiling glides inside the fixed circle instead of
-    the canvas moving on the page.</p>
+    <p class="hint">Drag inside the circle to pan in any direction; scroll or
+    pinch to zoom. Panning slides the hyperbolic plane itself (a Möbius
+    translation), so the tiling glides inside the fixed circle — drag a loop
+    and the picture comes back slightly rotated: that twist is real hyperbolic
+    holonomy, not a bug.</p>
   </div>
 </div>
 
@@ -319,8 +323,55 @@ const TILES = buildTiling();
 const canvas = document.getElementById("stage");
 const ctx = canvas.getContext("2d");
 
-const DEFAULTS = { size: 100, panX: 0, panY: 0 };
-const state = { ...DEFAULTS };
+/* View transform: a disk automorphism  f(z) = (a z + b) / (conj(b) z + conj(a))
+ * stored as the complex pair M = {a, b}. Composing the small hyperbolic
+ * translations produced by dragging/sliders stays in this family (matrix
+ * product of [[a,b],[conj b, conj a]] blocks), so the tiling can glide in
+ * any direction inside the fixed boundary circle. */
+function mIdentity() { return { ar: 1, ai: 0, br: 0, bi: 0 }; }
+
+/* Pure hyperbolic translation sending the origin to v. */
+function mTranslation(vx, vy) { return { ar: 1, ai: 0, br: vx, bi: vy }; }
+
+/* Composition A∘B (apply B first), then renormalize to det = 1. */
+function mCompose(A, B) {
+  const ar = A.ar * B.ar - A.ai * B.ai + A.br * B.br + A.bi * B.bi;
+  const ai = A.ar * B.ai + A.ai * B.ar + A.bi * B.br - A.br * B.bi;
+  const br = A.ar * B.br - A.ai * B.bi + A.br * B.ar + A.bi * B.ai;
+  const bi = A.ar * B.bi + A.ai * B.br + A.bi * B.ar - A.br * B.ai;
+  const s = Math.sqrt(Math.max(1e-12, ar * ar + ai * ai - br * br - bi * bi));
+  return { ar: ar / s, ai: ai / s, br: br / s, bi: bi / s };
+}
+
+/* Where the transform sends the origin: f(0) = b / conj(a). */
+function mOrigin(M) {
+  const n = M.ar * M.ar + M.ai * M.ai;
+  return { x: (M.br * M.ar - M.bi * M.ai) / n, y: (M.br * M.ai + M.bi * M.ar) / n };
+}
+
+/* Apply f to a point. */
+function mApply(M, p) {
+  const nr = M.ar * p.x - M.ai * p.y + M.br;          /* a z + b               */
+  const ni = M.ar * p.y + M.ai * p.x + M.bi;
+  const dr = M.br * p.x + M.bi * p.y + M.ar;          /* conj(b) z + conj(a)   */
+  const di = M.br * p.y - M.bi * p.x - M.ai;
+  const d2 = dr * dr + di * di;
+  return { x: (nr * dr + ni * di) / d2, y: (ni * dr - nr * di) / d2 };
+}
+
+/* The hyperbolic translation taking p to q:  d = (b + A conj(b)) / (1 - |A|^2)
+ * with b = q - p, A = q*p — used to make dragging follow the pointer. */
+function mDragStep(p, q) {
+  const bx = q.x - p.x, by = q.y - p.y;
+  const Ax = q.x * p.x - q.y * p.y, Ay = q.x * p.y + q.y * p.x;
+  const A2 = Ax * Ax + Ay * Ay;
+  if (A2 > 0.999) return null;
+  return mTranslation((bx + Ax * bx + Ay * by) / (1 - A2),
+                      (by + Ay * bx - Ax * by) / (1 - A2));
+}
+
+const DEFAULTS = { size: 100 };
+const state = { size: DEFAULTS.size, M: mIdentity() };
 
 function draw() {
   const w = canvas.width, h = canvas.height;
@@ -328,21 +379,9 @@ function draw() {
   const cy = h / 2;
   const scale = (Math.min(w, h) / 2 - 24) * (state.size / 100);
 
-  /* Pan = hyperbolic translation of the disk: the Möbius map
-   * z -> (z + a) / (1 + conj(a) z) sends the origin to a while keeping the
-   * unit circle fixed, so the tiling glides inside the boundary circle. */
-  let ax = state.panX, ay = state.panY;
-  const an = Math.hypot(ax, ay);
-  if (an > 0.93) { ax *= 0.93 / an; ay *= 0.93 / an; }
-  const moved = an > 1e-9;
-  function mobius(p) {
-    if (!moved) return p;
-    const nx = p.x + ax, ny = p.y + ay;                 /* z + a          */
-    const dx = 1 + ax * p.x + ay * p.y;                 /* 1 + conj(a) z  */
-    const dy = ax * p.y - ay * p.x;
-    const d2 = dx * dx + dy * dy;
-    return { x: (nx * dx + ny * dy) / d2, y: (ny * dx - nx * dy) / d2 };
-  }
+  const M = state.M;
+  const isIdent = Math.abs(M.br) + Math.abs(M.bi) + Math.abs(M.ai) < 1e-12;
+  const mobius = isIdent ? (p => p) : (p => mApply(M, p));
 
   ctx.clearRect(0, 0, w, h);
   ctx.save();
@@ -393,24 +432,99 @@ const panYOut = document.getElementById("panYOut");
 const panXOut = document.getElementById("panXOut");
 
 function syncOutputs() {
-  sizeOut.textContent = state.size + "%";
-  panYOut.textContent = state.panY.toFixed(2);
-  panXOut.textContent = state.panX.toFixed(2);
+  const f0 = mOrigin(state.M);
+  sizeOut.textContent = Math.round(state.size) + "%";
+  panYOut.textContent = f0.y.toFixed(2);
+  panXOut.textContent = f0.x.toFixed(2);
+  sizeSlider.value = Math.round(state.size);
+  panXSlider.value = Math.round(Math.max(-90, Math.min(90, f0.x * 100)));
+  panYSlider.value = Math.round(Math.max(-90, Math.min(90, f0.y * 100)));
 }
 
+/* Move the view so the tiling center lands at v (composes a translation on
+ * top of the current transform, so drags and sliders play together). */
+function panTo(vx, vy) {
+  const n = Math.hypot(vx, vy);
+  if (n > 0.9) { vx *= 0.9 / n; vy *= 0.9 / n; }
+  const a = mOrigin(state.M);
+  state.M = mCompose(mTranslation(vx, vy), mCompose(mTranslation(-a.x, -a.y), state.M));
+}
+
+function setSize(s) { state.size = Math.max(30, Math.min(300, s)); }
+
 /* Slider units: hundredths of the disk radius (-90..90 -> -0.90..0.90). */
-sizeSlider.addEventListener("input", () => { state.size = +sizeSlider.value; syncOutputs(); draw(); });
-panYSlider.addEventListener("input", () => { state.panY = panYSlider.value / 100; syncOutputs(); draw(); });
-panXSlider.addEventListener("input", () => { state.panX = panXSlider.value / 100; syncOutputs(); draw(); });
+sizeSlider.addEventListener("input", () => { setSize(+sizeSlider.value); syncOutputs(); draw(); });
+const sliderPan = () => { panTo(panXSlider.value / 100, panYSlider.value / 100); syncOutputs(); draw(); };
+panYSlider.addEventListener("input", sliderPan);
+panXSlider.addEventListener("input", sliderPan);
 
 document.getElementById("resetBtn").addEventListener("click", () => {
-  Object.assign(state, DEFAULTS);
-  sizeSlider.value = state.size;
-  panYSlider.value = state.panY * 100;
-  panXSlider.value = state.panX * 100;
+  state.size = DEFAULTS.size;
+  state.M = mIdentity();
   syncOutputs();
   draw();
 });
+
+/* --- drag to pan, wheel / pinch to zoom ---------------------------------- */
+
+/* Pointer position in disk coordinates, clamped just inside the boundary. */
+function diskPoint(e) {
+  const r = canvas.getBoundingClientRect();
+  const scale = (Math.min(canvas.width, canvas.height) / 2 - 24) * (state.size / 100);
+  let x = ((e.clientX - r.left) * canvas.width / r.width - canvas.width / 2) / scale;
+  let y = -((e.clientY - r.top) * canvas.height / r.height - canvas.height / 2) / scale;
+  const n = Math.hypot(x, y);
+  const inside = n < 1;
+  if (n > 0.98) { x *= 0.98 / n; y *= 0.98 / n; }
+  return { x, y, inside };
+}
+
+const pointers = new Map();   /* pointerId -> {disk, sx, sy} */
+
+canvas.addEventListener("pointerdown", (e) => {
+  const p = diskPoint(e);
+  if (!p.inside && pointers.size === 0) return;   /* start drags inside the circle */
+  canvas.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { disk: p, sx: e.clientX, sy: e.clientY });
+  canvas.classList.add("dragging");
+});
+
+canvas.addEventListener("pointermove", (e) => {
+  const held = pointers.get(e.pointerId);
+  if (!held) return;
+  if (pointers.size === 1) {
+    /* pan: hyperbolic translation taking the grabbed point to the pointer */
+    const q = diskPoint(e);
+    const step = mDragStep(held.disk, q);
+    if (step) state.M = mCompose(step, state.M);
+    held.disk = q;
+  } else if (pointers.size === 2) {
+    /* pinch: zoom by the change in distance between the two pointers */
+    const [p1, p2] = [...pointers.values()];
+    const before = Math.hypot(p1.sx - p2.sx, p1.sy - p2.sy);
+    held.sx = e.clientX; held.sy = e.clientY;
+    const after = Math.hypot(p1.sx - p2.sx, p1.sy - p2.sy);
+    if (before > 10) setSize(state.size * after / before);
+    held.disk = diskPoint(e);
+  }
+  held.sx = e.clientX; held.sy = e.clientY;
+  syncOutputs();
+  draw();
+});
+
+function endPointer(e) {
+  if (!pointers.delete(e.pointerId)) return;
+  if (pointers.size === 0) canvas.classList.remove("dragging");
+}
+canvas.addEventListener("pointerup", endPointer);
+canvas.addEventListener("pointercancel", endPointer);
+
+canvas.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  setSize(state.size * Math.exp(-e.deltaY * 0.0012));
+  syncOutputs();
+  draw();
+}, { passive: false });
 
 /* Keep the canvas square and within the viewport. */
 function fitCanvas() {
