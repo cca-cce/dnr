@@ -30,7 +30,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: flex-start;
+    align-items: stretch;   /* control panel matches canvas height on wide screens */
     gap: 1rem;
   }
   #stage {
@@ -49,12 +49,19 @@
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 0.25rem 0.75rem;
-    align-content: start;
+    align-content: space-between;  /* spread rows over the stretched height */
     align-items: center;
     width: min(280px, 100%);
   }
   #controls label { grid-column: 1 / -1; margin-top: 0.5rem; }
-  #controls label:first-child { margin-top: 0; }
+  #controls .intro {
+    grid-column: 1 / -1;
+    font-size: 0.8rem;
+    color: var(--ink);
+    line-height: 1.5;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
   #controls .hint {
     grid-column: 1 / -1;
     font-size: 0.72rem;
@@ -96,13 +103,16 @@
 <body>
 
 <h1>Hyperbolic Geometry of Squares — {4,5} Tiling</h1>
-<p class="subtitle">Five squares (72° corners) meet at the central vertex of the Poincaré disk —
-impossible in Euclidean space — and the tiling continues in ever-smaller squares toward the perimeter</p>
 
 <div id="layout">
   <canvas id="stage" width="640" height="640"></canvas>
 
   <div id="controls">
+    <p class="intro">Five squares with 72° corners meet at every vertex —
+    impossible in Euclidean space. All 1,260 tiles are the same hyperbolic
+    size; the Poincaré projection just shrinks them toward the rim, which
+    is infinitely far away.</p>
+
     <label for="sizeSlider">Size</label>
     <input id="sizeSlider" type="range" min="30" max="300" step="1" value="100">
     <output id="sizeOut">100%</output>
@@ -117,10 +127,8 @@ impossible in Euclidean space — and the tiling continues in ever-smaller squar
 
     <button id="resetBtn">Reset</button>
 
-    <p class="hint">Drag inside the circle to pan in any direction; scroll or
-    pinch to zoom. Panning slides the hyperbolic plane itself (a Möbius
-    translation), so the tiling glides inside the fixed circle — drag a loop
-    and the picture comes back slightly rotated: that twist is real hyperbolic
+    <p class="hint">Drag inside the circle to pan, scroll or pinch to zoom.
+    Drag a loop and the tiling returns slightly rotated — that's hyperbolic
     holonomy, not a bug.</p>
   </div>
 </div>
