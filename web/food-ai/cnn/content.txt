@@ -1,0 +1,53 @@
+Adaeze Onejeme, a 28-year-old ad sales worker in Los Angeles, was visiting a night market in Hollywood with her sister in late August when she noticed something curious. Stall after stall, hawking loaded French fries or taquitos or smoothies, featured menus with pictures that at first seemed real — until she looked closer and noticed a too-perfect, almost rubbery aesthetic. “I was like, ‘Those don’t look like chicken nuggets. Those don’t look like typical food that we eat,’” Onejeme said.
+
+Describing what she encountered as an “AI flyer epidemic,” Onejeme filmed videos of some of the market stalls and she shared them on TikTok . Then, instead of patronizing one of the vendors using artificial intelligence on their menus, she settled on buying some fries and lemonade from stores advertising their food the old-fashioned way.
+
+“Not too long ago, people would just take a picture of the food and that would be on the menu. Now, these AI-generated pictures — the saturation, the coloring, the texture. It’s like you don’t even know what you’re going to get when it comes out,” Onejeme said in an interview. “At that point, is it false advertising?”
+
+Generative AI has quickly become prevalent in marketing, particularly in illustrations or videos , to the discomfort or disdain of many beholders. In the dining scene, whether at food trucks or bodegas, diners or cafes, the use of “AI slop menus,” as some TikTokers have dubbed them, can signify qualities people generally don’t want to associate with food: low quality, laziness or, well, slop.
+
+“Food is important to us,” said Alexander Diel, a psychologist at Germany’s University of Duisburg-Essen, who is among a team of scientists investigating the public’s responses to AI-generated photos of food. “At the same time, it’s something that can easily make us sick, so we are very sensitive to when something is even slightly off.”
+
+AI-generated food advertisements have drawn particularly intense reactions. BuzzFeed described them as the “restaurant red flag that will keep people away,” while Mashable declared them “nightmare fuel.” In Food & Wine magazine, features editor Kat Kinsman complained the pictures were ruining her appetite. “I would rather see a photo of a sheet of notebook paper messily scrawled with the day’s specials in the chef’s own hand than feel the queasy upset as my eyes and brain try to meet across the uncanny valley of a dish I know cannot be real,” Kinsman wrote, expressing a sentiment shared by many others online.
+
+The phenomenon is not just limited to the US. In Tokyo, sandwiches are advertised with an image in which the bagel seems to be made of cobwebs and contains a tuna salad that appears to have been inserted via a piping bag. In Kuala Lumpur, a bowl of spaghetti marinara looks like perfectly arranged yarn or strings of Play-Doh. And in Berlin, various lunch options seem to include a plastic-looking quiche with holes or a penne pasta made from rubber.
+
+“I see a lot of AI food and it just looks a bit shiny and strange, but there’s something particularly alien and wrong with this one,” said 30-year-old tour guide Julia Damphouse, who took the viral photo of the Berlin restaurant billboard last month after first noticing it earlier in summer. “There is something wrong with it. It looks too geometric. I imagine that’s it’s like if you take acid and food stops looking like food.”
+
+AI pictures of food seem to be up against the same problem as images of people or animals: the so-called uncanny valley. First introduced as a concept by Japanese roboticist Masahiro Mori in 1970, the uncanny valley is the term given to eerie or repellant feelings that can be triggered within people when they are confronted with slight imperfections in humanlike figures.
+
+Admittedly, though, some of the most viral images of AI food menus don’t just contain slight imperfections; they’re alienlike catastrophes. “It stopped us in our tracks,” said Sam Biddle, a technology reporter at the Intercept who took a widely shared photo of a supposed shrimp scampi dish at a deli he visited in August, featuring circular creatures that Biddle later compared to monsters from the works of sci-fi writer HP Lovecraft. “It wasn’t just unappetizing — which, you know, it is — but it was also sort of spiritually unsettling and cosmically unnerving.”
+
+Courtesy of Sam Biddle
+
+## Saving money? Or scaring customers?
+
+Running a restaurant in 2026 is no easy task. Facing rising costs and uneven customer traffic, 42% of operators said their eateries failed to turn a profit in 2025, according to the National Restaurant Association . As they look to save money wherever possible, 26% of restaurant owners are using AI, the NRA said in its latest annual report published in February, with the majority of those using the tools to assist with marketing.
+
+Initially, as AI began rapidly advancing a few years back, there were signs customers were not yet sensitized to the images and their flaws. In 2023, the British restaurant ordering and payment platform Slerp surveyed 100 people and found more than 60% couldn’t tell if different images of food were authentic photographs or AI-generated.
+
+“For those brands and companies constrained by resources, timings or budgets, we would say as long as the images still look good enough to eat and reflect the real item being offered, then why not try it,” Slerp founder JP Then advised at the time. (That page has since been removed from Slerp’s website.)
+
+But as AI images become widespread, there are signs that may be changing — especially when it comes to pictures of what consumers physically consume.
+
+In one 2025 peer-reviewed study , Diel and his fellow researchers found that viewers rated slightly imperfect AI food images as significantly more “uncanny” and less pleasant than either nonrealistic food images or highly realistic looking food. In another study published last month, Diel’s team found that although people judged realistic and nonrealistic images of the same food to have the same health or caloric qualities, they expressed less desire to actually eat the AI food — a finding in line with prior studies .
+
+Diel and his fellow psychologists have a couple of hypotheses as to why people seem averse to AI food. It could be that these slightly-off images trigger our evolutionary sensitivities to food that may be unsafe to eat, much in the way our sense of disgust has developed to protect us from harmful things . Alternatively, it could just be that these images play into the fear of trying unfamiliar foods — something called food neophobia — for similar evolutionary reasons. “We don’t know if the food is safe or not, so we’d rather be careful and not eat it,” Diel explained.
+
+From Freedom 250
+
+Trump’s Freedom 250 gives the founders an AI glow-up
+
+## An AI food fight — with real consequences
+
+When these pictures go viral, they can negatively affect operators who may have had the best of intentions. One small restaurant owner said they were bombarded with negative online reviews and even threats after an image of their AI-illustrated menu went viral earlier this year. They said the experience was so detrimental that they no longer use AI in any food marketing.
+
+“It’s not fair to be grouped into this online hate. These people start giving fake reviews and trying to hurt these businesses because an owner used ChatGPT to make a poster,” said the restaurant owner, who asked not to be identified because of the online abuse they had already endured.
+
+Hospitality workers need to be particularly mindful of how they use AI, according to Nancy Hopkins, president of the International Association of Culinary Professionals . Hopkins believes that while there are smart ways for restaurateurs to incorporate AI into their businesses — say, with scheduling or payroll — using it to generate pictures of your food will lead to customers being disappointed that their meal doesn’t look like the menu.
+
+“I think it backfires if you’re a little startup restaurant. You might have all the good intentions in the world to use a photo and say we can serve you this, but really, when you get into it, you can’t,” Hopkins said. “No one can deliver what that photo brings.”
+
+Instead, Hopkins advised her small business owners without the budgets for professional photographers or designers to instead opt for smaller scale illustrations or even to take their own photos on smartphones, if need be. Authenticity, she advised, is what hungry patrons are really searching for.
+
+“Where food is concerned, people want to eat something that’s authentic and truly delicious,” Hopkins said. “Tell your honest story. Real people, real stories will always be better.”

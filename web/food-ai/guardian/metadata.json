@@ -1,0 +1,27 @@
+{
+  "url": "https://www.theguardian.com/technology/2026/sep/06/ai-food-menu-images",
+  "kind": "news article",
+  "title": "Uncanny and unappetizing: appetites spoil as AI images take over food menus",
+  "description": "Consumers are increasingly encountering AI-generated images on food menus such as leathery meat and bread resembling reptile skin",
+  "download_status": "complete",
+  "images": [
+    {
+      "file": "images/image-01.jpg",
+      "source_url": "https://i.guim.co.uk/img/media/02e203131392e710b2b1e75f0ac4203886c5eea7/0_627_3024_2419/master/3024.jpg?width=465&dpr=1&s=none&crop=none",
+      "caption_or_alt": "Bella Cafe's breakfast menu poster displays twelve dishes with Western-themed names and photos",
+      "content_type": "image/jpeg"
+    },
+    {
+      "file": "images/image-02.jpg",
+      "source_url": "https://i.guim.co.uk/img/media/69f04a9edee81d048900700957f90b200e3fa490/0_0_675_900/master/675.jpg?width=445&dpr=1&s=none&crop=none",
+      "caption_or_alt": "Artificial intelligence-generated menu images from a Jamaican BBQ pop-up restaurant.",
+      "content_type": "image/jpeg"
+    },
+    {
+      "file": "images/image-03.jpg",
+      "source_url": "https://i.guim.co.uk/img/media/550fc46a3b2171a2add21a64edcd7da3087e9f3f/0_212_1179_1473/master/1179.jpg?width=445&dpr=1&s=none&crop=none",
+      "caption_or_alt": "AI enhanced images seen on DoorDash",
+      "content_type": "image/jpeg"
+    }
+  ]
+}

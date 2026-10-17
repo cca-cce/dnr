@@ -1,0 +1,27 @@
+{
+  "url": "https://edition.cnn.com/2026/09/02/us/ai-food-slop-menus-viral-cec",
+  "kind": "news article",
+  "title": "Why restaurants are facing backlash for fake food pictures | CNN",
+  "description": "Generative AI is being used to advertise food around the world to the disdain of many beholders. But there are real reasons why consumers are repelled by the sometimes bizarre-looking meals.",
+  "download_status": "complete",
+  "images": [
+    {
+      "file": "images/image-01.jpg",
+      "source_url": "https://media.cnn.com/api/v1/images/stellar/prod/hqbaj9ga0aartjd.jpg?c=original&q=w_860,c_fill",
+      "caption_or_alt": "Among the entrees at another bodega was a shrimp scampi dish that looked like something from another planet.",
+      "content_type": "image/jpeg"
+    },
+    {
+      "file": "images/image-02.jpg",
+      "source_url": "https://media.cnn.com/api/v1/images/stellar/prod/16x9-ai-generated-image-image-name-20260702203258622.jpg?c=16x9&q=h_720,w_1280,c_fill/w_256",
+      "caption_or_alt": "From left to right, AI Generated images of Francis Lewis, Carter Braxton, Edward Rutledge and Abraham Clark from the Freedom 250 page.",
+      "content_type": "image/jpeg"
+    },
+    {
+      "file": "images/image-03.jpg",
+      "source_url": "https://media.cnn.com/api/v1/images/stellar/prod/img-1012-20260902191931601.jpg?c=16x9&q=w_800,c_fill",
+      "caption_or_alt": "Open Graph lead image",
+      "content_type": "image/jpeg"
+    }
+  ]
+}
