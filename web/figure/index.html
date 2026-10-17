@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Rigged Figure Preview</title>
+  <style>
+    :root { color-scheme: dark; font: 16px/1.4 system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #07101d; color: #edf4ff; }
+    main { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; }
+    .panel {
+      position: absolute; top: 1rem; left: 1rem; width: min(24rem, calc(100vw - 2rem));
+      padding: 1rem; border: 1px solid #ffffff20; border-radius: .9rem;
+      background: #07101dcc; backdrop-filter: blur(12px); box-shadow: 0 .8rem 3rem #0008;
+    }
+    h1 { margin: 0 0 .25rem; font-size: 1.15rem; }
+    p { margin: .25rem 0 .8rem; color: #b9c6da; font-size: .9rem; }
+    .controls { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+    label { font-size: .8rem; color: #b9c6da; }
+    select, button {
+      color: inherit; background: #17243a; border: 1px solid #ffffff25;
+      border-radius: .45rem; padding: .45rem .65rem;
+    }
+    button { cursor: pointer; }
+    #status { margin-top: .7rem; font-size: .78rem; color: #8fa8ca; }
+    .error { color: #ff9b9b !important; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+<main>
+  <div class="panel">
+    <h1>Rigged figure</h1>
+    <p>Drag to orbit, scroll to zoom, and select an embedded animation.</p>
+    <div class="controls">
+      <label for="clip">Animation</label>
+      <select id="clip" disabled><option>Loading…</option></select>
+      <button id="toggle" type="button" disabled>Pause</button>
+    </div>
+    <div id="status">Loading <code>./assets/figure-rigged.glb</code>…</div>
+  </div>
+</main>
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+  const container = document.querySelector('main');
+  const status = document.querySelector('#status');
+  const clipSelect = document.querySelector('#clip');
+  const toggle = document.querySelector('#toggle');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x07101d);
+  const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.01, 100);
+  camera.position.set(0, 3.2, 11.5);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.shadowMap.enabled = true;
+  container.prepend(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.target.set(0, 2.6, 0);
+  controls.minDistance = 4;
+  controls.maxDistance = 16;
+  scene.add(new THREE.HemisphereLight(0xddeeff, 0x172033, 2.4));
+  const key = new THREE.DirectionalLight(0xffffff, 3.2);
+  key.position.set(-4, 5, 8);
+  scene.add(key);
+  const frontFill = new THREE.DirectionalLight(0xffd9d5, 1.25);
+  frontFill.position.set(0, 1, 6);
+  scene.add(frontFill);
+  const floor = new THREE.Mesh(
+    new THREE.CircleGeometry(6, 64),
+    new THREE.MeshStandardMaterial({ color: 0x111b2b, roughness: 0.9 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  let mixer = null;
+  let activeAction = null;
+  const clock = new THREE.Clock();
+  const actions = new Map();
+
+  function playClip(name) {
+    const next = actions.get(name);
+    if (!next) return;
+    if (activeAction && activeAction !== next) activeAction.fadeOut(0.2);
+    next.reset().fadeIn(0.2).play();
+    activeAction = next;
+    toggle.textContent = 'Pause';
+  }
+
+  const loader = new GLTFLoader();
+  const acceptModel = (gltf) => {
+    gltf.scene.traverse((node) => {
+      if (node.isMesh) { node.castShadow = true; node.frustumCulled = false; }
+    });
+    scene.add(gltf.scene);
+    mixer = new THREE.AnimationMixer(gltf.scene);
+    clipSelect.replaceChildren();
+    for (const animation of gltf.animations) {
+      actions.set(animation.name, mixer.clipAction(animation));
+      clipSelect.add(new Option(animation.name, animation.name));
+    }
+    const initial = actions.has('Idle') ? 'Idle' : gltf.animations[0]?.name;
+    if (initial) { clipSelect.value = initial; playClip(initial); }
+    clipSelect.disabled = actions.size === 0;
+    toggle.disabled = actions.size === 0;
+    status.textContent = `${gltf.animations.length} animation clips loaded`;
+  };
+  const rejectModel = (error) => {
+    console.error(error);
+    status.classList.add('error');
+    status.textContent = 'Could not load the GLB. Serve this directory over HTTP rather than opening the file directly.';
+  };
+
+  if (window.FIGURE_GLB_BASE64) {
+    try {
+      const binary = atob(window.FIGURE_GLB_BASE64);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+      loader.parse(bytes.buffer, '', acceptModel, rejectModel);
+    } catch (error) {
+      rejectModel(error);
+    }
+  } else {
+    loader.load('./assets/figure-rigged.glb', acceptModel, undefined, rejectModel);
+  }
+
+  clipSelect.addEventListener('change', () => playClip(clipSelect.value));
+  toggle.addEventListener('click', () => {
+    if (!activeAction) return;
+    activeAction.paused = !activeAction.paused;
+    toggle.textContent = activeAction.paused ? 'Play' : 'Pause';
+  });
+  addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+  renderer.setAnimationLoop(() => {
+    if (mixer) mixer.update(clock.getDelta()); else clock.getDelta();
+    controls.update();
+    renderer.render(scene, camera);
+  });
+</script>
+</body>
+</html>
