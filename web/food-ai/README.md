@@ -9,7 +9,7 @@ Open [`index.html`](index.html) for the visual sourcebook. It provides:
 - Overview cards and short summaries for all six sources.
 - Separate image, video, and text collections.
 - Full readable Guardian and CNN article pages.
-- Local playback of the archived Instagram reel with reviewed English subtitles and transcript.
+- Local playback of the archived Instagram reel with reviewed English and German subtitles and transcripts.
 - A searchable page containing the Reddit post and 198 comments.
 - Explicit limitation pages for the blocked New York Times interactive and client-rendered TikTok discovery feed.
 

@@ -14,9 +14,11 @@
     "Video_by_jennyfrennberg-DeUPt1mIz5n.jpg"
   ],
   "subtitle_files": [
+    "subtitles-de.vtt",
     "subtitles-en.vtt"
   ],
   "transcript_files": [
+    "transcript-de.txt",
     "transcript-en.txt"
   ]
 }
