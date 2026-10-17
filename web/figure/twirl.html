@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Figure Circle Walk and Twirl</title>
+  <style>
+    :root { color-scheme: dark; font: 16px/1.4 system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; overflow: hidden; background: #07101d; color: #edf4ff; }
+    main { position: relative; width: 100vw; height: 100vh; }
+    canvas { display: block; width: 100%; height: 100%; }
+    .panel {
+      position: absolute; top: 1rem; left: 1rem; width: min(25rem, calc(100vw - 2rem));
+      padding: 1rem; border: 1px solid #ffffff20; border-radius: .9rem;
+      background: #07101dcc; backdrop-filter: blur(12px); box-shadow: 0 .8rem 3rem #0008;
+    }
+    h1 { margin: 0 0 .25rem; font-size: 1.15rem; }
+    p { margin: .25rem 0 .8rem; color: #b9c6da; font-size: .9rem; }
+    .row { display: flex; align-items: center; gap: .65rem; }
+    button {
+      color: inherit; background: #17243a; border: 1px solid #ffffff25;
+      border-radius: .45rem; padding: .45rem .75rem; cursor: pointer;
+    }
+    .phase { font-weight: 700; color: #ffca67; }
+    .track { flex: 1; height: .42rem; overflow: hidden; border-radius: 1rem; background: #ffffff18; }
+    .track span { display: block; width: 0; height: 100%; border-radius: inherit; background: #ffca67; }
+    #status { margin-top: .65rem; min-height: 1.2em; font-size: .8rem; color: #91a7c5; }
+    #status.error { color: #ff9b9b; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+<main>
+  <section class="panel" aria-live="polite">
+    <h1>Circle walk &amp; one-foot twirl</h1>
+    <p>The figure walks one lap, balances for a three-turn twirl, then repeats.</p>
+    <div class="row">
+      <button id="toggle" type="button" disabled>Pause</button>
+      <button id="restart" type="button" disabled>Restart</button>
+      <span id="phase" class="phase">Loading</span>
+      <span class="track" aria-hidden="true"><span id="progress"></span></span>
+    </div>
+    <div id="status">Loading <code>./assets/figure-rigged.glb</code>…</div>
+  </section>
+</main>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+  const WALK_SECONDS = 10;
+  const TWIRL_SECONDS = 4.5;
+  const CYCLE_SECONDS = WALK_SECONDS + TWIRL_SECONDS;
+  const PATH_RADIUS = 3.1;
+  const SUPPORT_FOOT_OFFSET = 0.34;
+
+  const container = document.querySelector('main');
+  const toggle = document.querySelector('#toggle');
+  const restart = document.querySelector('#restart');
+  const phaseLabel = document.querySelector('#phase');
+  const progress = document.querySelector('#progress');
+  const status = document.querySelector('#status');
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x07101d);
+  scene.fog = new THREE.Fog(0x07101d, 16, 27);
+
+  const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.01, 100);
+  camera.position.set(9.5, 7.8, 11.5);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.prepend(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.target.set(0, 2.25, 0);
+  controls.minDistance = 8;
+  controls.maxDistance = 25;
+
+  scene.add(new THREE.HemisphereLight(0xffeef0, 0x34415c, 2.8));
+  const key = new THREE.DirectionalLight(0xffffff, 3.4);
+  key.position.set(-6, 10, 7);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.camera.left = -9;
+  key.shadow.camera.right = 9;
+  key.shadow.camera.top = 9;
+  key.shadow.camera.bottom = -9;
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffc7cf, 1.2);
+  fill.position.set(7, 3, 9);
+  scene.add(fill);
+
+  const floor = new THREE.Mesh(
+    new THREE.CircleGeometry(9, 96),
+    new THREE.MeshStandardMaterial({ color: 0x172237, roughness: 0.92 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  const pathPoints = [];
+  for (let index = 0; index < 128; index += 1) {
+    const angle = index / 128 * Math.PI * 2;
+    pathPoints.push(new THREE.Vector3(Math.cos(angle) * PATH_RADIUS, 0.025, Math.sin(angle) * PATH_RADIUS));
+  }
+  const pathLine = new THREE.LineLoop(
+    new THREE.BufferGeometry().setFromPoints(pathPoints),
+    new THREE.LineBasicMaterial({ color: 0x6d7fa0, transparent: true, opacity: 0.42 })
+  );
+  scene.add(pathLine);
+
+  const motionRoot = new THREE.Group();
+  const figureRoot = new THREE.Group();
+  motionRoot.add(figureRoot);
+  scene.add(motionRoot);
+
+  let mixer = null;
+  let walkAction = null;
+  let sequenceStart = 0;
+  let pausedAt = 0;
+  let paused = false;
+  let activePhase = '';
+  let loaded = false;
+  const clock = new THREE.Clock();
+
+  const easeInOutCubic = (value) => value < 0.5
+    ? 4 * value * value * value
+    : 1 - Math.pow(-2 * value + 2, 3) / 2;
+
+  function enterPhase(nextPhase) {
+    if (activePhase === nextPhase || !walkAction) return;
+    activePhase = nextPhase;
+    if (nextPhase === 'walk') {
+      walkAction.enabled = true;
+      walkAction.paused = false;
+      walkAction.setLoop(THREE.LoopRepeat, Infinity).play();
+      figureRoot.position.x = 0;
+    } else {
+      // Frame 13 of the authored walk is a clear one-foot balance pose.
+      walkAction.enabled = true;
+      walkAction.paused = false;
+      walkAction.time = 12 / 24;
+      mixer.update(0);
+      walkAction.paused = true;
+    }
+  }
+
+  function applySequence(seconds) {
+    const cycleTime = ((seconds % CYCLE_SECONDS) + CYCLE_SECONDS) % CYCLE_SECONDS;
+    if (cycleTime < WALK_SECONDS) {
+      enterPhase('walk');
+      const lap = cycleTime / WALK_SECONDS;
+      const angle = lap * Math.PI * 2;
+      motionRoot.position.set(Math.cos(angle) * PATH_RADIUS, 0, Math.sin(angle) * PATH_RADIUS);
+      motionRoot.rotation.y = -angle;
+      figureRoot.position.x = 0;
+      phaseLabel.textContent = 'Walking';
+      progress.style.width = `${lap * 100}%`;
+      return;
+    }
+
+    enterPhase('twirl');
+    const twirl = (cycleTime - WALK_SECONDS) / TWIRL_SECONDS;
+    const eased = easeInOutCubic(twirl);
+    motionRoot.position.set(PATH_RADIUS, 0, 0);
+    motionRoot.rotation.y = eased * Math.PI * 6;
+    // Shift the body over the supporting foot, then return to center before walking.
+    figureRoot.position.x = -SUPPORT_FOOT_OFFSET * Math.sin(Math.PI * twirl);
+    phaseLabel.textContent = 'One-foot twirl';
+    progress.style.width = `${twirl * 100}%`;
+  }
+
+  new GLTFLoader().load('./assets/figure-rigged.glb', (gltf) => {
+    gltf.scene.traverse((node) => {
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.frustumCulled = false;
+      }
+    });
+    figureRoot.add(gltf.scene);
+    mixer = new THREE.AnimationMixer(gltf.scene);
+    const walkClip = THREE.AnimationClip.findByName(gltf.animations, 'Walk');
+    if (!walkClip) throw new Error('The GLB does not contain the Walk animation clip.');
+    walkAction = mixer.clipAction(walkClip);
+    walkAction.play();
+    const previewTwirl = location.hash === '#twirl';
+    sequenceStart = performance.now() / 1000 - (previewTwirl ? WALK_SECONDS + TWIRL_SECONDS * 0.5 : 0);
+    loaded = true;
+    toggle.disabled = false;
+    restart.disabled = false;
+    status.textContent = 'Walk and twirl sequence ready';
+  }, undefined, (error) => {
+    console.error(error);
+    status.classList.add('error');
+    status.textContent = 'Could not load the rigged GLB.';
+    phaseLabel.textContent = 'Error';
+  });
+
+  toggle.addEventListener('click', () => {
+    if (!loaded) return;
+    if (paused) {
+      sequenceStart += performance.now() / 1000 - pausedAt;
+      paused = false;
+      clock.start();
+      toggle.textContent = 'Pause';
+    } else {
+      pausedAt = performance.now() / 1000;
+      paused = true;
+      clock.stop();
+      toggle.textContent = 'Resume';
+    }
+  });
+
+  restart.addEventListener('click', () => {
+    sequenceStart = performance.now() / 1000;
+    activePhase = '';
+    if (walkAction) walkAction.reset().play();
+  });
+
+  addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+  renderer.setAnimationLoop(() => {
+    const delta = paused ? 0 : Math.min(clock.getDelta(), 0.05);
+    if (loaded) {
+      const now = paused ? pausedAt : performance.now() / 1000;
+      const sequenceTime = now - sequenceStart;
+      applySequence(sequenceTime);
+      if (activePhase === 'walk' && mixer) mixer.update(delta);
+    }
+    controls.update();
+    renderer.render(scene, camera);
+  });
+</script>
+</body>
+</html>
