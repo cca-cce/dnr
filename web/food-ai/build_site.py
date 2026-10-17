@@ -254,10 +254,11 @@ def build_instagram_page() -> None:
   <div class="video-frame">
     <video controls preload="metadata" poster="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.jpg">
       <source src="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4" type="video/mp4">
+      <track kind="subtitles" srclang="en" label="English" src="../instagram/subtitles-en.vtt" default>
       Your browser cannot play this video. <a href="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4">Download it instead.</a>
     </video>
   </div>
-  <div class="video-notes"><p class="kicker">Local playback · 48 seconds</p><h2>{html.escape(meta.get('uploader', 'Instagram'))}</h2><p>{description}</p><a class="text-link" href="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4" download>Download MP4 ↓</a></div>
+  <div class="video-notes"><p class="kicker">Local playback · 48 seconds · English subtitles</p><h2>{html.escape(meta.get('uploader', 'Instagram'))}</h2><p>{description}</p><p><a class="text-link" href="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4" download>Download MP4 ↓</a> · <a class="text-link" href="../instagram/transcript-en.txt">English transcript</a></p></div>
 </section>"""
     write(PAGES / "instagram.html", shell("Instagram reel", content, body_class="source-page"))
 
@@ -347,8 +348,8 @@ def build_video_page() -> None:
     content = f"""
 <section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">Video archive</p><h1>A Swedish reaction,<br>preserved locally</h1><p class="dek">Jenny Frennberg’s 48-second Instagram reel turns the subject into a direct appeal for authentic restaurant imagery.</p></section>
 <section class="cinema">
-  <div class="cinema-screen"><video controls preload="metadata" poster="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.jpg"><source src="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4" type="video/mp4"></video></div>
-  <aside><p class="kicker">Archived reel</p><h2>“AI-bilder på menyn? Nej tack.”</h2><p>{caption}</p><a class="button primary" href="instagram.html">Full source page</a></aside>
+  <div class="cinema-screen"><video controls preload="metadata" poster="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.jpg"><source src="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="../instagram/subtitles-en.vtt" default></video></div>
+  <aside><p class="kicker">Archived reel · English subtitles</p><h2>“AI-bilder på menyn? Nej tack.”</h2><p>{caption}</p><p><a class="text-link" href="../instagram/transcript-en.txt">Read English transcript →</a></p><a class="button primary" href="instagram.html">Full source page</a></aside>
 </section>"""
     write(PAGES / "videos.html", shell("Video", content, body_class="collection-page"))
 

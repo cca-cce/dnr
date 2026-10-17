@@ -16,6 +16,7 @@
 html { scroll-behavior: smooth; }
 body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--sans); line-height: 1.55; }
 img, video { display: block; max-width: 100%; }
+video::cue { color: white; background: rgba(18, 16, 13, .86); font-family: var(--sans); }
 a { color: inherit; text-decoration-color: rgba(27,25,21,.4); text-underline-offset: .2em; }
 button, input { font: inherit; }
 

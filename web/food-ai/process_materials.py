@@ -172,6 +172,8 @@ def process_instagram() -> dict:
             "download_status": "complete",
             "media_files": sorted(p.name for p in directory.glob("*.mp4")),
             "thumbnail_files": sorted(p.name for p in directory.glob("*.jpg")),
+            "subtitle_files": sorted(p.name for p in directory.glob("*.vtt")),
+            "transcript_files": sorted(p.name for p in directory.glob("transcript-*.txt")),
         }
     )
     lines = [
