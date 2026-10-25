@@ -1,0 +1,1366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendar Viewer</title>
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #1d2330; --muted: #6a7282; --line: #dde1e8; --hover: #eef1f6;
+  --accent: #2f6fde; --weekend: #f1f2f5; --allday: #ececec;
+  --ok: #2e8b57; --ok-bg: #e5f4eb;
+  --chip-bg: #eef2f8;
+  --conflict: #c62828; --conflict-bg: #fde8e8;
+  --overlap: #d26a00; --overlap-bg: #fff0dc;
+  --sameday: #9a7b00; --sameday-bg: #fdf6d3;
+  --dup: #7b3fb5; --dup-bg: #f1e7fb;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171c; --panel: #1c2027; --ink: #e5e8ee; --muted: #9aa3b2; --line: #2e343e; --hover: #262b34;
+    --accent: #6d9eff; --weekend: #191c22; --allday: #24272d;
+    --ok: #5cc48a; --ok-bg: #183126; --chip-bg: #232a36;
+    --conflict: #ff6b6b; --conflict-bg: #3b1d1f;
+    --overlap: #ffa94d; --overlap-bg: #3a2814;
+    --sameday: #e5c84a; --sameday-bg: #332d12;
+    --dup: #c39bf0; --dup-bg: #2c2140;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171c; --panel: #1c2027; --ink: #e5e8ee; --muted: #9aa3b2; --line: #2e343e; --hover: #262b34;
+  --accent: #6d9eff; --weekend: #191c22; --allday: #24272d;
+  --ok: #5cc48a; --ok-bg: #183126; --chip-bg: #232a36;
+  --conflict: #ff6b6b; --conflict-bg: #3b1d1f;
+  --overlap: #ffa94d; --overlap-bg: #3a2814;
+  --sameday: #e5c84a; --sameday-bg: #332d12;
+  --dup: #c39bf0; --dup-bg: #2c2140;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+html, body { height: 100%; }
+.app { display: grid; grid-template-columns: 300px minmax(0, 1fr); height: 100vh; }
+.side { overflow-y: auto; padding: 12px 14px; border-right: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; gap: 12px; }
+.side section { display: flex; flex-direction: column; gap: 6px; }
+.side h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0; }
+.side .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.side .row > input[type=url], .side .row > input[type=search], .side .row > input[type=text] { flex: 1; }
+.side .stat { font-size: 12px; padding: 2px 8px; }
+.side details summary { cursor: pointer; color: var(--muted); font-size: 12.5px; }
+.main { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 10px 14px; }
+.main > .bar { margin: 0 0 8px; }
+#view { flex: 1; min-height: 0; overflow: auto; }
+.chip[hidden] { display: none; }
+.more { display: block; width: 100%; margin-top: 2px; padding: 0 4px; font-size: 11px; text-align: left; border: 0; background: none; color: var(--accent); }
+h1 { font-size: 20px; margin: 4px 0 2px; }
+.sub, .small { color: var(--muted); font-size: 12.5px; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+button, input, select, textarea { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; }
+button { cursor: pointer; }
+button:hover { background: var(--hover); }
+button.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { color: var(--conflict); border-color: var(--conflict); }
+input { min-width: 0; }
+label.chk { display: inline-flex; gap: 4px; align-items: center; color: var(--muted); }
+#month-title { font-size: 18px; font-weight: 600; min-width: 150px; }
+.grow { flex: 1; }
+.sources { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.src { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; align-items: center; gap: 2px 6px; padding: 4px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.src:first-child { border-top: 0; }
+.src .nm { font-weight: 600; cursor: text; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.src .meta { grid-column: 3 / -1; font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.src button { padding: 0 6px; font-size: 12px; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px; }
+.stat { border-radius: 999px; padding: 3px 10px; font-size: 13px; border: 1px solid var(--line); background: var(--panel); }
+.st-CONFLICT { background: var(--conflict-bg); color: var(--conflict); border-color: var(--conflict); }
+.st-OVERLAP { background: var(--overlap-bg); color: var(--overlap); border-color: var(--overlap); }
+.st-SAMEDAY { background: var(--sameday-bg); color: var(--sameday); border-color: var(--sameday); }
+.st-HOLIDAY { background: var(--allday); color: var(--muted); }
+.st-DUPLICATE { background: var(--dup-bg); color: var(--dup); border-color: var(--dup); }
+.st-OK { background: var(--ok-bg); color: var(--ok); border-color: var(--ok); }
+.warn { color: var(--overlap); font-size: 13px; margin: 4px 0; }
+.err { color: var(--conflict); font-size: 13px; white-space: pre-wrap; }
+.msg { font-size: 13px; white-space: pre-wrap; color: var(--muted); margin: 4px 0; }
+
+.grid { display: grid; height: 100%; grid-template-columns: 34px repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--panel); border-radius: 8px; overflow: hidden; }
+.grid > div { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.dow { padding: 6px; font-weight: 600; color: var(--muted); text-align: center; font-size: 12px; }
+.wk { color: var(--muted); font-size: 11px; text-align: center; padding-top: 6px; }
+.day { min-height: 0; padding: 3px; overflow: hidden; }
+.day.other { opacity: .45; }
+.day.weekend { background: var(--weekend); }
+.day.hol { background: var(--allday); }
+.day.drop { outline: 2px dashed var(--accent); outline-offset: -3px; background: var(--hover); }
+.dnum { font-size: 12px; font-weight: 600; }
+.day.today .dnum > span { background: var(--accent); color: #fff; border-radius: 999px; padding: 0 6px; }
+.chip { display: block; width: 100%; margin-top: 2px; padding: 1px 4px; font-size: 11.5px; line-height: 1.3; border-radius: 4px; border-left: 3px solid; background: var(--chip-bg);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.chip[draggable="true"] { cursor: grab; }
+.chip:focus-visible { outline: 2px solid var(--accent); }
+.chip.allday { font-style: italic; }
+.chip.tentative { border-left-style: dashed; }
+.chip.notmine { opacity: .7; }
+.chip.s-CONFLICT { background: var(--conflict-bg); color: var(--conflict); font-weight: 600; box-shadow: inset 0 0 0 1px var(--conflict); }
+.chip.s-OVERLAP { background: var(--overlap-bg); box-shadow: inset 0 0 0 1px var(--overlap); }
+.chip.s-SAMEDAY { background: var(--sameday-bg); }
+.chip.s-DUPLICATE { box-shadow: inset 0 0 0 1px var(--dup); }
+.chip.edited::after { content: " ✎"; }
+.chip.created::after { content: " ✚"; }
+.chip .t { font-variant-numeric: tabular-nums; color: var(--muted); margin-right: 3px; }
+
+table { width: 100%; border-collapse: collapse; background: var(--panel); }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { position: sticky; top: 0; background: var(--panel); font-size: 12px; color: var(--muted); }
+tbody tr.click { cursor: pointer; }
+tbody tr.click:hover { background: var(--hover); }
+tr.r-CONFLICT td:first-child { box-shadow: inset 3px 0 var(--conflict); }
+tr.r-OVERLAP td:first-child { box-shadow: inset 3px 0 var(--overlap); }
+tr.r-SAMEDAY td:first-child { box-shadow: inset 3px 0 var(--sameday); }
+tr.r-DUPLICATE td:first-child { box-shadow: inset 3px 0 var(--dup); }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+.pill { display: inline-block; border-radius: 999px; padding: 0 7px; font-size: 12px; border: 1px solid; white-space: nowrap; }
+td .pill { max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: top; }
+td.small { overflow-wrap: anywhere; }
+table.events { table-layout: fixed; }
+table.events td { overflow-wrap: anywhere; }
+table.events th:nth-child(1) { width: 110px; } table.events th:nth-child(2) { width: 100px; } table.events th:nth-child(3) { width: 14%; }
+table.events th:nth-child(5) { width: 104px; } table.events th:nth-child(6) { width: 28%; }
+
+dialog { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); max-width: min(760px, calc(100vw - 32px)); width: 100%; max-height: calc(100vh - 40px); }
+dialog::backdrop { background: rgb(0 0 0 / .35); }
+dialog h2 { margin: 4px 0; font-size: 17px; }
+dialog h3 { font-size: 14px; margin: 10px 0 4px; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 8px 0; }
+dt { color: var(--muted); }
+dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.form { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 8px 0; }
+.form > label { color: var(--muted); }
+.form input:not([type=checkbox]), .form select, .form textarea { width: 100%; }
+.preview { max-height: 220px; overflow: auto; font-size: 12px; }
+.preview td, .preview th { padding: 3px 6px; }
+.changes li { margin: 4px 0; }
+.changes li button { margin-left: 6px; padding: 0 8px; font-size: 12px; }
+#drop { position: fixed; inset: 0; display: none; place-items: center; background: rgb(47 111 222 / .15); border: 3px dashed var(--accent); font-size: 20px; font-weight: 600; z-index: 10; }
+body.dragging #drop { display: grid; }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; height: auto; }
+  .side { border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
+  #view { overflow: visible; }
+  .grid { height: auto; }
+}
+@media (max-width: 760px) {
+  .grid { grid-template-columns: 22px repeat(7, minmax(0, 1fr)); }
+  .day { min-height: 70px; padding: 2px; }
+  .chip { font-size: 10px; padding: 0 2px; }
+  .chip .t { display: none; }
+  #month-title { min-width: 0; font-size: 16px; }
+  .hide-sm { display: none; }
+}
+</style>
+</head>
+<body>
+<div id="drop">Drop .ics / .xlsx / .csv / .tsv files to add them</div>
+<div class="app">
+<aside class="side">
+  <div>
+    <h1 id="title"></h1>
+    <div class="sub" id="subtitle"></div>
+  </div>
+
+  <section>
+    <h2>Sources</h2>
+    <div class="row">
+      <input type="file" id="file" accept=".ics,.ical,.ifb,.xlsx,.xlsm,.csv,.tsv,.txt,text/calendar,text/csv" multiple hidden>
+      <button type="button" id="file-btn">Open files…</button>
+      <button type="button" id="new-src">+ Empty source</button>
+    </div>
+    <form id="url-form" class="row">
+      <input type="url" id="url" placeholder="https://… .ics / .csv or webcal://" aria-label="Source URL">
+      <button type="submit">Load</button>
+    </form>
+    <div id="load-msg"></div>
+    <div class="sources" id="sources"></div>
+  </section>
+
+  <section>
+    <h2>Filter</h2>
+    <label class="row chk" title="Your initials and/or names, comma-separated. Events listing one of them, or in a source marked “mine”, are yours.">Me <input type="text" id="me" placeholder="initials or names, e.g. AB, Anna Berg"></label>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="f-mine"> only mine</label>
+      <label class="chk"><input type="checkbox" id="f-prob"> only problems</label>
+    </div>
+    <div class="row"><input type="search" id="q" placeholder="Search…" aria-label="Search"></div>
+  </section>
+
+  <section>
+    <h2>Checks</h2>
+    <div class="stats" id="stats"></div>
+    <div id="coverage"></div>
+  </section>
+
+  <section>
+    <h2>Edit &amp; export</h2>
+    <div class="row">
+      <button type="button" id="new">+ New event</button>
+      <button type="button" id="changes">Changes: 0</button>
+      <button type="button" id="export">Export…</button>
+    </div>
+  </section>
+
+  <details>
+    <summary>Legend &amp; help</summary>
+    <p class="small" id="legend"></p>
+  </details>
+</aside>
+
+<main class="main">
+  <div class="bar">
+    <div id="month-title"></div>
+    <button type="button" id="prev" aria-label="Previous month" title="Previous month (←)">◀</button>
+    <button type="button" id="next" aria-label="Next month" title="Next month (→)">▶</button>
+    <button type="button" id="today">Today</button>
+    <input type="month" id="goto" aria-label="Go to month">
+    <span class="grow"></span>
+    <button type="button" id="v-month">Month</button>
+    <button type="button" id="v-list">List</button>
+  </div>
+  <div id="view"></div>
+</main>
+</div>
+
+<dialog id="dlg"><form method="dialog"><div id="dlg-body"></div><div class="bar" style="justify-content:flex-end"><button>Close</button></div></form></dialog>
+
+<script id="data" type="application/json">{"title": "", "me": "", "files": [], "generated": "2026-10-25 10:28"}</script>
+<script>
+"use strict";
+const DATA = (() => { try { return JSON.parse(document.getElementById("data").textContent); } catch { return {}; } })();
+const TZ = "Europe/Stockholm";
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const COLORS = ["#2f6fde", "#2e8b57", "#b5179e", "#e07a00", "#0f9d9a", "#5a6acf", "#7a8b00", "#c0392b"];
+const STATUS_LABEL = { CONFLICT: "CONFLICT", OVERLAP: "OVERLAP", SAMEDAY: "SAME DAY", HOLIDAY: "HOLIDAY", DUPLICATE: "DUPLICATE", OK: "OK" };
+const $ = (id) => document.getElementById(id);
+
+// ---------------------------------------------------------------- tiny DOM helper (all text via textContent)
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "class") el.className = v;
+    else if (k === "style") el.style.cssText = v;
+    else if (k === "value") el.value = v;
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat(Infinity)) if (c != null && c !== false) el.append(c instanceof Node ? c : String(c));
+  return el;
+}
+
+// ---------------------------------------------------------------- dates: wall-clock strings "YYYY-MM-DDTHH:MM" in Europe/Stockholm
+const pad = (n) => String(n).padStart(2, "0");
+const dOf = (t) => t.slice(0, 10);
+const hm = (t) => t.slice(11, 16);
+function ymd(y, m, d) { const x = new Date(Date.UTC(y, m - 1, d)); return `${x.getUTCFullYear()}-${pad(x.getUTCMonth() + 1)}-${pad(x.getUTCDate())}`; }
+function addDays(ds, n) { const [y, m, d] = ds.split("-").map(Number); return ymd(y, m, d + n); }
+function weekday(ds) { const [y, m, d] = ds.split("-").map(Number); return (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7; }
+function isoWeek(ds) {
+  const [y, m, d] = ds.split("-").map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d)); t.setUTCDate(t.getUTCDate() + 3 - (t.getUTCDay() + 6) % 7);
+  const w1 = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
+  return 1 + Math.round(((t - w1) / 864e5 - 3 + (w1.getUTCDay() + 6) % 7) / 7);
+}
+const fmtCache = {};
+function wallClock(ts, tz) {
+  const f = fmtCache[tz] ||= new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+  const p = Object.fromEntries(f.formatToParts(new Date(ts)).map((x) => [x.type, x.value]));
+  return { s: `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`, utc: Date.UTC(+p.year, p.month - 1, +p.day, +p.hour, +p.minute, +p.second) };
+}
+function zonedToUtc(y, mo, d, hh, mi, tz) {
+  const guess = Date.UTC(y, mo - 1, d, hh, mi);
+  const ts = guess - (wallClock(guess, tz).utc - guess);
+  return ts - (wallClock(ts, tz).utc - guess);
+}
+const toMs = (t) => Date.UTC(+t.slice(0, 4), t.slice(5, 7) - 1, +t.slice(8, 10), +t.slice(11, 13), +t.slice(14, 16));
+const fromMs = (ms) => { const x = new Date(ms); return `${x.getUTCFullYear()}-${pad(x.getUTCMonth() + 1)}-${pad(x.getUTCDate())}T${pad(x.getUTCHours())}:${pad(x.getUTCMinutes())}`; };
+const minutes = (a, b) => (toMs(b) - toMs(a)) / 6e4;
+const todayStr = () => wallClock(Date.now(), TZ).s.slice(0, 10);
+function fnv(str) { let x = 0x811c9dc5; for (const c of str) x = Math.imul(x ^ c.codePointAt(0), 0x01000193) >>> 0; return x.toString(16).padStart(8, "0"); }
+
+// ---------------------------------------------------------------- ics parsing (TimeEdit part mirrors calics.parse_ics)
+const NAME = /^[A-ZÅÄÖ][a-zåäöéü]+(?:[ -][A-ZÅÄÖ][a-zåäöéü]+)+$/;
+const COURSE_CODE = /^[A-ZÅÄÖ]{3,4}\d{2,3}$/;
+const GROUP = /^[A-Z0-9]+(?:-[A-Z0-9]+)*-\d{2}[HV]$/;
+const unesc = (s) => s.replace(/\\[nN]/g, "\n").replace(/\\,/g, ",").replace(/\\;/g, ";").replace(/\\\\/g, "\\");
+const splitEsc = (s) => s.split("\\,").map((p) => unesc(p).trim());
+
+function parseDt(params, v) {
+  if (/VALUE=DATE(?!-)/i.test(params) || /^\d{8}$/.test(v)) return { t: `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}T00:00`, allday: true };
+  const m = v.match(/^(\d{4})(\d\d)(\d\d)T(\d\d)(\d\d)(\d\d)?(Z)?$/);
+  if (!m) throw new Error("unreadable date " + v);
+  const [y, mo, d, hh, mi] = [+m[1], +m[2], +m[3], +m[4], +m[5]];
+  const tz = (params.match(/TZID=("?)([^;:"]+)\1/i) || [])[2];
+  if (m[7]) return { t: wallClock(Date.UTC(y, mo - 1, d, hh, mi), TZ).s, allday: false };
+  if (!tz || tz === TZ) return { t: `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}`, allday: false };
+  try { return { t: wallClock(zonedToUtc(y, mo, d, hh, mi, tz), TZ).s, allday: false }; }
+  catch { return { t: `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}`, allday: false }; }   // Windows TZIDs etc: assume local
+}
+
+// TimeEdit SUMMARY/DESCRIPTION -> course, title (activity), people (teachers), groups, comment, TimeEdit ID
+function parseTimeEdit(summary, description) {
+  const parts = splitEsc(summary);
+  const desc = unesc(description).split("\n").map((l) => l.trim()).filter(Boolean);
+  const ev = { course: "", title: "", people: [], groups: [], comment: "", id: (desc.find((l) => l.startsWith("ID ")) || "").slice(3), style: "" };
+  if (parts.some((p) => p.startsWith("Grupp:"))) {
+    ev.style = "names";
+    ev.course = parts.shift();
+    while (parts.length && parts[0].startsWith("Grupp:")) ev.groups.push(parts.shift().slice(6).trim());
+    ev.title = parts.length ? parts.shift() : "";
+    if (parts.length && /^\d+$/.test(parts[parts.length - 1])) parts.pop();
+    while (parts.length && NAME.test(parts[0])) ev.people.push(parts.shift());
+    ev.comment = parts.join(", ").replace(/\s+/g, " ");
+  } else if (parts.length && COURSE_CODE.test(parts[0])) {
+    ev.style = "codes";
+    const codes = [];
+    while (parts.length && COURSE_CODE.test(parts[0])) codes.push(parts.shift());
+    ev.course = codes.join(", ");
+    ev.title = parts.join(", ");
+    const isGroup = (l) => GROUP.test(l) || COURSE_CODE.test(l);
+    let seen = !desc.some(isGroup);
+    const rest = [];
+    for (const l of desc) {
+      if (l.startsWith("ID ")) continue;
+      if (isGroup(l)) { ev.groups.push(l); seen = true; }
+      else if (seen && NAME.test(l)) ev.people.push(l);
+      else rest.push(l);
+    }
+    ev.comment = rest.join(" ").replace(/\s+/g, " ");
+  }
+  return ev;
+}
+
+// Expand simple RRULEs (DAILY/WEEKLY/MONTHLY with INTERVAL, COUNT, UNTIL, BYDAY) – enough for Google/Outlook feeds.
+function expand(start, end, rrule, exdates) {
+  const r = Object.fromEntries(rrule.split(";").map((kv) => kv.split("=")));
+  const len = minutes(start, end), tod = start.slice(10);
+  const step = +(r.INTERVAL || 1), max = Math.min(+(r.COUNT || 1000), 1000);
+  const until = r.UNTIL ? parseDt("", r.UNTIL).t : addDays(dOf(start), 3 * 366) + "T23:59";
+  const by = r.BYDAY ? r.BYDAY.split(",").map((x) => ["MO", "TU", "WE", "TH", "FR", "SA", "SU"].indexOf(x.slice(-2))) : null;
+  const out = [];
+  const push = (ds) => { const s = ds + tod; if (s > until || out.length >= max) return false; if (!exdates.has(s) && s >= start) out.push(s); return true; };
+  const d0 = dOf(start);
+  if (r.FREQ === "DAILY") for (let i = 0; push(addDays(d0, i * step)); i++);
+  else if (r.FREQ === "WEEKLY") {
+    const days = (by || [weekday(d0)]).sort(), mon = addDays(d0, -weekday(d0));
+    outer: for (let w = 0; ; w += step) for (const wd of days) if (!push(addDays(mon, w * 7 + wd))) break outer;
+  } else if (r.FREQ === "MONTHLY") {
+    const [y, m, d] = d0.split("-").map(Number);
+    for (let i = 0; push(ymd(y, m + i * step, d)); i++);
+  } else out.push(start);
+  return out.map((s) => [s, fromMs(toMs(s) + len * 6e4)]);
+}
+
+function parseIcs(text) {
+  const t = text.replace(/\r\n?/g, "\n").replace(/^\uFEFF/, "").trim();
+  if (!t.startsWith("BEGIN:VCALENDAR")) throw new Error("not an iCalendar file (HTML error page or login wall?)");
+  if (!t.endsWith("END:VCALENDAR")) throw new Error("file does not end with END:VCALENDAR (truncated?)");
+  const unf = t.replace(/\n[ \t]/g, "");
+  const header = (k) => unesc((unf.match(new RegExp(`^${k}:(.*)$`, "m")) || [])[1] || "").trim();
+  const events = [], overrides = new Set();
+  const props = [...unf.matchAll(/BEGIN:VEVENT\n([\s\S]*?)END:VEVENT/g)].map((m) => {
+    const p = { EX: new Set(), ATT: [] };
+    for (const line of m[1].split("\n")) {
+      const x = line.match(/^([A-Z0-9-]+)((?:;[^:]*)?):(.*)$/);
+      if (!x) continue;
+      if (x[1] === "EXDATE") for (const v of x[3].split(",")) p.EX.add(parseDt(x[2], v).t);
+      else if (x[1] === "ATTENDEE") { const cn = x[2].match(/CN=("?)([^;:"]+)\1/i); if (cn) p.ATT.push(cn[2].trim()); }
+      else if (!(x[1] in p)) p[x[1]] = [x[2], x[3]];
+    }
+    return p;
+  });
+  const val = (p, k) => (p[k] ? p[k][1] : "");
+  for (const p of props) if (p["RECURRENCE-ID"]) overrides.add(val(p, "UID") + "|" + parseDt(...p["RECURRENCE-ID"]).t);
+  for (const p of props) {
+    if (!p.DTSTART || /CANCELLED/i.test(val(p, "STATUS"))) continue;
+    const s = parseDt(...p.DTSTART);
+    let e = p.DTEND ? parseDt(...p.DTEND).t : s.t;
+    if (!p.DTEND && p.DURATION) {
+      const m = p.DURATION[1].match(/P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?/) || [];
+      e = fromMs(toMs(s.t) + (((+m[1] || 0) * 7 + (+m[2] || 0)) * 1440 + (+m[3] || 0) * 60 + (+m[4] || 0)) * 6e4);
+    }
+    if (s.allday && e <= s.t) e = addDays(dOf(s.t), 1) + "T00:00";
+    if (e < s.t) continue;
+    const uid = val(p, "UID");
+    const summary = val(p, "SUMMARY"), description = val(p, "DESCRIPTION");
+    const base = { uid, allday: s.allday, location: unesc(val(p, "LOCATION")).replace(/\s*\n\s*/g, ", ").trim(),
+                   course: "", title: "", people: [], description: "", status: /TENTATIVE/i.test(val(p, "STATUS")) ? "tentative" : /CONFIRMED/i.test(val(p, "STATUS")) ? "confirmed" : "",
+                   extId: "", extra: {}, srcName: p["X-CALICS-SOURCE"] ? unesc(val(p, "X-CALICS-SOURCE")) : "" };
+    if (p["X-CALICS-TITLE"]) {                     // our own export: lossless fields
+      const json = (k, d) => { try { return JSON.parse(unesc(val(p, k))); } catch { return d; } };
+      Object.assign(base, { course: unesc(val(p, "X-CALICS-COURSE")), title: unesc(val(p, "X-CALICS-TITLE")), people: json("X-CALICS-PEOPLE", []),
+        extra: json("X-CALICS-EXTRA", {}), extId: unesc(val(p, "X-CALICS-EXTID")), description: unesc(val(p, "X-CALICS-DESCRIPTION")) });
+    } else if (s.allday) base.title = unesc(summary);
+    else {
+      const te = parseTimeEdit(summary, description);
+      if (te.style) Object.assign(base, { course: te.course, title: te.title, people: te.people, description: te.comment, extId: te.id, extra: te.groups.length ? { Groups: te.groups.join(", ") } : {} });
+      else Object.assign(base, { title: unesc(summary), description: unesc(description).trim(), people: p.ATT });
+    }
+    if (val(p, "CATEGORIES") && !base.extra.Categories) base.extra.Categories = unesc(val(p, "CATEGORIES"));
+    const times = p.RRULE ? expand(s.t, e, p.RRULE[1], p.EX).filter(([st]) => !overrides.has(uid + "|" + st)) : [[s.t, e]];
+    for (const [st, en] of times) events.push({ ...base, extra: { ...base.extra }, start: st, end: en });
+  }
+  events.sort((a, b) => a.start.localeCompare(b.start) || a.end.localeCompare(b.end));
+  return { name: header("X-WR-CALNAME"), desc: header("X-WR-CALDESC"), events };
+}
+
+// ---------------------------------------------------------------- xlsx reading (zip + XML, no libraries)
+const xmlDecode = (s) => s.replace(/&(lt|gt|amp|quot|apos|#x[0-9a-f]+|#\d+);/gi, (m, e) =>
+  ({ lt: "<", gt: ">", amp: "&", quot: '"', apos: "'" })[e.toLowerCase()] ?? String.fromCodePoint(e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : +e.slice(1)));
+async function unzip(buf) {
+  const u8 = new Uint8Array(buf), dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  let eocd = -1;
+  for (let i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error("not an .xlsx (zip) file");
+  const files = {};
+  let p = dv.getUint32(eocd + 16, true);
+  for (let k = dv.getUint16(eocd + 10, true); k > 0; k--) {
+    if (dv.getUint32(p, true) !== 0x02014b50) throw new Error("corrupt zip directory");
+    const nlen = dv.getUint16(p + 28, true);
+    files[new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nlen))] = { method: dv.getUint16(p + 10, true), size: dv.getUint32(p + 20, true), off: dv.getUint32(p + 42, true) };
+    p += 46 + nlen + dv.getUint16(p + 30, true) + dv.getUint16(p + 32, true);
+  }
+  return async (name) => {
+    const f = files[name.replace(/^\//, "")];
+    if (!f) return null;
+    const start = f.off + 30 + dv.getUint16(f.off + 26, true) + dv.getUint16(f.off + 28, true);
+    const data = u8.subarray(start, start + f.size);
+    if (f.method === 0) return new TextDecoder().decode(data);
+    if (f.method !== 8) throw new Error("unsupported zip compression");
+    if (typeof DecompressionStream === "undefined") throw new Error("this browser cannot unzip .xlsx – save the sheet as .csv instead");
+    return new TextDecoder().decode(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer());
+  };
+}
+function isDateFormat(code) {
+  const c = code.replace(/"[^"]*"|\[[^\]]*\]|\\./g, "");
+  return !/general/i.test(c) && /[ydhs]|m/i.test(c) && !/^[#0.,%\s@]*$/.test(c);
+}
+function excelSerial(n) {
+  const t = fromMs(Math.round((n - 25569) * 864e5));
+  if (n < 1) return hm(t);                       // time only
+  return Math.abs(n % 1) < 1e-9 ? dOf(t) : t;
+}
+async function readXlsx(buf) {
+  const get = await unzip(buf);
+  const shared = [];
+  const ss = await get("xl/sharedStrings.xml");
+  if (ss) for (const m of ss.matchAll(/<(?:\w+:)?si>([\s\S]*?)<\/(?:\w+:)?si>/g))
+    shared.push(xmlDecode([...m[1].replace(/<(?:\w+:)?rPh[\s\S]*?<\/(?:\w+:)?rPh>/g, "").matchAll(/<(?:\w+:)?t(?:\s[^>]*)?>([\s\S]*?)<\/(?:\w+:)?t>/g)].map((x) => x[1]).join("")));
+  const styles = (await get("xl/styles.xml")) || "";
+  const fmts = {};
+  for (const m of styles.matchAll(/<(?:\w+:)?numFmt\b[^>]*numFmtId="(\d+)"[^>]*formatCode="([^"]*)"/g)) fmts[m[1]] = xmlDecode(m[2]);
+  const xfs = ((styles.match(/<(?:\w+:)?cellXfs\b[\s\S]*?<\/(?:\w+:)?cellXfs>/) || [""])[0].match(/<(?:\w+:)?xf\b[^>]*>/g) || [])
+    .map((x) => { const id = +((x.match(/numFmtId="(\d+)"/) || [])[1] || 0); return (id >= 14 && id <= 22) || (id >= 45 && id <= 47) || (fmts[id] ? isDateFormat(fmts[id]) : false); });
+  const wb = (await get("xl/workbook.xml")) || "";
+  const rels = (await get("xl/_rels/workbook.xml.rels")) || "";
+  const target = {};
+  for (const m of rels.matchAll(/<(?:\w+:)?Relationship\b[^>]*>/g)) {
+    const id = (m[0].match(/Id="([^"]+)"/) || [])[1], tg = (m[0].match(/Target="([^"]+)"/) || [])[1];
+    if (id && tg) target[id] = tg.startsWith("/") ? tg.slice(1) : "xl/" + tg.replace(/^\.\//, "");
+  }
+  const sheets = [];
+  for (const m of wb.matchAll(/<(?:\w+:)?sheet\b[^>]*>/g)) {
+    const name = xmlDecode((m[0].match(/name="([^"]*)"/) || [])[1] || "Sheet");
+    const rid = (m[0].match(/r:id="([^"]+)"/) || m[0].match(/\bid="([^"]+)"/) || [])[1];
+    const xml = target[rid] && (await get(target[rid]));
+    if (!xml) continue;
+    const rows = [];
+    for (const c of xml.matchAll(/<(?:\w+:)?c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/(?:\w+:)?c>)/g)) {
+      const attr = c[1], body = c[2] || "";
+      const ref = attr.match(/\br="([A-Z]+)(\d+)"/) || [];
+      if (!ref[1]) continue;
+      const col = [...ref[1]].reduce((a, ch) => a * 26 + ch.charCodeAt(0) - 64, 0) - 1, row = +ref[2] - 1;
+      const type = (attr.match(/\bt="(\w+)"/) || [])[1] || "n", style = +((attr.match(/\bs="(\d+)"/) || [])[1] || 0);
+      const v = (body.match(/<(?:\w+:)?v>([\s\S]*?)<\/(?:\w+:)?v>/) || [])[1];
+      let out = "";
+      if (type === "s") out = shared[+v] ?? "";
+      else if (type === "inlineStr") out = xmlDecode([...body.matchAll(/<(?:\w+:)?t(?:\s[^>]*)?>([\s\S]*?)<\/(?:\w+:)?t>/g)].map((x) => x[1]).join(""));
+      else if (type === "str" || type === "e") out = xmlDecode(v ?? "");
+      else if (type === "b") out = v === "1" ? "TRUE" : "FALSE";
+      else if (v != null && v !== "") out = xfs[style] ? excelSerial(+v) : String(+v);
+      if (out === "") continue;
+      (rows[row] ||= [])[col] = out;
+    }
+    sheets.push({ name, rows: Array.from(rows, (r) => Array.from(r || [], (x) => x ?? "")) });
+  }
+  return sheets;
+}
+
+// ---------------------------------------------------------------- csv / tsv
+function parseDelimited(text) {
+  text = text.replace(/^\uFEFF/, "");
+  const first = text.split(/\r?\n/, 1)[0];
+  const delim = ["\t", ";", ","].map((d) => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const rows = [];
+  let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += ch;
+    } else if (ch === '"' && cell === "") q = true;
+    else if (ch === delim) { row.push(cell); cell = ""; }
+    else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += ch;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.map((r) => r.map((c) => c.trim()));
+}
+
+// ---------------------------------------------------------------- tables -> events (column detection + mapping)
+const FIELDS = ["date", "time", "start", "end", "allday", "course", "title", "people", "location", "description", "status", "uid", "extId", "source"];
+const FIELD_LABEL = { date: "Date", time: "Time range (10-12)", start: "Start time", end: "End time", allday: "All-day flag", course: "Course / group",
+  title: "Title", people: "People", location: "Location", description: "Description", status: "Status", uid: "UID", extId: "External ID", source: "Source name" };
+// first matching rule wins for a column header (lower-cased)
+const HEADER_RULES = [
+  ["ignore", /^(veckodag|weekday|timmar|hours|duration|längd|change|conflict|teaching|overlapping_bookings|same_day_bookings|clashes)\b/],
+  ["source", /^(source|källa)$/], ["uid", /^uid$/], ["extId", /^(id|ext_id|external id|timeedit-id|event id|booking id)$/],
+  ["status", /^status$/], ["allday", /^(all-?day|allday|heldag)$/],
+  ["description", /anteckning|kommentar|comment|^notes?\b|beskrivning|description/],
+  ["people", /lärare|teacher|^people|deltagare|attendee|participant|personal|^who\b/],
+  ["location", /^(lokal|sal|rum|room|location|plats|place)\b/],
+  ["date", /^(datum|date|dag|day)\b/], ["start", /^(start|starttid|start time|från|from|begin)\b/], ["end", /^(slut|sluttid|end|stop|till|to)\b/],
+  ["time", /^(tid|time|klockslag|kl)\b/], ["course", /^(kurs|course|kurskod)/],
+  ["title", /^(summary|title|titel|rubrik|aktivitet|activity|undervisningstyp|type|typ|event|händelse|subject|ämne|what)\b/],
+];
+const fieldOf = (header) => { const s = String(header).trim().toLowerCase().replace(/\s+/g, " "); if (!s) return null; for (const [f, re] of HEADER_RULES) if (re.test(s)) return f; return null; };
+function mapHeader(cells) {
+  const map = {};
+  (cells || []).forEach((hd, c) => { const f = fieldOf(hd); if (f && f !== "ignore" && map[f] == null) map[f] = c; });
+  return map;
+}
+function detect(rows) {
+  let best = { score: 1, header: -1 };
+  for (let i = 0; i < Math.min(rows.length, 40); i++) {
+    const fs = (rows[i] || []).map(fieldOf).filter((f) => f && f !== "ignore");
+    const score = new Set(fs).size + (fs.some((f) => f === "time" || f === "start") ? 1 : 0);
+    if (score > best.score) best = { score, header: i };
+  }
+  return { header: best.header, map: best.header >= 0 ? mapHeader(rows[best.header]) : {} };
+}
+function parseDateCell(v) {
+  const s = String(v ?? "").trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return ymd(+m[1], +m[2], +m[3]);
+  m = s.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})\b/);
+  if (m) return ymd(+m[3], +m[2], +m[1]);
+  return "";
+}
+function parseTimeCell(v) {
+  const s = String(v ?? "").trim();
+  const m = s.match(/(?:^|T|\s)(\d{1,2})[:.](\d{2})/) || s.match(/^(\d{1,2})$/);
+  return m ? `${pad(+m[1] % 24)}:${pad(+(m[2] || 0))}` : "";
+}
+// "10-12" | "8-10, 10-12" | "13.15-15" | "9" (deadline) -> [[HH:MM, HH:MM]]  (mirrors calics.parse_tid)
+function parseTid(s) {
+  const out = [];
+  for (const part of String(s).split(",")) {
+    const nums = [...part.matchAll(/(\d{1,2})(?:[.:](\d{2}))?/g)].slice(0, 2).map((m) => `${pad(+m[1] % 24)}:${pad(+(m[2] || 0))}`);
+    if (nums.length) out.push([nums[0], nums[nums.length - 1]]);
+  }
+  return out;
+}
+const splitPeople = (s) => String(s ?? "").split(/\s*(?:[,;/&\n]| och | and )\s*/).map((x) => x.trim()).filter(Boolean);
+const normStatus = (s) => (/tentativ|prel/i.test(s) ? "tentative" : /confirm|bekräft/i.test(s) ? "confirmed" : "");
+function tableToEvents(rows, opt) {
+  const { header, map, filldown } = opt;
+  const meta = {};
+  for (let i = 0; i < Math.max(header, 0); i++) {
+    const cells = (rows[i] || []).filter((x) => x !== "");
+    if (cells.length >= 2) meta[String(cells[0]).replace(/\s*obl\.?$/i, "").replace(/[.:\s]+$/, "")] = String(cells[1]);
+  }
+  const metaCourse = Object.entries(meta).find(([k]) => /^(kurskod|course code|course)$/i.test(k))?.[1] || "";
+  const headers = rows[header] || [];
+  const has = (f) => map[f] != null && map[f] !== "";
+  const used = new Set(FIELDS.filter(has).map((f) => map[f]));
+  const firstTimeCol = ["time", "start"].filter(has).map((f) => map[f]).sort((a, b) => a - b)[0] ?? 4;
+  const events = [];
+  let cur = "", skipped = 0;
+  const get = (cells, f) => (has(f) ? String(cells[map[f]] ?? "").trim() : "");
+  for (let i = header + 1; i < rows.length; i++) {
+    const cells = rows[i] || [];
+    if (!cells.some((x) => x !== "")) continue;
+    let d = parseDateCell(get(cells, "date"));
+    if (!d) for (let c = 0; c < firstTimeCol && !d; c++) d = parseDateCell(cells[c]);    // e.g. Schemamall: date in col C under header "DAG" in col B
+    const explicit = !!d;
+    if (d) cur = d; else if (filldown) d = cur;
+    const title = get(cells, "title"), course = get(cells, "course");
+    const tid = get(cells, "time"), st = parseTimeCell(get(cells, "start")), en = parseTimeCell(get(cells, "end"));
+    if (!d || (!title && !course)) { if (title || tid || st) skipped++; continue; }
+    let spans;
+    if (st) spans = [[st, en || st]];
+    else if (tid && parseTid(tid).length) spans = parseTid(tid);
+    else if (/^(1|true|ja|yes|x)$/i.test(get(cells, "allday")) || (explicit && !has("time") && !has("start"))) spans = null;
+    else { skipped++; continue; }                 // time column exists but is empty -> nothing to place
+    const extra = {};
+    headers.forEach((hd, c) => {
+      const v = String(cells[c] ?? "").trim();
+      if (!v || used.has(c) || !String(hd).trim() || fieldOf(hd) === "ignore") return;
+      extra[String(hd).trim().split("\n")[0].replace(/\s{2,}.*$/, "").slice(0, 40)] = v;
+    });
+    if (tid) extra.Time = tid;
+    const base = { course: course || metaCourse, title, people: splitPeople(get(cells, "people")), location: get(cells, "location"),
+                   description: get(cells, "description"), status: normStatus(get(cells, "status")), uid: get(cells, "uid"), extId: get(cells, "extId"),
+                   srcName: get(cells, "source"), extra };
+    if (!base.status && get(cells, "status")) extra.Status = get(cells, "status");
+    if (!spans) events.push({ ...base, allday: true, start: d + "T00:00", end: (parseDateCell(get(cells, "end")) ? addDays(parseDateCell(get(cells, "end")), 1) : addDays(d, 1)) + "T00:00" });
+    else for (const [a, b] of spans)
+      events.push({ ...base, extra: { ...extra, ...(spans.length > 1 ? { Time: `${a}-${b}` } : {}) }, allday: false, start: `${d}T${a}`, end: b < a ? `${addDays(d, 1)}T${b}` : `${d}T${b}` });
+  }
+  return { events, meta, skipped };
+}
+
+// ---------------------------------------------------------------- state
+let seq = 0;
+const newKey = () => "k" + (++seq);
+const state = {
+  sources: [], deleted: [], me: DATA.me || "",
+  view: "month", ym: null, listRange: "month",
+  f: { mine: false, prob: false, q: "" },
+};
+let model = null;
+const meIds = () => state.me.split(/[,;]/).map((x) => x.trim().toLowerCase()).filter(Boolean);
+function uniqueName(name) {
+  let n = name || "Source", i = 2;
+  while (state.sources.some((s) => s.name === n)) n = `${name} (${i++})`;
+  return n;
+}
+function normalize(e, srcName, i) {
+  const ev = { key: newKey(), uid: e.uid || "", extId: e.extId || "", start: e.start, end: e.end, allday: !!e.allday,
+               course: e.course || "", title: e.title || "", people: e.people || [], location: e.location || "", description: e.description || "",
+               status: e.status || "", extra: e.extra || {} };
+  // stable UID for events without one, so exported .ics files update instead of duplicating on re-import
+  if (!ev.uid) ev.uid = `${fnv([srcName, ev.start, ev.end, ev.course, ev.title, i].join("|"))}-${fnv(srcName)}@calics`;
+  return ev;
+}
+function addSource(name, events, opts = {}) {
+  const src = { id: newKey(), name: uniqueName(name), on: true, mine: !!opts.mine, color: COLORS[state.sources.length % COLORS.length],
+                info: opts.info || "", meta: opts.meta || {}, local: !!opts.local, events: [] };
+  events.forEach((e, i) => src.events.push(normalize(e, name, i)));
+  state.sources.push(src);
+  return src;
+}
+const label = (e) => [e.course, e.title].filter(Boolean).join(" · ") || "(untitled)";
+function evLabel(e) {
+  if (e.allday) return `${dOf(e.start)} (all day) ${label(e)}`;
+  return `${dOf(e.start)} ${hm(e.start)}${e.end !== e.start ? "-" + hm(e.end) : ""} ${label(e)}${e.location ? " [" + e.location + "]" : ""}`;
+}
+const fmtSpan = (e) => (e.allday ? "all day" : e.start === e.end ? hm(e.start) : `${hm(e.start)}–${hm(e.end)}`);
+
+// ---------------------------------------------------------------- conflicts
+// Statuses (worst wins): CONFLICT = overlaps another event and both are yours; OVERLAP = overlaps an event but not both yours;
+// SAME DAY = no overlap, but one of your events from another source is on the same day; HOLIDAY = only all-day events on that day;
+// DUPLICATE = the same event in two sources (same UID / external ID, or same time + title). Point events (start = end) are deadlines.
+function overlapping(a, b) {
+  const pa = a.start === a.end, pb = b.start === b.end;
+  if (pa && pb) return a.start === b.start;
+  if (pa) return b.start <= a.start && a.start < b.end;
+  if (pb) return a.start <= b.start && b.start < a.end;
+  return a.start < b.end && b.start < a.end;
+}
+const isDup = (a, b) => (a.uid && a.uid === b.uid) || (a.extId && a.extId === b.extId) || (a.source !== b.source && a.start === b.start && a.end === b.end && label(a) === label(b));
+function compute() {
+  const ids = meIds();
+  const items = [];
+  for (const s of state.sources) if (s.on) for (const e of s.events)
+    items.push({ ...e, e, source: s, mine: s.mine || e.people.some((p) => ids.includes(p.toLowerCase())), conf: [], over: [], same: [], hol: [], dup: [], status: "OK" });
+  const timed = items.filter((x) => !x.allday).sort((a, b) => a.start.localeCompare(b.start));
+  const pairs = { conf: 0, over: 0, dup: 0 };
+  const near = (fn) => { for (let i = 0; i < timed.length; i++) for (let j = i + 1; j < timed.length && timed[j].start <= timed[i].end; j++) if (overlapping(timed[i], timed[j])) fn(timed[i], timed[j]); };
+  // pass 1: the same event in several sources -> one copy is shown and checked, the others are hidden
+  near((a, b) => {
+    if (a.source === b.source || !isDup(a, b)) return;
+    a.dup.push(b); b.dup.push(a); pairs.dup++;
+    (state.sources.indexOf(a.source) > state.sources.indexOf(b.source) ? a : b).hidden = true;
+  });
+  // pass 2: overlaps between distinct events
+  near((a, b) => {
+    if (a.hidden || b.hidden || isDup(a, b)) return;
+    const k = a.mine && b.mine ? "conf" : "over";
+    a[k].push(b); b[k].push(a); pairs[k]++;
+  });
+  const byDay = new Map();
+  const add = (ds, x) => (byDay.get(ds) || byDay.set(ds, []).get(ds)).push(x);
+  for (const x of items) {
+    if (x.allday) for (let d = dOf(x.start); d < dOf(x.end); d = addDays(d, 1)) add(d, x);
+    else add(dOf(x.start), x);
+  }
+  for (const x of timed) {
+    const day = byDay.get(dOf(x.start)) || [];
+    x.hol = day.filter((y) => y.allday);
+    if (!x.conf.length && !x.over.length)
+      x.same = x.hidden ? [] : day.filter((y) => !y.allday && !y.hidden && y !== x && y.mine && y.source !== x.source && !isDup(x, y) && !overlapping(x, y));
+    x.status = x.conf.length ? "CONFLICT" : x.over.length ? "OVERLAP" : x.same.length ? "SAMEDAY" : x.hol.length ? "HOLIDAY" : x.dup.length ? "DUPLICATE" : "OK";
+  }
+  for (const list of byDay.values()) list.sort((a, b) => (b.allday - a.allday) || a.start.localeCompare(b.start) || a.source.name.localeCompare(b.source.name));
+  model = { items, timed, byDay, pairs };
+}
+const problem = (x) => ["CONFLICT", "OVERLAP", "SAMEDAY", "DUPLICATE"].includes(x.status);
+function visible(x) {
+  const f = state.f;
+  if (f.mine && !x.mine) return false;
+  if (f.prob && !problem(x)) return false;
+  if (f.q) {
+    const hay = [x.course, x.title, x.people.join(" "), x.location, x.description, x.source.name, Object.values(x.extra).join(" ")].join(" ").toLowerCase();
+    if (!hay.includes(f.q.toLowerCase())) return false;
+  }
+  return true;
+}
+
+// ---------------------------------------------------------------- rendering
+function sourceRange(s) {
+  const t = s.events.filter((e) => !e.allday).map((e) => e.start).sort();
+  return t.length ? `${dOf(t[0])} .. ${dOf(t[t.length - 1])}` : "no timed events";
+}
+function renderSources() {
+  const box = $("sources"); box.replaceChildren();
+  if (!state.sources.length) box.append(h("p", { class: "small" }, "No sources yet – open or drop .ics / .xlsx / .csv / .tsv files, load a URL, or start an empty source and add events."));
+  for (const s of state.sources) {
+    const changed = s.events.filter((e) => e.created || e.orig).length;
+    box.append(h("div", { class: "src", title: [s.name, s.info, ...Object.entries(s.meta).map(([k, v]) => `${k}: ${v}`)].filter(Boolean).join("\n") },
+      h("input", { type: "checkbox", checked: s.on, "aria-label": "show " + s.name, onchange: (e) => { s.on = e.target.checked; refresh(); } }),
+      h("input", { type: "color", value: s.color, "aria-label": "colour of " + s.name, style: "width:22px;height:18px;padding:0;border:0;background:none", oninput: (e) => { s.color = e.target.value; render(); } }),
+      h("span", { class: "nm", title: "Click to rename", onclick: () => { const n = prompt("Source name", s.name); if (n && n.trim()) { s.name = n.trim(); refresh(); } } }, s.name),
+      h("label", { class: "chk", title: "All events in this source are yours (e.g. your personal calendar)" },
+        h("input", { type: "checkbox", checked: s.mine, onchange: (e) => { s.mine = e.target.checked; refresh(); } }), "mine"),
+      h("button", { type: "button", title: "Remove source", onclick: () => { if (confirm(`Remove “${s.name}” (${s.events.length} events)?`)) { state.sources.splice(state.sources.indexOf(s), 1); refresh(); } } }, "✕"),
+      h("span", { class: "meta" }, `${s.events.length} events · ${sourceRange(s)}${changed ? ` · ${changed} changed` : ""}`)));
+  }
+}
+
+function renderStats() {
+  const vis = model.items.filter(visible);
+  const n = (st) => vis.filter((x) => x.status === st).length;
+  const mine = model.items.filter((x) => x.mine && !x.allday);
+  const hrs = mine.reduce((a, x) => a + minutes(x.start, x.end) / 60, 0);
+  const box = $("stats"); box.replaceChildren();
+  const jump = () => { state.f.prob = true; $("f-prob").checked = true; setView("list"); };
+  box.append(
+    h("button", { type: "button", class: "stat st-CONFLICT", title: "Pairs of overlapping events that are both yours", onclick: jump }, `Conflicts: ${model.pairs.conf}`),
+    h("button", { type: "button", class: "stat st-OVERLAP", title: "Pairs of overlapping events where at most one is yours", onclick: jump }, `Overlaps: ${model.pairs.over}`),
+    h("button", { type: "button", class: "stat st-SAMEDAY", title: "Events sharing a day with one of your events from another source", onclick: jump }, `Same day: ${n("SAMEDAY")}`),
+    h("span", { class: "stat st-HOLIDAY" }, `On all-day dates: ${n("HOLIDAY")}`),
+    model.pairs.dup ? h("button", { type: "button", class: "stat st-DUPLICATE", title: "The same event in two sources", onclick: jump }, `Duplicates: ${model.pairs.dup}`) : null,
+    h("span", { class: "stat" }, `Events: ${model.items.length}`),
+    meIds().length || state.sources.some((s) => s.mine) ? h("span", { class: "stat" }, `Mine: ${mine.length} events, ${hrs.toFixed(hrs % 1 ? 1 : 0)} h`) : null);
+
+  const cov = $("coverage"); cov.replaceChildren();
+  const rng = state.sources.filter((s) => s.on && s.events.some((e) => !e.allday))
+    .map((s) => { const t = s.events.filter((e) => !e.allday).map((e) => e.start).sort(); return { s, a: dOf(t[0]), b: dOf(t[t.length - 1]) }; });
+  // a source that overlaps no other source in time cannot produce conflicts – usually a feed that lacks the term
+  for (const x of rng) {
+    const others = rng.filter((y) => y !== x);
+    if (others.length && others.every((y) => x.b < y.a || y.b < x.a))
+      cov.append(h("p", { class: "warn" }, `⚠ “${x.s.name}” (${x.a} .. ${x.b}) does not overlap in time with any other source – no conflicts can be found for it.`));
+  }
+  if (!meIds().length && !state.sources.some((s) => s.mine) && state.sources.length > 1)
+    cov.append(h("p", { class: "small" }, "Tip: fill in “Me” (or tick “mine” on your own calendar) to tell your conflicts from other people's overlaps."));
+}
+
+const changeCls = (e) => (e.created ? " created" : e.orig ? " edited" : "");
+function chipAttrs(x) {     // chips are divs, not <button>s: Firefox does not start drags on buttons
+  return { role: "button", tabindex: "0", title: `${evLabel(x)} — ${x.source.name}${x.status !== "OK" ? " — " + STATUS_LABEL[x.status] : ""}`,
+           onclick: () => detail(x), onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); detail(x); } },
+           draggable: "true", ondragstart: (e) => { e.dataTransfer.setData("text/x-cal-key", x.key); e.dataTransfer.effectAllowed = "copyMove"; } };
+}
+function chip(x) {
+  const anyMe = meIds().length || state.sources.some((s) => s.mine);
+  const cls = `chip s-${x.status}${x.allday ? " allday" : ""}${x.e.status === "tentative" ? " tentative" : ""}${anyMe && !x.mine ? " notmine" : ""}${changeCls(x.e)}`;
+  return h("div", { class: cls, style: `border-left-color:${x.source.color}`, ...chipAttrs(x) },
+    x.allday ? null : h("span", { class: "t" }, hm(x.start)), x.status === "CONFLICT" ? "⚠ " : "", label(x), x.dup.length ? ` (×${x.dup.length + 1})` : "");
+}
+function dropAttrs(ds) {
+  const ours = (e) => [...e.dataTransfer.types].includes("text/x-cal-key");
+  return {
+    ondragover: (e) => { if (ours(e)) { e.preventDefault(); e.dataTransfer.dropEffect = e.ctrlKey || e.altKey ? "copy" : "move"; e.currentTarget.classList.add("drop"); } },
+    ondragleave: (e) => e.currentTarget.classList.remove("drop"),
+    ondrop: (e) => {
+      if (!ours(e)) return;
+      e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.remove("drop");
+      moveTo(e.dataTransfer.getData("text/x-cal-key"), ds, e.ctrlKey || e.altKey);
+    },
+    ondblclick: (e) => { if (!e.target.closest(".chip")) editForm(null, { date: ds }); },
+  };
+}
+function renderMonth() {
+  const [y, m] = state.ym;
+  const first = ymd(y, m, 1), start = addDays(first, -weekday(first));
+  const today = todayStr();
+  const weeks = Math.ceil((weekday(first) + Math.round(minutes(first + "T00:00", ymd(y, m + 1, 1) + "T00:00") / 1440)) / 7);
+  const grid = h("div", { class: "grid", style: `grid-template-rows: auto repeat(${weeks}, minmax(0, 1fr))` },
+    h("div", { class: "dow", title: "ISO week" }, "Wk"), DAYS.map((d) => h("div", { class: "dow" }, d)));
+  for (let w = 0; w < weeks; w++) {
+    const wkStart = addDays(start, w * 7);
+    grid.append(h("div", { class: "wk" }, isoWeek(wkStart)));
+    for (let d = 0; d < 7; d++) {
+      const ds = addDays(wkStart, d);
+      const all = model.byDay.get(ds) || [];
+      const cls = ["day", Number(ds.slice(5, 7)) !== m && "other", d >= 5 && "weekend", all.some((x) => x.allday) && "hol", ds === today && "today"].filter(Boolean).join(" ");
+      grid.append(h("div", { class: cls, "data-date": ds, ...dropAttrs(ds) }, h("div", { class: "dnum" }, h("span", {}, Number(ds.slice(8)))), all.filter((x) => visible(x) && !x.hidden).map(chip)));
+    }
+  }
+  return grid;
+}
+
+function renderList() {
+  const ym = `${state.ym[0]}-${pad(state.ym[1])}`;
+  const rows = model.items.filter((x) => visible(x) && (state.listRange === "all" || dOf(x.start).slice(0, 7) === ym))
+    .sort((a, b) => a.start.localeCompare(b.start) || a.source.name.localeCompare(b.source.name));
+  const wrap = h("div", {});
+  wrap.append(h("div", { class: "bar" },
+    h("button", { type: "button", class: state.listRange === "month" ? "on" : "", onclick: () => { state.listRange = "month"; render(); } }, "This month"),
+    h("button", { type: "button", class: state.listRange === "all" ? "on" : "", onclick: () => { state.listRange = "all"; render(); } }, "All dates"),
+    h("span", { class: "small" }, `${rows.length} events`)));
+  const tb = h("tbody", {});
+  for (const x of rows) {
+    const rel = [...x.conf.map((y) => `conflict: ${evLabel(y)} (${y.source.name})`), ...x.over.map((y) => `overlap: ${evLabel(y)} (${y.source.name})`),
+                 ...x.same.map((y) => "same day: " + evLabel(y)), ...x.dup.map((y) => "duplicate in " + y.source.name)];
+    tb.append(h("tr", { class: `click r-${x.status}`, onclick: () => detail(x) },
+      h("td", { class: "num" }, dOf(x.start), h("div", { class: "small" }, `${DAYS[weekday(dOf(x.start))]}, week ${isoWeek(dOf(x.start))}`)), h("td", { class: "num" }, fmtSpan(x)),
+      h("td", {}, h("span", { class: "pill", style: `border-color:${x.source.color};color:${x.source.color}` }, x.source.name)),
+      h("td", {}, label(x), x.e.created ? " ✚" : x.e.orig ? " ✎" : "", x.e.status === "tentative" ? h("span", { class: "small" }, " (tentative)") : null,
+        x.people.length || x.location ? h("div", { class: "small" }, [x.people.join(", "), x.location].filter(Boolean).join(" · ")) : null),
+      h("td", {}, x.status !== "OK" ? h("span", { class: `pill st-${x.status}` }, STATUS_LABEL[x.status]) : ""),
+      h("td", { class: "small" }, rel.map((l, i) => [i ? h("br") : null, l]))));
+  }
+  wrap.append(h("div", { class: "tbl-wrap" }, h("table", { class: "events" },
+    h("thead", {}, h("tr", {}, ["Date", "Time", "Source", "Event", "Status", "Relations"].map((c) => h("th", {}, c)))), tb)));
+  if (!rows.length) wrap.append(h("p", { class: "small" }, "Nothing matches the current filters."));
+  return wrap;
+}
+
+function detail(x) {
+  const body = $("dlg-body"); body.replaceChildren();
+  const rows = [["When", `${dOf(x.start)} ${DAYS[weekday(dOf(x.start))]} (week ${isoWeek(dOf(x.start))}), ${fmtSpan(x)}${x.allday && dOf(x.end) > addDays(dOf(x.start), 1) ? " – " + addDays(dOf(x.end), -1) : ""}`],
+    ["Source", x.source.name + (x.mine ? " (mine)" : "")], ["Course / group", x.course], ["Title", x.title], ["People", x.people.join(", ")], ["Location", x.location],
+    ["Description", x.description], ["Status", x.e.status], ...Object.entries(x.extra), ["External ID", x.extId], ["UID", x.uid],
+    ["Check", x.status !== "OK" ? STATUS_LABEL[x.status] : ""]];
+  body.append(h("h2", {}, label(x)), h("dl", {}, rows.filter(([, v]) => v).map(([k, v]) => [h("dt", {}, k), h("dd", {}, v)])));
+  const list = (title, items) => (items.length ? [h("h3", {}, title), h("ul", { style: "margin:0;padding-left:18px" }, items.map((y) => h("li", {}, `${evLabel(y)} — ${y.source.name}`)))] : []);
+  body.append(...list("Conflicts with (both yours)", x.conf), ...list("Overlaps with", x.over), ...list("Same day as", x.same), ...list("Duplicate of", x.dup));
+  if (x.e.orig) body.append(h("p", { class: "small" }, "Changed – was: " + evLabel(x.e.orig)));
+  body.append(h("div", { class: "bar" },
+    h("button", { type: "button", class: "primary", onclick: () => editForm(x.key) }, "Edit"),
+    h("button", { type: "button", onclick: () => duplicate(x.key, true) }, "Duplicate"),
+    x.e.orig ? h("button", { type: "button", onclick: () => { revert(x.key); closeDlg(); } }, "Revert") : null,
+    h("button", { type: "button", class: "danger", onclick: () => { remove(x.key); closeDlg(); } }, "Delete")));
+  openDlg();
+}
+
+function setView(v) { state.view = v; render(); }
+// Hide chips that do not fit in a day cell and add a "+N more" button listing the whole day.
+function fitDays() {
+  for (const cell of document.querySelectorAll(".day")) {
+    cell.querySelector(".more")?.remove();
+    const chips = [...cell.querySelectorAll(".chip")];
+    chips.forEach((c) => { c.hidden = false; });
+    if (cell.scrollHeight <= cell.clientHeight + 1) continue;
+    const more = h("button", { type: "button", class: "more", onclick: () => dayDialog(cell.dataset.date) });
+    cell.append(more);
+    let n = 0;
+    for (let i = chips.length - 1; i >= 0 && (n === 0 || cell.scrollHeight > cell.clientHeight + 1); i--) {
+      chips[i].hidden = true; n++;
+      more.textContent = `+${n} more`;
+    }
+  }
+}
+function dayDialog(ds) {
+  const body = $("dlg-body"); body.replaceChildren();
+  const items = (model.byDay.get(ds) || []).filter((x) => visible(x) && !x.hidden);
+  body.append(h("h2", {}, `${DAYS[weekday(ds)]} ${ds} (week ${isoWeek(ds)})`),
+    h("div", {}, items.map((x) => h("div", { class: `chip s-${x.status}${changeCls(x.e)}`, style: `border-left-color:${x.source.color};font-size:13px;padding:3px 6px`, ...chipAttrs(x),
+      onclick: () => detail(x) }, h("span", { class: "t" }, fmtSpan(x)), label(x), h("span", { class: "small" }, ` — ${x.source.name}`)))),
+    h("div", { class: "bar" }, h("button", { type: "button", onclick: () => editForm(null, { date: ds }) }, "+ New event this day")));
+  openDlg();
+}
+function render() {
+  const [y, m] = state.ym;
+  $("month-title").textContent = `${MONTHS[m - 1]} ${y}`;
+  $("goto").value = `${y}-${pad(m)}`;
+  $("v-month").classList.toggle("on", state.view === "month");
+  $("v-list").classList.toggle("on", state.view === "list");
+  $("view").replaceChildren(state.view === "month" ? renderMonth() : renderList());
+  renderStats();
+  if (state.view === "month") fitDays();
+  try { history.replaceState(null, "", `#${y}-${pad(m)}/${state.view}`); } catch { /* some file:// contexts */ }
+}
+function refresh() {
+  compute(); renderSources(); render();
+  const n = changes().length;
+  $("changes").textContent = `Changes: ${n}`;
+  $("changes").classList.toggle("on", n > 0);
+}
+function goMonth(ds) { state.ym = [+ds.slice(0, 4), +ds.slice(5, 7)]; render(); }
+function shift(n) { const [y, m] = state.ym; goMonth(ymd(y, m + n, 1)); }
+
+// ---------------------------------------------------------------- editing (in memory)
+const openDlg = () => { if (!$("dlg").open) $("dlg").showModal(); };
+const closeDlg = () => $("dlg").close();
+const snap = (o) => JSON.parse(JSON.stringify(o, (k, v) => (k === "orig" ? undefined : v)));
+function find(key) {
+  for (const s of state.sources) { const e = s.events.find((x) => x.key === key); if (e) return { e, src: s }; }
+  return null;
+}
+function change(ref, patch, toSource) {
+  if (!ref.e.created && !ref.e.orig) ref.e.orig = snap(ref.e);
+  Object.assign(ref.e, patch);
+  if (toSource && toSource !== ref.src) { ref.src.events.splice(ref.src.events.indexOf(ref.e), 1); toSource.events.push(ref.e); }
+  if (ref.e.orig && JSON.stringify(snap(ref.e)) === JSON.stringify(ref.e.orig)) delete ref.e.orig;
+  refresh();
+}
+function shifted(e, ds) {
+  const span = Math.round(minutes(dOf(e.start) + "T00:00", dOf(e.end) + "T00:00") / 1440);
+  return { start: ds + e.start.slice(10), end: addDays(ds, span) + e.end.slice(10) };
+}
+function moveTo(key, ds, copy) {
+  const ref = find(key);
+  if (!ref) return;
+  if (copy) duplicate(key, false, ds);
+  else if (dOf(ref.e.start) !== ds) change(ref, shifted(ref.e, ds));
+}
+function duplicate(key, edit, ds) {
+  const ref = find(key);
+  const c = snap(ref.e);
+  Object.assign(c, { key: newKey(), created: true, extId: "", uid: `new-${Date.now().toString(36)}-${seq}@calics` }, ds ? shifted(c, ds) : {});
+  ref.src.events.splice(ref.src.events.indexOf(ref.e) + 1, 0, c);
+  refresh();
+  if (edit) editForm(c.key);
+}
+function remove(key) {
+  const ref = find(key);
+  if (!ref) return;
+  ref.src.events.splice(ref.src.events.indexOf(ref.e), 1);
+  if (!ref.e.created) state.deleted.push({ e: ref.e, src: ref.src });
+  refresh();
+}
+function revert(key) {
+  const ref = find(key);
+  if (!ref || !ref.e.orig) return;
+  const o = ref.e.orig;
+  for (const k of Object.keys(ref.e)) if (k !== "key") delete ref.e[k];
+  Object.assign(ref.e, o);
+  refresh();
+}
+function changes() {
+  const out = [];
+  for (const s of state.sources) for (const e of s.events) if (e.created || e.orig) out.push({ key: e.key, e, src: s, what: e.created ? "new" : "changed" });
+  for (const d of state.deleted) if (state.sources.includes(d.src)) out.push({ e: d.e, src: d.src, what: "deleted", del: d });
+  return out;
+}
+function undo(c) {
+  if (c.what === "deleted") { c.src.events.push(c.e); state.deleted.splice(state.deleted.indexOf(c.del), 1); refresh(); }
+  else if (c.what === "new") remove(c.key);
+  else revert(c.key);
+}
+let lastTarget = null;
+function targetSource() {
+  if (lastTarget && state.sources.includes(lastTarget)) return lastTarget;
+  return state.sources.find((s) => s.local) || addSource("My events", [], { local: true, mine: true, info: "created in this page" });
+}
+
+function editForm(key, defaults = {}) {
+  const ref = key ? find(key) : null;
+  const e = ref ? ref.e : null;
+  const body = $("dlg-body"); body.replaceChildren();
+  const f = {};
+  const inp = (name, value, type = "text", extra = {}) => (f[name] = h("input", { type, value: value ?? "", name, ...extra }));
+  const row = (lbl, el) => [h("label", {}, lbl), el];
+  const defSrc = ref ? ref.src : targetSource();
+  f.source = h("select", { name: "source" }, state.sources.map((s) => h("option", { value: s.id, selected: s === defSrc }, s.name)), h("option", { value: "__new" }, "New source…"));
+  const ds = e ? dOf(e.start) : defaults.date || todayStr();
+  f.allday = h("input", { type: "checkbox", checked: e ? e.allday : false, onchange: () => { f.start.disabled = f.end.disabled = f.allday.checked; } });
+  const extraText = e ? Object.entries(e.extra).map(([k, v]) => `${k}: ${v}`).join("\n") : "";
+  const form = h("div", { class: "form" },
+    ...row("Source", f.source),
+    ...row("Date", inp("date", ds, "date")),
+    ...row("All day", h("label", { class: "chk" }, f.allday, "whole day" + (e && e.allday && dOf(e.end) > addDays(dOf(e.start), 1) ? `, until ${addDays(dOf(e.end), -1)}` : ""))),
+    ...row("Start", inp("start", e && !e.allday ? hm(e.start) : "10:00", "time")),
+    ...row("End", inp("end", e && !e.allday ? hm(e.end) : "12:00", "time")),
+    ...row("Title", inp("title", e ? e.title : "")),
+    ...row("Course / group", inp("course", e ? e.course : defaults.course || "")),
+    ...row("People", inp("people", e ? e.people.join(", ") : state.me.split(",")[0].trim(), "text", { placeholder: "comma-separated" })),
+    ...row("Location", inp("location", e ? e.location : "")),
+    ...row("Status", (f.status = h("select", {}, ["", "confirmed", "tentative"].map((s) => h("option", { value: s, selected: (e ? e.status : "") === s }, s || "—"))))),
+    ...row("Description", (f.description = h("textarea", { rows: 2 }, e ? e.description : ""))),
+    ...row("Other fields", (f.extra = h("textarea", { rows: 2, placeholder: "Key: value, one per line" }, extraText))));
+  f.start.disabled = f.end.disabled = f.allday.checked;
+  const err = h("p", { class: "err" });
+  const save = () => {
+    const d = f.date.value;
+    if (!d) return (err.textContent = "Date is required.");
+    let st, en;
+    if (f.allday.checked) {
+      const days = e && e.allday ? Math.max(1, Math.round(minutes(e.start, e.end) / 1440)) : 1;
+      st = d + "T00:00"; en = addDays(d, days) + "T00:00";
+    } else {
+      if (!f.start.value) return (err.textContent = "Start time is required (or tick All day).");
+      st = `${d}T${f.start.value}`; en = `${d}T${f.end.value || f.start.value}`;
+      if (en < st) en = `${addDays(d, 1)}T${f.end.value}`;      // past midnight
+    }
+    if (!f.title.value.trim() && !f.course.value.trim()) return (err.textContent = "Give the event a title or a course.");
+    const extra = {};
+    for (const line of f.extra.value.split("\n")) { const m = line.match(/^\s*([^:]+?)\s*:\s*(.*)$/); if (m && m[2]) extra[m[1]] = m[2].trim(); }
+    let to = state.sources.find((s) => s.id === f.source.value);
+    if (f.source.value === "__new") { const n = prompt("Name of the new source", "My events"); if (!n) return; to = addSource(n.trim(), [], { local: true, info: "created in this page" }); }
+    lastTarget = to;
+    const patch = { start: st, end: en, allday: f.allday.checked, title: f.title.value.trim(), course: f.course.value.trim(), people: splitPeople(f.people.value),
+                    location: f.location.value.trim(), status: f.status.value, description: f.description.value.trim(), extra };
+    if (e) change(ref, patch, to);
+    else { to.events.push({ key: newKey(), created: true, uid: `new-${Date.now().toString(36)}-${seq}@calics`, extId: "", ...patch }); refresh(); }
+    closeDlg();
+  };
+  form.addEventListener("keydown", (ev) => { if (ev.key === "Enter" && ev.target.tagName !== "TEXTAREA") { ev.preventDefault(); save(); } });
+  body.append(h("h2", {}, e ? "Edit event" : "New event"), form, err,
+    h("div", { class: "bar" }, h("button", { type: "button", class: "primary", onclick: save }, e ? "Save" : "Create"),
+      e ? h("button", { type: "button", class: "danger", onclick: () => { remove(key); closeDlg(); } }, "Delete") : null,
+      h("span", { class: "small" }, "Changes live in this page only – export them before closing.")));
+  openDlg();
+  f.title.focus();
+}
+
+function showChanges() {
+  const list = changes();
+  const body = $("dlg-body"); body.replaceChildren();
+  body.append(h("h2", {}, `Changes (${list.length})`));
+  if (!list.length) body.append(h("p", { class: "small" }, "No changes yet. Drag events to another day (Ctrl/Alt-drag copies), double-click a day or use “+ New event”, or click an event and choose Edit."));
+  body.append(h("ul", { class: "changes" }, list.map((c) => h("li", {},
+    h("strong", {}, c.what), ` ${c.src.name}: ${evLabel(c.e)}`, c.e.orig ? h("span", { class: "small" }, ` (was ${evLabel(c.e.orig)})`) : null,
+    h("button", { type: "button", onclick: () => { undo(c); showChanges(); } }, c.what === "new" ? "Remove" : "Revert")))));
+  if (list.length) body.append(h("div", { class: "bar" },
+    h("button", { type: "button", class: "danger", onclick: () => { for (const c of changes()) undo(c); showChanges(); } }, "Revert all"),
+    h("button", { type: "button", onclick: () => exportDialog(true) }, "Export changes…")));
+  openDlg();
+}
+
+// ---------------------------------------------------------------- export (ics / tsv / csv)
+function download(name, text, type) {
+  const a = h("a", { href: URL.createObjectURL(new Blob([text], { type })), download: name });
+  document.body.append(a); a.click(); a.remove();
+}
+const TABLE_COLS = ["source", "date", "weekday", "start", "end", "allday", "course", "title", "people", "location", "description", "status", "conflict", "change", "uid", "ext_id"];
+function tableRows(items) {
+  const extraKeys = [...new Set(items.flatMap((x) => Object.keys(x.extra)))].filter((k) => !TABLE_COLS.includes(k.toLowerCase()));
+  const rows = [TABLE_COLS.concat(extraKeys)];
+  for (const x of items) rows.push([x.source.name, dOf(x.start), DAYS[weekday(dOf(x.start))], x.allday ? "" : hm(x.start),
+    x.allday ? (dOf(x.end) > addDays(dOf(x.start), 1) ? addDays(dOf(x.end), -1) : "") : hm(x.end),
+    x.allday ? "yes" : "", x.course, x.title, x.people.join(", "), x.location, x.description, x.e.status, x.status === "OK" ? "" : STATUS_LABEL[x.status],
+    x.e.created ? "new" : x.e.orig ? "changed" : "", x.uid, x.extId, ...extraKeys.map((k) => x.extra[k] ?? "")]);
+  return rows;
+}
+const toTsv = (rows) => rows.map((r) => r.map((v) => String(v ?? "").replace(/[\t\r\n]+/g, " ")).join("\t")).join("\n") + "\n";
+const toCsv = (rows) => "\uFEFF" + rows.map((r) => r.map((v) => { const s = String(v ?? ""); return /[",\n\r;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }).join(",")).join("\r\n") + "\r\n";
+const icsText = (v) => String(v ?? "").replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
+const icsDt = (t) => `${t.slice(0, 4)}${t.slice(5, 7)}${t.slice(8, 10)}T${t.slice(11, 13)}${t.slice(14, 16)}00`;
+const utf8 = new TextEncoder();
+function fold(line) {
+  let out = "", n = 0;
+  for (const ch of line) {
+    const b = utf8.encode(ch).length;
+    if (n + b > 75) { out += "\r\n "; n = 1; }
+    out += ch; n += b;
+  }
+  return out;
+}
+const VTIMEZONE = ["BEGIN:VTIMEZONE", "TZID:Europe/Stockholm",
+  "BEGIN:DAYLIGHT", "TZOFFSETFROM:+0100", "TZOFFSETTO:+0200", "TZNAME:CEST", "DTSTART:19700329T020000", "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU", "END:DAYLIGHT",
+  "BEGIN:STANDARD", "TZOFFSETFROM:+0200", "TZOFFSETTO:+0100", "TZNAME:CET", "DTSTART:19701025T030000", "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU", "END:STANDARD",
+  "END:VTIMEZONE"];
+// RFC 5545 with readable SUMMARY/DESCRIPTION for other calendar apps plus X-CALICS-* fields so this page reads its own export back losslessly.
+function buildIcs(items, calName) {
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//calics//calendar.html//SV", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+             `X-WR-CALNAME:${icsText(calName)}`, "X-WR-TIMEZONE:Europe/Stockholm", ...VTIMEZONE];
+  for (const x of items) {
+    L.push("BEGIN:VEVENT", `UID:${x.uid}`, `DTSTAMP:${stamp}`);
+    if (x.allday) L.push(`DTSTART;VALUE=DATE:${icsDt(x.start).slice(0, 8)}`, `DTEND;VALUE=DATE:${icsDt(x.end).slice(0, 8)}`);
+    else L.push(`DTSTART;TZID=Europe/Stockholm:${icsDt(x.start)}`, `DTEND;TZID=Europe/Stockholm:${icsDt(x.end)}`);
+    L.push(`SUMMARY:${[...x.course.split(/,\s*/), x.title].filter(Boolean).map(icsText).join("\\,")}`);
+    if (x.location) L.push(`LOCATION:${icsText(x.location)}`);
+    const desc = [x.description, x.people.length && "People: " + x.people.join(", "), ...Object.entries(x.extra).map(([k, v]) => `${k}: ${v}`)].filter(Boolean).join("\n");
+    if (desc) L.push(`DESCRIPTION:${icsText(desc)}`);
+    if (x.e.status) L.push(`STATUS:${x.e.status.toUpperCase()}`);
+    L.push(`X-CALICS-SOURCE:${icsText(x.source.name)}`, `X-CALICS-COURSE:${icsText(x.course)}`, `X-CALICS-TITLE:${icsText(x.title)}`,
+           `X-CALICS-PEOPLE:${icsText(JSON.stringify(x.people))}`, `X-CALICS-EXTRA:${icsText(JSON.stringify(x.extra))}`,
+           `X-CALICS-DESCRIPTION:${icsText(x.description)}`, `X-CALICS-EXTID:${icsText(x.extId)}`, "END:VEVENT");
+  }
+  L.push("END:VCALENDAR");
+  return L.map(fold).join("\r\n") + "\r\n";
+}
+// all events of the chosen sources, with their computed status where the source is shown
+function exportItems(sources) {
+  const byE = new Map(model.items.map((x) => [x.e, x]));
+  const items = [];
+  for (const s of sources) for (const e of s.events) items.push(byE.get(e) || { ...e, e, source: s, mine: s.mine || e.people.some((p) => meIds().includes(p.toLowerCase())), status: "OK" });
+  return items.sort((x, y) => x.start.localeCompare(y.start));
+}
+
+function exportDialog(changedOnly = false) {
+  const body = $("dlg-body"); body.replaceChildren();
+  const fmt = h("select", {}, h("option", { value: "ics" }, "iCalendar .ics (Outlook / Google / Apple)"), h("option", { value: "tsv" }, "TSV (tab-separated)"), h("option", { value: "csv" }, "CSV (Excel)"));
+  const cb = (lbl, checked) => { const el = h("input", { type: "checkbox", checked }); return [el, h("label", { class: "chk" }, el, " " + lbl)]; };
+  const srcs = state.sources.map((s) => [s, ...cb(`${s.name} (${s.events.length})`, s.on)]);
+  const [mine, mineL] = cb("only my events", state.f.mine);
+  const [chg, chgL] = cb("only new / changed events", changedOnly);
+  const [vis, visL] = cb("only events matching the current search / filters", false);
+  const [nodup, nodupL] = cb("skip copies of events that are in several sources", true);
+  const range = h("select", {}, h("option", { value: "all" }, "all dates"), h("option", { value: "month" }, "the month shown"), h("option", { value: "custom" }, "from – to"));
+  const from = h("input", { type: "date", value: ymd(state.ym[0], state.ym[1], 1), disabled: true }), to = h("input", { type: "date", value: addDays(ymd(state.ym[0], state.ym[1] + 1, 1), -1), disabled: true });
+  const fname = h("input", { type: "text", value: `calendar_${todayStr()}` });
+  const note = h("p", { class: "small" });
+  const pick = () => {
+    const [a, b] = range.value === "all" ? ["0000", "9999"] : range.value === "month" ? [ymd(state.ym[0], state.ym[1], 1), addDays(ymd(state.ym[0], state.ym[1] + 1, 1), -1)] : [from.value, to.value];
+    return exportItems(srcs.filter(([, el]) => el.checked).map(([s]) => s))
+      .filter((x) => (!mine.checked || x.mine) && (!chg.checked || x.e.created || x.e.orig) && (!vis.checked || visible(x)) && (!nodup.checked || !x.hidden) && dOf(x.start) >= a && dOf(x.start) <= b);
+  };
+  const update = () => {
+    from.disabled = to.disabled = range.value !== "custom";
+    note.textContent = `${pick().length} events.` + (state.deleted.length ? " Deleted events are left out (importing a file does not delete them in another calendar)." : "") +
+      (fmt.value !== "ics" ? " The file can be loaded here again (the “source” column keeps the sources apart)." : " Loading the .ics here again restores sources and all fields.");
+  };
+  for (const el of [fmt, mine, chg, vis, nodup, range, from, to, ...srcs.map(([, el]) => el)]) el.onchange = update;
+  update();
+  const go = () => {
+    const items = pick();
+    const name = (fname.value.trim() || "calendar").replace(/[\\/:*?"<>|]+/g, "_");
+    if (fmt.value === "ics") download(name + ".ics", buildIcs(items, name), "text/calendar");
+    else if (fmt.value === "tsv") download(name + ".tsv", toTsv(tableRows(items)), "text/tab-separated-values");
+    else download(name + ".csv", toCsv(tableRows(items)), "text/csv");
+    closeDlg();
+  };
+  body.append(h("h2", {}, "Export events"),
+    h("div", { class: "form" },
+      h("label", {}, "Format"), fmt,
+      h("label", {}, "Sources"), h("div", {}, srcs.map(([, , l], i) => [i ? h("br") : null, l])),
+      h("label", {}, "Only"), h("div", {}, mineL, h("br"), chgL, h("br"), visL, h("br"), nodupL),
+      h("label", {}, "Dates"), h("div", { class: "bar", style: "margin:0" }, range, from, to),
+      h("label", {}, "File name"), fname),
+    note, h("div", { class: "bar" }, h("button", { type: "button", class: "primary", onclick: go }, "Download")));
+  openDlg();
+}
+
+// ---------------------------------------------------------------- loading sources
+function msg(text, cls) { $("load-msg").replaceChildren(text ? h("p", { class: cls || "msg" }, text) : ""); }
+function summary(name, events, extra) {
+  const t = events.filter((e) => !e.allday).map((e) => e.start).sort();
+  return `${name}: ${events.length} events${t.length ? ` (timed ${dOf(t[0])} .. ${dOf(t[t.length - 1])})` : " (no timed events)"}${extra ? " – " + extra : ""}`;
+}
+// Group events carrying a source name (our own exports) into one source each.
+function addGrouped(fallback, events, opts) {
+  const groups = new Map();
+  for (const e of events) { const k = e.srcName || fallback; (groups.get(k) || groups.set(k, []).get(k)).push(e); }
+  if (!groups.size) groups.set(fallback, []);
+  return [...groups].map(([n, evs]) => addSource(n, evs, opts));
+}
+function addIcs(name, text, fromUrl) {
+  const { name: calName, desc, events } = parseIcs(text);
+  const mine = !!calName && meIds().some((id) => id.length > 2 && calName.toLowerCase().includes(id));
+  const lbl = fromUrl && calName ? calName.replace(/^TimeEdit-/, "").slice(0, 48) : name;
+  const info = [calName && calName !== lbl ? calName : "", desc].filter(Boolean).join(" · ");
+  const added = addGrouped(lbl, events, { mine, info });
+  return summary(added.map((s) => s.name).join(", "), events, desc ? `header says “${desc}”` : "");
+}
+const looksLikeIcs = (t) => /^\uFEFF?\s*BEGIN:VCALENDAR/.test(t);
+const isZip = (buf) => { const u = new Uint8Array(buf, 0, Math.min(2, buf.byteLength)); return u[0] === 0x50 && u[1] === 0x4b; };
+async function sheetsFrom(name, buf) {
+  if (isZip(buf)) return readXlsx(buf);
+  return [{ name, rows: parseDelimited(new TextDecoder().decode(buf)) }];
+}
+function bestSheet(sheets) {
+  let best = null;
+  for (const sh of sheets) {
+    const det = detect(sh.rows);
+    if (det.header < 0) continue;
+    const res = tableToEvents(sh.rows, { ...det, filldown: true });
+    if (!best || res.events.length > best.res.events.length) best = { sh, det, res };
+  }
+  return best;
+}
+const baseName = (n) => n.replace(/\.(ics|ical|ifb|xlsx|xlsm|csv|tsv|txt)$/i, "");
+function addTableAuto(name, sheets) {
+  const best = bestSheet(sheets);
+  if (!best || !best.res.events.length) throw new Error("no events found – no header row with date/time/title columns recognised");
+  const added = addGrouped(baseName(name), best.res.events, { meta: best.res.meta, info: sheets.length > 1 ? `sheet “${best.sh.name}”` : "" });
+  return summary(added.map((s) => s.name).join(", "), best.res.events, best.res.skipped ? `${best.res.skipped} rows skipped` : "");
+}
+// Import dialog: pick sheet, header row and column mapping; live preview.
+function importDialog(name, sheets) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (v) => { if (!done) { done = true; resolve(v); } };
+    const best = bestSheet(sheets) || { sh: sheets[0], det: detect(sheets[0].rows) };
+    const body = $("dlg-body"); body.replaceChildren();
+    const sheetSel = h("select", {}, sheets.map((s, i) => h("option", { value: i, selected: s === best.sh }, `${s.name} (${s.rows.length} rows)`)));
+    const hdr = h("input", { type: "number", min: 1, value: Math.max(1, best.det.header + 1), style: "width:90px" });
+    const fill = h("input", { type: "checkbox", checked: true });
+    const nameIn = h("input", { type: "text", value: baseName(name) });
+    const selects = {};
+    const mapBox = h("div", { class: "form", style: "grid-template-columns:max-content minmax(0,1fr) max-content minmax(0,1fr)" });
+    const preview = h("div", { class: "preview tbl-wrap" }), info = h("p", { class: "small" });
+    const sheet = () => sheets[+sheetSel.value];
+    const colName = (c) => { let s = ""; for (let n = c + 1; n > 0; n = Math.floor((n - 1) / 26)) s = String.fromCharCode(65 + ((n - 1) % 26)) + s; return s; };
+    const buildMap = (det) => {
+      const headers = sheet().rows[det.header] || [];
+      mapBox.replaceChildren();
+      for (const fld of FIELDS) {
+        selects[fld] = h("select", { onchange: run }, h("option", { value: "" }, "—"),
+          headers.map((hd, c) => (String(hd).trim() ? h("option", { value: c, selected: det.map[fld] === c }, `${colName(c)}: ${String(hd).trim().split("\n")[0].slice(0, 40)}`) : null)));
+        mapBox.append(h("label", {}, FIELD_LABEL[fld]), selects[fld]);
+      }
+    };
+    const opts = () => ({ header: Math.max(0, +hdr.value - 1), filldown: fill.checked,
+      map: Object.fromEntries(FIELDS.map((f) => [f, selects[f].value === "" ? null : +selects[f].value])) });
+    function run() {
+      const res = tableToEvents(sheet().rows, opts());
+      info.textContent = `${res.events.length} events${res.skipped ? `, ${res.skipped} rows skipped (no date, title or time)` : ""}.` +
+        (Object.keys(res.meta).length ? ` Sheet info: ${Object.entries(res.meta).slice(0, 4).map(([k, v]) => `${k}: ${v}`).join(" · ")}` : "");
+      preview.replaceChildren(h("table", {}, h("thead", {}, h("tr", {}, ["Date", "Time", "Course", "Title", "People", "Location", "Other"].map((c) => h("th", {}, c)))),
+        h("tbody", {}, res.events.slice(0, 12).map((e) => h("tr", {}, h("td", {}, dOf(e.start)), h("td", {}, fmtSpan(e)), h("td", {}, e.course), h("td", {}, e.title),
+          h("td", {}, e.people.join(", ")), h("td", {}, e.location), h("td", { class: "small" }, Object.entries(e.extra).map(([k, v]) => `${k}: ${v}`).join("; ")))))));
+      return res;
+    }
+    sheetSel.onchange = () => { const det = detect(sheet().rows); hdr.value = Math.max(1, det.header + 1); buildMap(det); run(); };
+    hdr.onchange = () => { const i = Math.max(0, +hdr.value - 1); buildMap({ header: i, map: mapHeader(sheet().rows[i]) }); run(); };
+    fill.onchange = run;
+    buildMap(best.det);
+    body.append(h("h2", {}, `Import ${name}`),
+      h("div", { class: "form" }, h("label", {}, "Source name"), nameIn, sheets.length > 1 ? [h("label", {}, "Sheet"), sheetSel] : null,
+        h("label", {}, "Header row"), hdr, h("label", {}, "Empty dates"), h("label", { class: "chk" }, fill, "use the date from the row above")),
+      h("h3", {}, "Columns"), mapBox, info, preview,
+      h("div", { class: "bar" },
+        h("button", { type: "button", class: "primary", onclick: () => { const res = run(); finish({ name: nameIn.value.trim() || baseName(name), res, sheet: sheet().name }); closeDlg(); } }, "Import"),
+        h("button", { type: "button", onclick: () => { finish(null); closeDlg(); } }, "Cancel")));
+    $("dlg").addEventListener("close", () => finish(null), { once: true });
+    run();
+    openDlg();
+  });
+}
+async function addTableInteractive(name, sheets) {
+  const r = await importDialog(name, sheets);
+  if (!r) return "";
+  if (!r.res.events.length) throw new Error("no events with this column mapping");
+  const added = addGrouped(r.name, r.res.events, { meta: r.res.meta, info: sheets.length > 1 ? `sheet “${r.sheet}”` : "" });
+  return summary(added.map((s) => s.name).join(", "), r.res.events, r.res.skipped ? `${r.res.skipped} rows skipped` : "");
+}
+async function loadOne(name, buf, interactive, fromUrl) {
+  if (!isZip(buf)) {
+    const text = new TextDecoder().decode(buf);
+    if (looksLikeIcs(text)) return addIcs(baseName(name), text, fromUrl);
+    if (/\.(ics|ical|ifb)$/i.test(name)) parseIcs(text);     // throws a helpful error
+  }
+  const sheets = await sheetsFrom(name, buf);
+  return interactive ? addTableInteractive(name, sheets) : addTableAuto(name, sheets);
+}
+async function loadFiles(files) {
+  const done = [], errs = [];
+  for (const f of files) {
+    try { const r = await loadOne(f.name, await f.arrayBuffer(), true, false); if (r) done.push(r); refresh(); }
+    catch (e) { errs.push(`${f.name}: ${e.message}`); }
+  }
+  refresh();
+  msg([done.length ? "Loaded " + done.join("\n") : "", errs.join("\n")].filter(Boolean).join("\n"), errs.length ? "err" : "msg");
+  if (done.length) jumpToData();
+}
+async function loadUrl(raw) {
+  let url = raw.trim().replace(/^webcal:\/\//i, "https://");
+  try { url = new URL(url); } catch { return msg("Not a valid URL.", "err"); }
+  if (url.protocol !== "https:" && url.protocol !== "http:") return msg("Only http(s)/webcal URLs can be loaded.", "err");
+  msg("Loading…");
+  let buf;
+  try {
+    const r = await fetch(url, { cache: "no-store", credentials: "omit" });
+    if (!r.ok) throw new Error(`HTTP ${r.status}${r.status === 410 ? " (TimeEdit: “Outside ical date range”)" : ""}`);
+    buf = await r.arrayBuffer();
+  } catch (e) {
+    return msg(`Could not fetch ${url.host}: ${e.message}.\nBrowsers report some refusals only as a network error. Common causes: TimeEdit refuses the link (HTTP 410 “Outside ical date range” – ` +
+               `the subscription's start date is not accepted), the server does not let web pages read it (CORS), or you are offline. ` +
+               `\`python -I calics.py fetch '<url>' --dir DIR\` prints the server's answer; a downloaded file can be opened with “Open files…”.`, "err");
+  }
+  try {
+    const r = await loadOne((url.pathname.split("/").pop() || url.host).slice(0, 40) || url.host, buf, true, true);
+    refresh();
+    if (r) { msg("Loaded " + r); jumpToData(); }
+    $("url").value = "";
+  } catch (e) { msg(`${url.host}: ${e.message}`, "err"); }
+}
+// after loading, if the month shown has no events, jump to the next month that has some
+function jumpToData() {
+  const ym = `${state.ym[0]}-${pad(state.ym[1])}`;
+  if (!model || model.items.some((x) => dOf(x.start).slice(0, 7) === ym)) return;
+  const dates = model.items.map((x) => dOf(x.start)).sort();
+  const next = dates.find((d) => d >= todayStr()) || dates[0];
+  if (next) goMonth(next);
+}
+function b64ToBuf(b64) { const s = atob(b64); const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u.buffer; }
+
+// ---------------------------------------------------------------- init
+async function init() {
+  $("title").textContent = "Calendar Viewer";
+  document.title = DATA.title ? `${DATA.title} – Calendar Viewer` : "Calendar Viewer";
+  $("subtitle").textContent = [DATA.title, DATA.generated && `generated ${DATA.generated}`].filter(Boolean).join(" · ");
+  $("me").value = state.me;
+  $("legend").textContent = "Coloured left edge = source. Red = CONFLICT (two of your events overlap), orange = OVERLAP (overlaps an event that is not yours), yellow = SAME DAY as one of your events from another source, " +
+    "grey day = all-day event (e.g. holiday), purple outline / ×2 = DUPLICATE (same event in several sources, shown once), dashed edge = tentative, faded = not yours. " +
+    "Drag an event to another day (Ctrl/Alt-drag copies), double-click a day to add one, click an event to edit (✎ changed, ✚ new). Changes stay in this page until you export them.";
+  const m = location.hash.match(/^#(\d{4})-(\d{2})(?:\/(month|list))?/);
+  state.ym = m ? [+m[1], +m[2]] : [+todayStr().slice(0, 4), +todayStr().slice(5, 7)];
+  if (m && m[3]) state.view = m[3];
+
+  const errs = [];
+  for (const f of DATA.files || []) {
+    try { await loadOne(f.name, f.b64 ? b64ToBuf(f.b64) : new TextEncoder().encode(f.text).buffer, false, false); }
+    catch (e) { errs.push(`${f.name}: ${e.message}`); }
+  }
+  if (errs.length) msg(errs.join("\n"), "err");
+
+  $("prev").onclick = () => shift(-1);
+  $("next").onclick = () => shift(1);
+  $("today").onclick = () => goMonth(todayStr());
+  $("goto").onchange = (e) => { if (e.target.value) goMonth(e.target.value + "-01"); };
+  $("v-month").onclick = () => setView("month");
+  $("v-list").onclick = () => setView("list");
+  $("me").oninput = (e) => { state.me = e.target.value; refresh(); };
+  for (const [id, key] of [["f-mine", "mine"], ["f-prob", "prob"]]) $(id).onchange = (e) => { state.f[key] = e.target.checked; render(); };
+  $("q").oninput = (e) => { state.f.q = e.target.value.trim(); render(); };
+  $("export").onclick = () => exportDialog(false);
+  $("new").onclick = () => editForm(null, { date: `${state.ym[0]}-${pad(state.ym[1])}` === todayStr().slice(0, 7) ? todayStr() : ymd(state.ym[0], state.ym[1], 1) });
+  $("changes").onclick = showChanges;
+  $("new-src").onclick = () => { const n = prompt("Name of the new source", "My events"); if (n && n.trim()) { lastTarget = addSource(n.trim(), [], { local: true, info: "created in this page" }); refresh(); } };
+  $("file-btn").onclick = () => $("file").click();
+  $("file").onchange = (e) => { loadFiles([...e.target.files]); e.target.value = ""; };
+  $("url-form").onsubmit = (e) => { e.preventDefault(); loadUrl($("url").value); };
+  let rt;
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (state.view === "month") fitDays(); }, 100); });
+  window.addEventListener("beforeunload", (e) => { if (changes().length) { e.preventDefault(); e.returnValue = ""; } });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.matches("input, select, textarea") || $("dlg").open) return;
+    if (e.key === "ArrowLeft") shift(-1); else if (e.key === "ArrowRight") shift(1);
+  });
+  let depth = 0;
+  const hasFiles = (e) => [...e.dataTransfer.types].includes("Files");
+  document.addEventListener("dragenter", (e) => { if (hasFiles(e)) { depth++; document.body.classList.add("dragging"); } });
+  document.addEventListener("dragleave", (e) => { if (hasFiles(e) && --depth <= 0) { depth = 0; document.body.classList.remove("dragging"); } });
+  document.addEventListener("dragover", (e) => { if (hasFiles(e)) e.preventDefault(); });
+  document.addEventListener("drop", (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault(); depth = 0; document.body.classList.remove("dragging");
+    loadFiles([...e.dataTransfer.files]);
+  });
+  refresh();
+  if (!m) jumpToData();
+  document.body.dataset.ready = "1";
+}
+init();
+</script>
+</body>
+</html>
