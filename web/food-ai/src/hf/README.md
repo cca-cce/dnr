@@ -1,0 +1,49 @@
+---
+pretty_name: Food / AI Sourcebook media
+license: other
+license_name: mixed-third-party
+language:
+  - en
+  - sv
+  - de
+tags:
+  - food
+  - generative-ai
+  - media-archive
+  - uncanny-valley
+size_categories:
+  - n<1K
+---
+
+# Food / AI Sourcebook: media files
+
+Binary media for the **Food / AI Sourcebook**, a research archive on AI-generated food imagery in
+restaurant menus and advertising. It was compiled to prepare an SVT Nyheter Helsingborg interview
+(October 2026). The website itself (HTML, text, subtitles, metadata, bibliography, build scripts) lives
+in the GitHub repository [`cca-cce/dnr`](https://github.com/cca-cce/dnr) under `web/food-ai/`, and
+embeds these files directly from this repo.
+
+File paths mirror the website layout, so a site path `X` is served at
+`https://huggingface.co/datasets/nils-holmberg/food-ai/resolve/main/X`.
+
+| Path | Content |
+|---|---|
+| `pdf/food-ai-sourcebook.pdf` | The complete sourcebook as one PDF (text, transcripts, all comments, described images), written for offline reading and retrieval-augmented (RAG) search |
+| `pdf/food-ai-intro.pdf`, `pdf/food-ai-<source>.pdf` | The same content split into an introduction and one file per source |
+| `references/diel2026ai.pdf` | Diel et al. (2026), *Scientific Reports* 16, 25521, doi:10.1038/s41598-026-66977-1 |
+| `instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4` / `.jpg` | The archived Instagram reel by Jenny Frennberg and its thumbnail |
+| `guardian/images/`, `cnn/images/`, `reddit/images/` | Images from the archived Guardian and CNN articles and the r/sweden post |
+
+SHA-256 checksums for every file are listed in `web/food-ai/MANIFEST.sha256` in the GitHub repository.
+
+## Rights and attribution
+
+- `references/diel2026ai.pdf` is © the authors and licensed under
+  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- The news images (The Guardian, CNN and the photographers credited there), the Instagram reel
+  (Jenny Frennberg) and the Reddit photo (u/Sensitive_Cream3920) remain the property of their owners.
+  They are archived unchanged for research, criticism and commentary, with sources credited on the website.
+  They are **not** licensed for reuse here.
+- The PDF editions are compilations of the material above, plus editorial descriptions, translations and summaries.
+
+Rights holders who want a file removed can open a discussion on this repository.

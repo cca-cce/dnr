@@ -1,0 +1,5 @@
+# Binary media are hosted on https://huggingface.co/datasets/nils-holmberg/food-ai
+# (upload with src/publish_assets.sh); local copies stay on disk for builds.
+*.mp4
+*.jpg
+*.pdf

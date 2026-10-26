@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import re
 from pathlib import Path
 
@@ -12,6 +13,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PAGES = ROOT / "pages"
 ASSETS = ROOT / "web-assets"
+
+# Binary media are served from the Hugging Face dataset repo, whose paths mirror
+# this archive (see src/publish_assets.sh). FOOD_AI_LOCAL_ASSETS=1 builds with
+# relative links to the local copies instead, for offline preview.
+HF_DATASET = "nils-holmberg/food-ai"
+ASSET_BASE = f"https://huggingface.co/datasets/{HF_DATASET}/resolve/main/"
+REMOTE_SUFFIXES = {".mp4", ".jpg", ".pdf"}
+LOCAL_ASSETS = os.environ.get("FOOD_AI_LOCAL_ASSETS") == "1"
 
 SUMMARIES = {
     "guardian": (
@@ -94,6 +103,13 @@ PDF_EDITIONS = [
 ]
 
 
+def asset(path: str, prefix: str = "../", *, download: bool = False) -> str:
+    """URL for an archive file: the HF dataset copy for binary media, else a relative link."""
+    if LOCAL_ASSETS or Path(path).suffix.lower() not in REMOTE_SUFFIXES:
+        return prefix + path
+    return ASSET_BASE + path + ("?download=true" if download else "")
+
+
 def load_meta(source: str) -> dict:
     return json.loads((ROOT / source / "metadata.json").read_text(encoding="utf-8"))
 
@@ -169,7 +185,7 @@ def pdf_card(filename: str, kind: str, title: str, summary: str) -> str:
   </div>
   <h3>{html.escape(title)}</h3>
   <p>{html.escape(summary)}</p>
-  <a class="text-link" href="pdf/{filename}" target="_blank" rel="noopener">Open PDF <span aria-hidden="true">↗</span></a>
+  <a class="text-link" href="{asset(f'pdf/{filename}', '')}" target="_blank" rel="noopener">Open PDF <span aria-hidden="true">↗</span></a>
 </article>"""
 
 
@@ -196,13 +212,13 @@ def build_index() -> None:
     <div class="hero-actions">
       <a class="button primary" href="pages/images.html">Enter the visual archive</a>
       <a class="button secondary" href="#sources">Browse six sources</a>
-      <a class="button secondary" href="pdf/food-ai-sourcebook.pdf" target="_blank" rel="noopener">Read the PDF book ↗</a>
+      <a class="button secondary" href="{asset('pdf/food-ai-sourcebook.pdf', '')}" target="_blank" rel="noopener">Read the PDF book ↗</a>
     </div>
   </div>
   <div class="hero-collage" aria-label="Examples from the source archive">
-    <figure class="tile tile-large"><img src="guardian/images/image-01.jpg" alt="Restaurant breakfast menu with generated food images"><figcaption>Menu board · Guardian source</figcaption></figure>
-    <figure class="tile tile-small"><img src="cnn/images/image-01.jpg" alt="Uncanny generated shrimp food image"><figcaption>Shrimp scampi · CNN source</figcaption></figure>
-    <figure class="tile tile-tall"><img src="reddit/images/image-01.jpg" alt="AI-generated restaurant menu shared on Reddit"><figcaption>Swedish discussion · Reddit</figcaption></figure>
+    <figure class="tile tile-large"><img src="{asset('guardian/images/image-01.jpg', '')}" alt="Restaurant breakfast menu with generated food images"><figcaption>Menu board · Guardian source</figcaption></figure>
+    <figure class="tile tile-small"><img src="{asset('cnn/images/image-01.jpg', '')}" alt="Uncanny generated shrimp food image"><figcaption>Shrimp scampi · CNN source</figcaption></figure>
+    <figure class="tile tile-tall"><img src="{asset('reddit/images/image-01.jpg', '')}" alt="AI-generated restaurant menu shared on Reddit"><figcaption>Swedish discussion · Reddit</figcaption></figure>
   </div>
 </section>
 
@@ -305,7 +321,7 @@ def gallery(source: str, *, exclude: set[str] | None = None) -> str:
         if image["file"] in exclude:
             continue
         figures.append(
-            f"""<figure class="gallery-item"><a href="../{source}/{html.escape(image['file'])}"><img loading="lazy" src="../{source}/{html.escape(image['file'])}" alt="{html.escape(image.get('caption_or_alt', ''))}"></a><figcaption>{html.escape(image.get('caption_or_alt', 'Source image'))}</figcaption></figure>"""
+            f"""<figure class="gallery-item"><a href="{asset(f'{source}/{image['file']}')}" target="_blank" rel="noopener"><img loading="lazy" src="{asset(f'{source}/{image['file']}')}" alt="{html.escape(image.get('caption_or_alt', ''))}"></a><figcaption>{html.escape(image.get('caption_or_alt', 'Source image'))}</figcaption></figure>"""
         )
     if not figures:
         return ""
@@ -330,14 +346,14 @@ def build_instagram_page() -> None:
     content = source_header("instagram") + f"""
 <section class="source-section video-stage">
   <div class="video-frame">
-    <video controls preload="metadata" poster="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.jpg">
-      <source src="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4" type="video/mp4">
+    <video controls preload="metadata" poster="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.jpg')}">
+      <source src="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4')}" type="video/mp4">
       <track kind="subtitles" srclang="en" label="English" src="../instagram/subtitles-en.vtt" default>
       <track kind="subtitles" srclang="de" label="Deutsch" src="../instagram/subtitles-de.vtt">
-      Your browser cannot play this video. <a href="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4">Download it instead.</a>
+      Your browser cannot play this video. <a href="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4', download=True)}">Download it instead.</a>
     </video>
   </div>
-  <div class="video-notes"><p class="kicker">Local playback · 48 seconds · English + German subtitles</p><h2>{html.escape(meta.get('uploader', 'Instagram'))}</h2><p>{description}</p><p><a class="text-link" href="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4" download>Download MP4 ↓</a> · <a class="text-link" href="../instagram/transcript-en.txt">English transcript</a> · <a class="text-link" href="../instagram/transcript-de.txt">Deutsches Transkript</a></p></div>
+  <div class="video-notes"><p class="kicker">Archived playback · 48 seconds · English + German subtitles</p><h2>{html.escape(meta.get('uploader', 'Instagram'))}</h2><p>{description}</p><p><a class="text-link" href="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4', download=True)}" download>Download MP4 ↓</a> · <a class="text-link" href="../instagram/transcript-en.txt">English transcript</a> · <a class="text-link" href="../instagram/transcript-de.txt">Deutsches Transkript</a></p></div>
 </section>"""
     write(PAGES / "instagram.html", shell("Instagram reel", content, body_class="source-page"))
 
@@ -412,7 +428,7 @@ def build_images_page() -> None:
     for source, path, caption, label in relevant_images():
         figures.append(f"""
 <figure class="archive-figure">
-  <a href="../{source}/{html.escape(path)}"><img loading="lazy" src="../{source}/{html.escape(path)}" alt="{html.escape(caption)}"></a>
+  <a href="{asset(f'{source}/{path}')}" target="_blank" rel="noopener"><img loading="lazy" src="{asset(f'{source}/{path}')}" alt="{html.escape(caption)}"></a>
   <figcaption><b>{html.escape(label)}</b><span>{html.escape(caption)}</span><a href="{source}.html">Source notes →</a></figcaption>
 </figure>""")
     content = f"""
@@ -425,9 +441,9 @@ def build_video_page() -> None:
     meta = load_meta("instagram")
     caption = html.escape(meta.get("description", "")).replace("\n", "<br>")
     content = f"""
-<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">Video archive</p><h1>A Swedish reaction,<br>preserved locally</h1><p class="dek">Jenny Frennberg’s 48-second Instagram reel turns the subject into a direct appeal for authentic restaurant imagery.</p></section>
+<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">Video archive</p><h1>A Swedish reaction,<br>preserved in the archive</h1><p class="dek">Jenny Frennberg’s 48-second Instagram reel turns the subject into a direct appeal for authentic restaurant imagery.</p></section>
 <section class="cinema">
-  <div class="cinema-screen"><video controls preload="metadata" poster="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.jpg"><source src="../instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="../instagram/subtitles-en.vtt" default><track kind="subtitles" srclang="de" label="Deutsch" src="../instagram/subtitles-de.vtt"></video></div>
+  <div class="cinema-screen"><video controls preload="metadata" poster="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.jpg')}"><source src="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4')}" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="../instagram/subtitles-en.vtt" default><track kind="subtitles" srclang="de" label="Deutsch" src="../instagram/subtitles-de.vtt"></video></div>
   <aside><p class="kicker">Archived reel · English + German subtitles</p><h2>“AI-bilder på menyn? Nej tack.”</h2><p>{caption}</p><p><a class="text-link" href="../instagram/transcript-en.txt">English transcript</a> · <a class="text-link" href="../instagram/transcript-de.txt">Deutsches Transkript</a></p><a class="button primary" href="instagram.html">Full source page</a></aside>
 </section>"""
     write(PAGES / "videos.html", shell("Video", content, body_class="collection-page"))
@@ -570,7 +586,7 @@ def bib_note(entry: dict[str, str], keys: set[str]) -> str:
 def bib_links(entry: dict[str, str]) -> str:
     links = []
     if entry.get("file") and (REF_DIR / entry["file"]).exists():
-        links.append(f'<a href="../references/{html.escape(entry["file"])}" target="_blank" rel="noopener">Full text (PDF) ↗</a>')
+        links.append(f'<a href="{asset("references/" + entry["file"])}" target="_blank" rel="noopener">Full text (PDF) ↗</a>')
     if entry.get("doi"):
         doi = entry["doi"]
         links.append(f'<a href="https://doi.org/{html.escape(doi)}" target="_blank" rel="noopener">doi:{html.escape(doi)} ↗</a>')
