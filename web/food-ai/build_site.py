@@ -51,6 +51,28 @@ SOURCE_LABELS = {
 
 SOURCE_ORDER = ["guardian", "cnn", "instagram", "reddit", "tiktok", "nytimes"]
 
+PDF_DIR = ROOT / "pdf"
+
+PDF_EDITIONS = [
+    ("food-ai-sourcebook.pdf", "Complete book", "Full sourcebook",
+     "Every source in one document: overview, full article texts, transcripts, all Reddit comments, "
+     "described images, source catalogue, and glossary."),
+    ("food-ai-intro.pdf", "Section", "Introduction",
+     "The interview questions, the six sources at a glance, recurring explanations, file catalogue, and glossary."),
+    ("food-ai-guardian.pdf", "Section", "The Guardian",
+     "The full extracted article with its three menu images and written visual descriptions."),
+    ("food-ai-cnn.pdf", "Section", "CNN",
+     "The full extracted article with its images and written visual descriptions."),
+    ("food-ai-instagram.pdf", "Section", "Instagram",
+     "Reel caption and translation, English and German transcripts, timed subtitles, and sampled video frames."),
+    ("food-ai-reddit.pdf", "Section", "Reddit / r/sweden",
+     "The original post and menu image, a thematic summary, and all 198 comments verbatim."),
+    ("food-ai-tiktok.pdf", "Section", "TikTok",
+     "Retrieval note for the discovery page whose result videos could not be archived."),
+    ("food-ai-nytimes.pdf", "Section", "The New York Times",
+     "Retrieval note for the interactive blocked by the publisher."),
+]
+
 
 def load_meta(source: str) -> dict:
     return json.loads((ROOT / source / "metadata.json").read_text(encoding="utf-8"))
@@ -116,8 +138,23 @@ def source_card(source: str) -> str:
 </article>"""
 
 
+def pdf_card(filename: str, kind: str, title: str, summary: str) -> str:
+    size = (PDF_DIR / filename).stat().st_size / 1e6
+    return f"""
+<article class="source-card">
+  <div class="card-topline">
+    <span class="eyebrow">{html.escape(kind)}</span>
+    <span class="status complete">PDF · {size:.1f} MB</span>
+  </div>
+  <h3>{html.escape(title)}</h3>
+  <p>{html.escape(summary)}</p>
+  <a class="text-link" href="pdf/{filename}" target="_blank" rel="noopener">Open PDF <span aria-hidden="true">↗</span></a>
+</article>"""
+
+
 def build_index() -> None:
     cards = "\n".join(source_card(source) for source in SOURCE_ORDER)
+    pdf_cards = "\n".join(pdf_card(*edition) for edition in PDF_EDITIONS if (PDF_DIR / edition[0]).exists())
     content = f"""
 <section class="hero">
   <div class="hero-copy">
@@ -127,6 +164,7 @@ def build_index() -> None:
     <div class="hero-actions">
       <a class="button primary" href="pages/images.html">Enter the visual archive</a>
       <a class="button secondary" href="#sources">Browse six sources</a>
+      <a class="button secondary" href="pdf/food-ai-sourcebook.pdf" target="_blank" rel="noopener">Read the PDF book ↗</a>
     </div>
   </div>
   <div class="hero-collage" aria-label="Examples from the source archive">
@@ -178,6 +216,14 @@ def build_index() -> None:
     </div>
   </div>
   <div class="source-grid">{cards}</div>
+</section>
+
+<section class="section" id="pdf" aria-labelledby="pdf-title">
+  <div class="section-heading">
+    <p class="kicker">Read offline · search · RAG</p>
+    <h2 id="pdf-title">PDF editions</h2>
+  </div>
+  <div class="source-grid">{pdf_cards}</div>
 </section>
 """
     write(ROOT / "index.html", shell("Home", content, prefix="", body_class="home"))
