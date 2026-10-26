@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Video Player</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --fg: #1d2129; --muted: #667085; --rule: #e3e6eb;
+    --accent: #2563eb; --hl: #e8efff; --hit: #fff3bf;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121417; --panel: #1a1d22; --fg: #d7dae0; --muted: #8b929c; --rule: #2a2e35;
+      --accent: #6cb6ff; --hl: #1f2b3d; --hit: #4a3f12;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121417; --panel: #1a1d22; --fg: #d7dae0; --muted: #8b929c; --rule: #2a2e35;
+    --accent: #6cb6ff; --hl: #1f2b3d; --hit: #4a3f12;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--fg); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent); }
+  .app { display: grid; grid-template-columns: minmax(0, 1fr) 380px; grid-template-rows: auto minmax(0, 1fr); height: 100vh; overflow: hidden; }
+  header { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid var(--rule); }
+  header h1 { font-size: 1.15em; margin: 0; }
+  header .links { margin-left: auto; display: flex; gap: 12px; font-size: .85em; color: var(--muted); }
+  .stage { display: flex; flex-direction: column; min-height: 0; padding: 12px 16px; gap: 8px; }
+  video { width: 100%; flex: 1; min-height: 0; max-height: 100%; background: #000; border-radius: 6px; }
+  .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: .85em; color: var(--muted); }
+  button, input[type=text], input[type=search], input[type=url] { font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--rule); border-radius: 5px; padding: 4px 9px; }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  aside { display: flex; flex-direction: column; min-height: 0; border-left: 1px solid var(--rule); background: var(--panel); }
+  aside .tools { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--rule); font-size: .85em; color: var(--muted); }
+  aside .tools input[type=search] { flex: 1; min-width: 0; }
+  #cues { flex: 1; overflow: auto; padding: 6px 0; }
+  .cue { display: grid; grid-template-columns: 58px 1fr; gap: 8px; width: 100%; text-align: left; border: 0; border-radius: 0; background: none; padding: 4px 12px; color: var(--fg); }
+  .cue time { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .85em; padding-top: 1px; }
+  .cue:hover { background: var(--hl); }
+  .cue.now { background: var(--hl); box-shadow: inset 3px 0 0 var(--accent); }
+  .cue mark { background: var(--hit); color: inherit; border-radius: 2px; }
+  .empty { padding: 16px; color: var(--muted); }
+  form.open { max-width: 640px; margin: 10vh auto; padding: 0 16px; display: grid; gap: 10px; }
+  form.open label { display: grid; gap: 4px; font-size: .9em; color: var(--muted); }
+  @media (min-width: 901px) { html, body { overflow: hidden; } }
+  @media (max-width: 900px) {
+    .app { display: block; height: auto; overflow: visible; }
+    video { flex: none; max-height: 60vh; }
+    aside { border-left: 0; border-top: 1px solid var(--rule); }
+    #cues { max-height: 60vh; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app" hidden>
+  <header>
+    <h1 id="title">Video</h1>
+    <div class="links">
+      <a id="dl-video" download>Video file</a>
+      <a id="dl-vtt" download hidden>Subtitles (.vtt)</a>
+      <a id="dl-txt" href="#" hidden>Transcript (.txt)</a>
+    </div>
+  </header>
+  <section class="stage">
+    <video id="video" controls preload="metadata" crossorigin="anonymous" playsinline></video>
+    <div class="bar">
+      <button id="copy-link" type="button" title="Copy a link that starts at the current time">Copy link at current time</button>
+      <span>Speed</span>
+      <select id="rate"><option>0.75</option><option selected>1</option><option>1.25</option><option>1.5</option><option>2</option></select>
+      <span id="status"></span>
+    </div>
+  </section>
+  <aside>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search transcript" aria-label="Search transcript">
+      <label><input type="checkbox" id="follow" checked> Follow</label>
+    </div>
+    <div id="cues"><div class="empty">No subtitles loaded.</div></div>
+  </aside>
+</div>
+
+<form class="open" id="open" hidden>
+  <h1>Video Player</h1>
+  <p>Plays a video file with optional WebVTT subtitles and a clickable transcript. The page reads <code>?src=</code>, <code>?vtt=</code> and <code>?title=</code> from its link, and <code>#t=MM:SS</code> to start at a time.</p>
+  <label>Video URL (.mp4/.webm)<input type="url" name="src" required></label>
+  <label>Subtitles URL (.vtt, optional)<input type="url" name="vtt"></label>
+  <label>Title (optional)<input type="text" name="title"></label>
+  <div><button type="submit">Open</button></div>
+</form>
+
+<script>
+const $ = s => document.querySelector(s);
+const params = new URLSearchParams(location.search);
+const video = $("#video");
+let cues = [], rows = [], current = -1;
+
+const fmt = t => {
+  t = Math.floor(t); const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, s = t % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0");
+};
+// "1:02:03", "10:00", "95", "95.5" -> seconds
+const parseTime = s => s.split(":").reduce((acc, p) => acc * 60 + parseFloat(p || 0), 0);
+
+function parseVtt(text) {
+  const out = [];
+  for (const block of text.replace(/\r/g, "").split(/\n{2,}/)) {
+    const lines = block.split("\n"), i = lines.findIndex(l => l.includes("-->"));
+    if (i < 0) continue;
+    const [a, b] = lines[i].split("-->").map(x => parseTime(x.trim().split(/\s+/)[0]));
+    const txt = lines.slice(i + 1).join(" ").replace(/<[^>]+>/g, "").trim();
+    if (txt) out.push({ start: a, end: b, text: txt });
+  }
+  return out;
+}
+
+function renderCues() {
+  const box = $("#cues"), q = $("#q").value.trim().toLowerCase();
+  box.textContent = ""; rows = [];
+  if (!cues.length) { box.innerHTML = '<div class="empty">No subtitles loaded.</div>'; return; }
+  cues.forEach((c, i) => {
+    if (q && !c.text.toLowerCase().includes(q)) { rows[i] = null; return; }
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "cue";
+    const tm = document.createElement("time"); tm.textContent = fmt(c.start);
+    const sp = document.createElement("span");
+    if (q) {
+      const at = c.text.toLowerCase().indexOf(q);
+      sp.append(c.text.slice(0, at), Object.assign(document.createElement("mark"), { textContent: c.text.slice(at, at + q.length) }), c.text.slice(at + q.length));
+    } else sp.textContent = c.text;
+    b.append(tm, sp);
+    b.onclick = () => { video.currentTime = c.start + 0.01; video.play(); };
+    box.append(b); rows[i] = b;
+  });
+  if (!box.children.length) box.innerHTML = '<div class="empty">No matches.</div>';
+  current = -1; highlight();
+}
+
+function highlight() {
+  const t = video.currentTime;
+  let i = cues.findIndex(c => t >= c.start && t < c.end);
+  if (i < 0) for (let k = cues.length - 1; k >= 0; k--) if (cues[k].start <= t) { i = k; break; }
+  if (i === current) return;
+  if (rows[current]) rows[current].classList.remove("now");
+  current = i;
+  const r = rows[i];
+  if (r) {
+    r.classList.add("now");
+    // scroll only the transcript box (scrollIntoView would also scroll the page)
+    const box = $("#cues");
+    if ($("#follow").checked && !video.paused)
+      box.scrollTo({ top: r.offsetTop - box.offsetTop - box.clientHeight / 2 + r.offsetHeight / 2, behavior: "smooth" });
+  }
+}
+
+async function loadVtt(url) {
+  const st = $("#status");
+  st.textContent = "Loading subtitles…";
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    // Some hosts serve .vtt as text/plain, which Firefox refuses for <track>; re-serve it as text/vtt.
+    const track = document.createElement("track");
+    Object.assign(track, { kind: "subtitles", srclang: "en", label: "English", default: true,
+                           src: URL.createObjectURL(new Blob([text], { type: "text/vtt" })) });
+    video.append(track);
+    cues = parseVtt(text);
+    renderCues();
+    const txt = cues.map(c => `[${fmt(c.start)}] ${c.text}`).join("\n");
+    const dl = $("#dl-txt");
+    dl.href = URL.createObjectURL(new Blob([txt], { type: "text/plain" }));
+    dl.download = (params.get("title") || "transcript").replace(/[^\w.-]+/g, "_") + ".txt";
+    dl.hidden = false;
+    st.textContent = `${cues.length} subtitle lines`;
+  } catch (e) {
+    st.textContent = "Subtitles could not be loaded (" + e.message + ").";
+  }
+}
+
+function startAt() {
+  const m = location.hash.match(/t=([\d:.]+)/);
+  if (m) video.currentTime = parseTime(m[1]);
+}
+
+function init() {
+  const src = params.get("src");
+  if (!src) { $("#open").hidden = false; return; }
+  $("#app").hidden = false;
+  const title = params.get("title") || decodeURIComponent(src.split("/").pop());
+  $("#title").textContent = title; document.title = title + " · Video Player";
+  video.src = src; $("#dl-video").href = src;
+  const vtt = params.get("vtt");
+  if (vtt) { $("#dl-vtt").href = vtt; $("#dl-vtt").hidden = false; loadVtt(vtt); }
+  video.addEventListener("loadedmetadata", startAt, { once: true });
+  window.addEventListener("hashchange", startAt);
+  video.addEventListener("timeupdate", highlight);
+  video.addEventListener("error", () => { $("#status").textContent = "The video could not be loaded."; });
+  $("#q").addEventListener("input", renderCues);
+  $("#rate").onchange = e => { video.playbackRate = +e.target.value; };
+  $("#copy-link").onclick = async () => {
+    const url = location.href.split("#")[0] + "#t=" + fmt(video.currentTime);
+    try { await navigator.clipboard.writeText(url); $("#status").textContent = "Copied " + fmt(video.currentTime) + " link"; }
+    catch { prompt("Link at current time:", url); }
+  };
+}
+
+$("#open").onsubmit = e => {
+  e.preventDefault();
+  const f = new FormData(e.target), p = new URLSearchParams();
+  for (const k of ["src", "vtt", "title"]) if (f.get(k)) p.set(k, f.get(k));
+  location.search = p.toString();
+};
+init();
+</script>
+</body>
+</html>
