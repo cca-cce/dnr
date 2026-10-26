@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 PAGES = ROOT / "pages"
 ASSETS = ROOT / "web-assets"
 
@@ -52,6 +52,26 @@ SOURCE_LABELS = {
 SOURCE_ORDER = ["guardian", "cnn", "instagram", "reddit", "tiktok", "nytimes"]
 
 PDF_DIR = ROOT / "pdf"
+REF_DIR = ROOT / "references"
+BIB_FILE = REF_DIR / "food-ai.bib"
+
+# BibTeX keys of the six archived sources, mapped to their source pages.
+BIB_SOURCE_PAGES = {
+    "bonos2026uncanny": "guardian",
+    "mack2026restaurants": "cnn",
+    "frennberg2026ai": "instagram",
+    "sensitivecream2026vad": "reddit",
+    "tiktok2026ai": "tiktok",
+    "nytimes2026ai": "nytimes",
+}
+
+BIB_GROUPS = [
+    ("research", "Research literature", "Peer-reviewed studies and the original uncanny-valley essay cited by the reporting."),
+    ("primary", "Archived sources", "The six topical links from svt.pdf, each preserved in this archive."),
+    ("grey", "Reporting and industry sources", "News coverage, industry reports, and commentary linked from the Guardian and CNN articles."),
+]
+
+BIB_KIND_LABELS = {"article": "Journal article", "techreport": "Report", "misc": "Web source"}
 
 PDF_EDITIONS = [
     ("food-ai-sourcebook.pdf", "Complete book", "Full sourcebook",
@@ -106,6 +126,7 @@ def shell(title: str, content: str, *, prefix: str = "../", body_class: str = ""
       <a href="{prefix}pages/images.html">Images</a>
       <a href="{prefix}pages/videos.html">Video</a>
       <a href="{prefix}pages/texts.html">Texts</a>
+      <a href="{prefix}pages/references.html">References</a>
     </nav>
   </header>
   <main id="main">{content}</main>
@@ -155,6 +176,17 @@ def pdf_card(filename: str, kind: str, title: str, summary: str) -> str:
 def build_index() -> None:
     cards = "\n".join(source_card(source) for source in SOURCE_ORDER)
     pdf_cards = "\n".join(pdf_card(*edition) for edition in PDF_EDITIONS if (PDF_DIR / edition[0]).exists())
+    if BIB_FILE.exists():
+        pdf_cards += f"""
+<article class="source-card">
+  <div class="card-topline">
+    <span class="eyebrow">References</span>
+    <span class="status complete">BibTeX · {len(parse_bib(BIB_FILE))} entries</span>
+  </div>
+  <h3>Bibliography</h3>
+  <p>Research literature, archived sources, and the reporting they cite, with DOIs and open-access full text where available.</p>
+  <a class="text-link" href="pages/references.html">Browse references <span aria-hidden="true">→</span></a>
+</article>"""
     content = f"""
 <section class="hero">
   <div class="hero-copy">
@@ -434,6 +466,143 @@ def build_texts_page() -> None:
     write(PAGES / "texts.html", shell("Texts", content, body_class="collection-page"))
 
 
+LATEX_REPLACEMENTS = [
+    (r'{\"a}', "ä"), (r'{\"o}', "ö"), (r'{\"u}', "ü"), (r"{\aa}", "å"), (r"\&", "&"), (r"\%", "%"),
+    (r"\$", "$"), (r"\_", "_"), ("``", "“"), ("''", "”"), ("--", "–"),
+]
+
+
+def latex_to_text(value: str) -> str:
+    for latex, char in LATEX_REPLACEMENTS:
+        value = value.replace(latex, char)
+    return re.sub(r"\s+", " ", value.replace("{", "").replace("}", "")).strip()
+
+
+def parse_bib(path: Path) -> list[dict[str, str]]:
+    """Minimal BibTeX reader for the archive's own bibliography (braced or bare field values)."""
+    text = path.read_text(encoding="utf-8")
+    entries = []
+    for match in re.finditer(r"@(\w+)\s*\{\s*([^,\s]+)\s*,", text):
+        entry = {"type": match.group(1).lower(), "key": match.group(2)}
+        pos = match.end()
+        while True:
+            bare = re.compile(r"\s*(\w+)\s*=\s*(\w+)\s*,?").match(text, pos)
+            if bare:
+                entry[bare.group(1).lower()] = bare.group(2)
+                pos = bare.end()
+                continue
+            field = re.compile(r"\s*(\w+)\s*=\s*\{").match(text, pos)
+            if not field:
+                break
+            depth, i = 1, field.end()
+            while depth:
+                depth += {"{": 1, "}": -1}.get(text[i], 0)
+                i += 1
+            entry[field.group(1).lower()] = text[field.end():i - 1]
+            pos = re.compile(r"\s*,?").match(text, i).end()
+        entries.append(entry)
+    return entries
+
+
+def bib_authors(raw: str) -> str:
+    names = []
+    for name in raw.split(" and "):
+        name = name.strip()
+        if name.startswith("{"):
+            names.append(latex_to_text(name))
+            continue
+        last, _, first = (latex_to_text(part) for part in name.partition(","))
+        initials = " ".join(f"{part[0]}." for part in re.split(r"[\s-]+", first) if part)
+        names.append(f"{last}, {initials}" if initials else last)
+    if len(names) == 1:
+        return names[0]
+    return ", ".join(names[:-1]) + ", & " + names[-1]
+
+
+def bib_short(entry: dict[str, str]) -> str:
+    """Author–year label such as “Diel et al. 2025” or “Califano & Spence 2024”."""
+    lasts = [latex_to_text(name).split(",")[0] for name in entry.get("author", "").split(" and ")]
+    label = lasts[0] if len(lasts) == 1 else f"{lasts[0]} & {lasts[1]}" if len(lasts) == 2 else f"{lasts[0]} et al."
+    return f"{label} {entry.get('year', 'n.d.')}"
+
+
+def bib_group(entry: dict[str, str]) -> str:
+    if entry["key"] in BIB_SOURCE_PAGES:
+        return "primary"
+    return "research" if entry["type"] == "article" else "grey"
+
+
+MONTHS = dict(zip("jan feb mar apr may jun jul aug sep oct nov dec".split(), (
+    "January February March April May June July August September October November December".split())))
+
+
+def bib_citation(entry: dict[str, str]) -> str:
+    """Format an entry as an APA-style reference (HTML)."""
+    get = lambda field: latex_to_text(entry.get(field, ""))
+    year = get("year") or "n.d."
+    if entry.get("month") and entry["type"] != "article":
+        day = f" {get('day')}" if entry.get("day") else ""
+        year += f", {MONTHS.get(entry['month'].strip().lower(), entry['month'])}{day}"
+    title = get("title")
+    title += "" if title.endswith(("?", "!", ".")) else "."
+    parts = [f"{html.escape(bib_authors(entry.get('author', '')))} ({html.escape(year)}). {html.escape(title)}"]
+    if entry["type"] == "article":
+        venue = f"<i>{html.escape(get('journal'))}</i>"
+        if entry.get("volume"):
+            venue += f", <i>{html.escape(get('volume'))}</i>"
+        if entry.get("number"):
+            venue += f"({html.escape(get('number'))})"
+        if entry.get("pages"):
+            venue += f", {html.escape(get('pages'))}"
+        parts.append(venue + ".")
+    else:
+        venue = get("howpublished") or get("institution")
+        if venue:
+            parts.append(f"<i>{html.escape(venue)}</i>.")
+    return " ".join(parts)
+
+
+def bib_note(entry: dict[str, str], keys: set[str]) -> str:
+    note = html.escape(latex_to_text(entry.get("note", "")))
+    return re.sub(r"\b(" + "|".join(map(re.escape, keys)) + r")\b", r'<a href="#\1">\1</a>', note) if keys else note
+
+
+def bib_links(entry: dict[str, str]) -> str:
+    links = []
+    if entry.get("file") and (REF_DIR / entry["file"]).exists():
+        links.append(f'<a href="../references/{html.escape(entry["file"])}" target="_blank" rel="noopener">Full text (PDF) ↗</a>')
+    if entry.get("doi"):
+        doi = entry["doi"]
+        links.append(f'<a href="https://doi.org/{html.escape(doi)}" target="_blank" rel="noopener">doi:{html.escape(doi)} ↗</a>')
+    elif entry.get("url"):
+        links.append(f'<a href="{html.escape(entry["url"])}" target="_blank" rel="noopener">Original URL ↗</a>')
+    if entry["key"] in BIB_SOURCE_PAGES:
+        links.append(f'<a href="{BIB_SOURCE_PAGES[entry["key"]]}.html">Archived source page →</a>')
+    return " · ".join(links)
+
+
+def build_references_page() -> None:
+    if not BIB_FILE.exists():
+        return
+    entries = parse_bib(BIB_FILE)
+    keys = {entry["key"] for entry in entries}
+    groups = []
+    for group, title, dek in BIB_GROUPS:
+        items = "".join(f"""
+<article class="text-shelf-item" id="{html.escape(entry['key'])}">
+  <div><span class="eyebrow">{BIB_KIND_LABELS.get(entry['type'], entry['type'])}</span><h2>{html.escape(bib_short(entry))}</h2><p class="text-detail"><code>{html.escape(entry['key'])}</code></p></div>
+  <div><p>{bib_citation(entry)}</p><p class="text-detail">{bib_note(entry, keys - {entry['key']})}</p><p class="download-line">{bib_links(entry)}</p></div>
+</article>""" for entry in entries if bib_group(entry) == group)
+        groups.append(f"""
+<section class="text-shelf" aria-labelledby="refs-{group}">
+  <div class="section-heading"><p class="kicker">{html.escape(dek)}</p><h2 id="refs-{group}">{html.escape(title)}</h2></div>{items}
+</section>""")
+    content = f"""
+<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">Bibliography · {len(entries)} entries</p><h1>Works cited<br>and consulted</h1><p class="dek">Research literature, the archived sources, and the reporting they draw on. Keys follow the Google Scholar pattern and match the BibTeX file.</p><p class="download-line"><a href="../references/{BIB_FILE.name}" target="_blank" rel="noopener">Download BibTeX ({BIB_FILE.name}) ↗</a></p></section>
+{''.join(groups)}"""
+    write(PAGES / "references.html", shell("References", content, body_class="collection-page"))
+
+
 def main() -> None:
     PAGES.mkdir(exist_ok=True)
     ASSETS.mkdir(exist_ok=True)
@@ -447,6 +616,7 @@ def main() -> None:
     build_images_page()
     build_video_page()
     build_texts_page()
+    build_references_page()
 
 
 if __name__ == "__main__":

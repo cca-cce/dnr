@@ -7,6 +7,7 @@ import hashlib
 import json
 import mimetypes
 import re
+import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -14,7 +15,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
@@ -276,6 +277,9 @@ def write_manifest() -> None:
 
 
 def main() -> None:
+    if "--manifest-only" in sys.argv[1:]:
+        write_manifest()
+        return
     process_news("guardian")
     process_news("cnn")
     process_instagram()

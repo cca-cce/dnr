@@ -39,3 +39,23 @@ The linked material supplies three complementary evidence types:
 - A Swedish audience discussion on Reddit, useful for local reactions and language.
 
 Across the accessible sources, recurring explanations include low production cost and speed for businesses; visual defects in texture, anatomy, repetition, and food structure; learned expectations that food imagery should represent something actually available; disgust/contamination cues; and distrust created when a synthetic image substitutes for evidence of the real dish. “Uncanny valley” is relevant as shorthand for near-real but perceptually wrong imagery, though food-specific disgust and truth-in-advertising expectations add mechanisms beyond the term’s original human/robot context.
+
+## PDF editions and bibliography
+
+- `pdf/` holds the complete sourcebook (`food-ai-sourcebook.pdf`) and one PDF per section (`food-ai-intro.pdf`, `food-ai-<source>.pdf`), written for offline reading and retrieval-augmented (RAG) search. They are linked from the “PDF editions” section of `index.html`.
+- `references/food-ai.bib` is a BibTeX bibliography of the research literature, the six archived sources, and the reporting and industry sources they cite (keys follow the Google Scholar pattern). Open-access full text is stored as `references/<key>.pdf` where the license allows (currently `diel2026ai.pdf`, CC BY 4.0). `pages/references.html` renders the bibliography.
+
+## Scripts
+
+All build scripts live in `src/` and locate the archive from their own path, so run them from anywhere (shown here from the archive root, using the project's Python environment):
+
+| Script | Purpose |
+|---|---|
+| `src/process_materials.py` | Re-downloads and processes the linked sources into the per-source directories, then writes `MANIFEST.sha256`. `--manifest-only` refreshes only the checksums. |
+| `src/build_site.py` | Regenerates `index.html` and `pages/*.html` (including the references page built from `references/food-ai.bib`). Standard library only. |
+| `src/build_book.py` | Builds the PDF editions in `pdf/` (optional output directory argument). Needs PyMuPDF, Pillow, ffmpeg, and headless Chromium. |
+| `src/page_metadata.py` | Prints title, author, and date metadata from saved HTML pages; used when compiling the bibliography. |
+
+Typical rebuild after changing content:
+
+    python src/build_book.py && python src/build_site.py && python -B src/process_materials.py --manifest-only
