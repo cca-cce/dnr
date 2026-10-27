@@ -7,6 +7,7 @@ The PDF is a three-page Swedish email thread preparing an SVT Nyheter Helsingbor
 Open [`index.html`](index.html) for the visual sourcebook. It provides:
 
 - The resulting SVT interviews with Joel Sund (SVT Nyheter Helsingborg and Sverige Live, 26 October 2026) on `pages/svt.html`, with English, Swedish and German subtitles and clickable, searchable transcripts.
+- An AI-generated infographic and a 25½-minute audio overview (Gemini Notebook) on `pages/notebook.html`, with a fact-check of the infographic's figures and a clickable, searchable transcript.
 - Overview cards and short summaries for all six sources.
 - Separate image, video, and text collections.
 - Full readable Guardian and CNN article pages.
@@ -24,6 +25,7 @@ The static site has no external software dependencies. Pages, text and subtitles
 | `guardian/` | The Guardian | Raw HTML, readable article text, metadata, article images | Complete |
 | `cnn/` | CNN | Raw HTML, readable article text, metadata, article images | Complete |
 | `instagram/` | Instagram reel by Jenny Frennberg | Raw HTML, merged MP4, thumbnail, yt-dlp metadata, readable description | Complete |
+| `notebook/` | AI-generated summaries made with Gemini Notebook (not one of the six links) | Infographic PNG with JPG preview, M4A audio overview, English WebVTT and `.txt` transcript, metadata, `content.txt` | Complete; transcript by Whisper small with names corrected against the archive, otherwise not proofread |
 | `svt/` | The SVT interviews themselves (not one of the six links) | Two MP4 clips with stills, WebVTT subtitles and `.txt` transcripts (`<clip>.<sv/en/de>.*`), metadata, Swedish transcripts in `content.txt` | Complete; Swedish transcribed with KBLab/kb-whisper-large and proofread, English and German translated with the same timings |
 | `tiktok/` | TikTok discovery page | Raw HTML and metadata | Page archived; discovery results require client-side/API loading and were not exposed in the response |
 | `reddit/` | r/sweden discussion | Raw page responses, Atom thread with the post and 198 comments, readable text, original attached image, metadata | Complete via Atom feed |
@@ -66,7 +68,7 @@ Typical rebuild after changing content:
 
 ## Media hosting
 
-Binary media (the Instagram and SVT MP4s, all JPG images, and the PDFs in `pdf/` and `references/`) are served from the Hugging Face dataset [`nils-holmberg/food-ai`](https://huggingface.co/datasets/nils-holmberg/food-ai), whose paths mirror this directory. `src/build_site.py` writes `https://huggingface.co/datasets/nils-holmberg/food-ai/resolve/main/<path>` for them. They are not in this directory: the local copies live in a mirror of the dataset with the same paths, `/data/media/food-ai` (override with `FOOD_AI_MEDIA`), used by the build scripts, `MANIFEST.sha256` and uploads. Restore or refresh it with
+Binary media (the Instagram and SVT MP4s, the M4A audio overview, all JPG and PNG images, and the PDFs in `pdf/` and `references/`) are served from the Hugging Face dataset [`nils-holmberg/food-ai`](https://huggingface.co/datasets/nils-holmberg/food-ai), whose paths mirror this directory. `src/build_site.py` writes `https://huggingface.co/datasets/nils-holmberg/food-ai/resolve/main/<path>` for them. They are not in this directory: the local copies live in a mirror of the dataset with the same paths, `/data/media/food-ai` (override with `FOOD_AI_MEDIA`), used by the build scripts, `MANIFEST.sha256` and uploads. Restore or refresh it with
 
     hf download nils-holmberg/food-ai --repo-type dataset --local-dir /data/media/food-ai
 

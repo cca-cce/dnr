@@ -1,0 +1,28 @@
+{
+  "source": "notebook",
+  "kind": "AI-generated summaries",
+  "title": "Infographic and audio overview generated with Gemini Notebook",
+  "generator": "Google Gemini Notebook (watermark on the infographic; the audio was delivered as an AAC/DASH file encoded by Google)",
+  "download_status": "complete: user-supplied files, 2026-10-27",
+  "infographic": {
+    "title": "AI Menu Imagery: Why Fake Food Is Backfiring on Restaurants",
+    "file": "ai-menu-imagery-infographic.png",
+    "preview": "ai-menu-imagery-infographic.jpg",
+    "width": 2752,
+    "height": 1536,
+    "alt": "Infographic titled 'AI Menu Imagery: Why Fake Food Is Backfiring on Restaurants'. Left half, 'The problem: visual defects and psychological repulsion', shows a glitchy AI burger: alien visual defects ruin diner appetites (rubbery textures, unnatural shapes, leather-like meat); the uncanny valley triggers evolved food disgust; 37% decreased desire to eat imperfect AI dishes. Right half, 'Business impact and authentic solutions', shows a real burger photo: diners view synthetic menus as low-quality shortcuts; replace AI food visuals with real smartphone photos; cost pressures drive 26% of operators to AI. Footer: to maintain brand trust, prioritize authenticity over artificiality in menu visuals."
+  },
+  "audio": {
+    "title": "Why AI Food Menus Disgust Us",
+    "file": "why-ai-food-menus-disgust-us.m4a",
+    "duration_s": 1533.8,
+    "length": "25½ min",
+    "summary": "Two AI-generated hosts walk through the archive's material: the Hollywood night-market flyers, the New York deli 'shrimp', the Denver barbecue menu and the Skellefteå hot-dog board from r/sweden; why owners use AI (42% of US operators unprofitable, 26% using AI); backlash such as the Grind & Unwind graffiti; the uncanny valley, evolved disgust and food neophobia (Diel, Spence); broken trust, hallucinated allergen badges, and the case for authentic photos.",
+    "processing": "Remuxed from Google's fragmented DASH M4A to a standard M4A with faststart (audio stream copied unchanged)."
+  },
+  "transcript_note": "Machine transcript (Whisper small, English), names corrected against the archived sources; otherwise not proofread. The audio itself is AI-generated and may contain errors.",
+  "fact_check": {
+    "26%": "CNN, citing the National Restaurant Association's annual report (cnn/content.txt).",
+    "37%": "Not found in the archived sources or in references/diel2026ai.pdf; unverified."
+  }
+}

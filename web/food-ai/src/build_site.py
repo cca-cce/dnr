@@ -88,6 +88,11 @@ SVT_CLIPS = [
     },
 ]
 
+# AI-generated summaries (Gemini Notebook): an infographic and an audio overview; files in notebook/.
+NOTEBOOK_DIR = ROOT / "notebook"
+NOTEBOOK_INFOGRAPHIC = "notebook/ai-menu-imagery-infographic"   # .png full size, .jpg 1600 px preview
+NOTEBOOK_AUDIO = "notebook/why-ai-food-menus-disgust-us"         # .m4a, .en.vtt, .en.txt
+
 PDF_DIR = MEDIA / "pdf"
 REF_DIR = ROOT / "references"
 BIB_FILE = REF_DIR / "food-ai.bib"
@@ -246,6 +251,7 @@ def build_index() -> None:
       <a class="button primary" href="pages/images.html">Enter the visual archive</a>
       <a class="button secondary" href="#sources">Browse six sources</a>
       <a class="button secondary" href="{asset('pdf/food-ai-sourcebook.pdf', '')}" target="_blank" rel="noopener">Read the PDF book ↗</a>
+      <a class="button secondary" href="pages/notebook.html">Infographic + audio overview</a>
     </div>
   </div>
   <div class="hero-collage" aria-label="Examples from the source archive">
@@ -515,6 +521,15 @@ def clock(t: float) -> str:
     return f"{int(t) // 60}:{int(t) % 60:02d}"
 
 
+def cue_list(vtt: Path, lang: str, *, hidden: bool = False) -> str:
+    """Clickable transcript (one button per cue) for the [data-clip] player behaviour in site.js."""
+    items = "".join(
+        f'<li><button type="button" data-start="{start:.2f}" data-end="{end:.2f}"><time>{clock(start)}</time><span>{html.escape(text)}</span></button></li>'
+        for start, end, text in vtt_cues(vtt)
+    )
+    return f'<ol class="cue-list" data-cues="{lang}"{" hidden" if hidden else ""}>{items}</ol>'
+
+
 def svt_clip(clip: dict, meta: dict) -> str:
     cid = clip["id"]
     info = next(c for c in meta["clips"] if c["id"] == cid)
@@ -526,15 +541,7 @@ def svt_clip(clip: dict, meta: dict) -> str:
         f'<button type="button" data-lang="{lang}"' + (' class="active"' if i == 0 else "") + f">{label}</button>"
         for i, (lang, label) in enumerate(SVT_LANGS)
     )
-    lists = "".join(
-        f'<ol class="cue-list" data-cues="{lang}"{"" if i == 0 else " hidden"}>'
-        + "".join(
-            f'<li><button type="button" data-start="{start:.2f}" data-end="{end:.2f}"><time>{clock(start)}</time><span>{html.escape(text)}</span></button></li>'
-            for start, end, text in vtt_cues(SVT_DIR / f"{cid}.{lang}.vtt")
-        )
-        + "</ol>"
-        for i, (lang, _) in enumerate(SVT_LANGS)
-    )
+    lists = "".join(cue_list(SVT_DIR / f"{cid}.{lang}.vtt", lang, hidden=i > 0) for i, (lang, _) in enumerate(SVT_LANGS))
     downloads = " · ".join(f'<a href="../svt/{cid}.{lang}.txt">{label} (.txt)</a>' for lang, label in SVT_LANGS)
     return f"""
 <section class="interview" id="{cid}" data-clip>
@@ -565,6 +572,40 @@ def build_svt_page() -> None:
 {''.join(svt_clip(clip, meta) for clip in SVT_CLIPS)}
 <section class="source-section"><p class="text-detail">{html.escape(meta['subtitles'])} Video {html.escape(meta['rights'])} <a href="../svt/metadata.json">Metadata</a> · <a href="../svt/content.txt">Swedish transcripts as text</a></p></section>"""
     write(PAGES / "svt.html", shell("SVT interviews", content, body_class="collection-page"))
+
+
+def build_notebook_page() -> None:
+    meta = json.loads((NOTEBOOK_DIR / "metadata.json").read_text(encoding="utf-8"))
+    audio, info = meta["audio"], meta["infographic"]
+    vtt = ROOT / f"{NOTEBOOK_AUDIO}.en.vtt"
+    content = f"""
+<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">AI-generated summaries · Gemini Notebook</p><h1>The argument<br>in one picture</h1><p class="dek">An infographic and an audio overview ({audio['length']}) about AI-generated menu imagery, both generated with Google’s Gemini Notebook. They are machine-made summaries, shown here as companions to the archived sources, not as sources themselves.</p></section>
+<section class="source-section infographic">
+  <figure>
+    <a href="{asset(NOTEBOOK_INFOGRAPHIC + '.png')}" target="_blank" rel="noopener"><img src="{asset(NOTEBOOK_INFOGRAPHIC + '.jpg')}" width="1600" height="893" alt="{html.escape(info['alt'])}"></a>
+    <figcaption><b>{html.escape(info['title'])}</b> Infographic generated with Gemini Notebook. <a href="{asset(NOTEBOOK_INFOGRAPHIC + '.png')}" target="_blank" rel="noopener">Full size PNG ({info['width']}×{info['height']}) ↗</a></figcaption>
+  </figure>
+  <div class="fact-check">
+    <p class="kicker">Checking the figures</p>
+    <p><b>26%</b> of restaurant owners use AI: reported by CNN from the National Restaurant Association’s annual report. <a class="text-link" href="cnn.html">CNN source page →</a></p>
+    <p><b>37%</b> less desire to eat imperfect AI dishes: this figure does not appear in any of the archived sources or in the research article in the bibliography, so treat it as unverified.</p>
+  </div>
+</section>
+<section class="interview" id="audio" data-clip>
+  <div class="interview-screen audio-screen">
+    <img src="{asset(NOTEBOOK_INFOGRAPHIC + '.jpg')}" alt="" width="1600" height="893">
+    <audio controls preload="metadata" src="{asset(NOTEBOOK_AUDIO + '.m4a')}">Your browser cannot play this audio. <a href="{asset(NOTEBOOK_AUDIO + '.m4a', download=True)}">Download it instead.</a></audio>
+  </div>
+  <div class="interview-side">
+    <p class="kicker">Audio overview · {audio['length']} · English</p>
+    <h2>{html.escape(audio['title'])}</h2>
+    <p>{html.escape(audio['summary'])}</p>
+    <div class="cue-tools"><input type="search" placeholder="Search transcript" aria-label="Search transcript" data-cue-search></div>
+    <div class="cue-box">{cue_list(vtt, 'en')}</div>
+    <p class="download-line">{html.escape(meta['transcript_note'])} <a href="../{NOTEBOOK_AUDIO}.en.txt">Transcript (.txt)</a> · <a href="{asset(NOTEBOOK_AUDIO + '.m4a', download=True)}">Audio (.m4a) ↓</a></p>
+  </div>
+</section>"""
+    write(PAGES / "notebook.html", shell("Infographic and audio overview", content, body_class="collection-page"))
 
 
 def excerpt(source: str, paragraphs: int = 2) -> str:
@@ -750,6 +791,7 @@ def main() -> None:
     build_images_page()
     build_video_page()
     build_svt_page()
+    build_notebook_page()
     build_texts_page()
     build_references_page()
 

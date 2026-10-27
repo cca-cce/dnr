@@ -173,6 +173,18 @@ main { overflow: hidden; }
 .interview, .interview-hero { color-scheme: dark; }   /* dark native scrollbars and controls (Firefox otherwise draws light ones) */
 .interview-screen video { width: 100%; max-height: 80vh; background: black; }
 .interview-screen.portrait video { width: auto; max-width: 100%; height: min(80vh, 760px); margin: 0 auto; }
+.audio-screen { display: grid; gap: 1rem; align-content: center; }
+.audio-screen img { width: 100%; height: auto; border: 6px solid #050504; opacity: .9; }
+.audio-screen audio { width: 100%; }
+
+.infographic { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, .6fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+.infographic figure { margin: 0; }
+.infographic img { width: 100%; height: auto; box-shadow: 0 24px 55px rgba(45, 38, 24, .18); }
+.infographic figcaption { padding: .8rem 0; color: var(--muted); font-size: .8rem; }
+.infographic figcaption b { color: var(--ink); margin-right: .35rem; }
+.fact-check { padding: 1.4rem; border: 1px solid var(--line); background: var(--white); }
+.fact-check p:not(.kicker) { margin: 0 0 1rem; font-size: .92rem; }
+.fact-check b { font-family: var(--serif); font-size: 1.6rem; font-weight: 400; }
 .interview-side { display: flex; flex-direction: column; min-width: 0; }
 .interview-side .kicker { color: #f2bf4b; }
 .interview-side h2 { margin: 0 0 .8rem; font-family: var(--serif); font-size: clamp(2rem, 3.2vw, 3.3rem); font-weight: 400; line-height: 1; letter-spacing: -.035em; }
@@ -203,7 +215,7 @@ main { overflow: hidden; }
   .mode-grid, .source-grid { grid-template-columns: 1fr; }
   .mode-card, .source-card { min-height: 260px; border-right: 0; }
   .mode-card { border-bottom: 1px solid var(--line); }
-  .thesis-grid, .video-stage, .limitation-panel, .cinema, .text-shelf-item, .interview-hero, .interview { grid-template-columns: 1fr; }
+  .thesis-grid, .video-stage, .limitation-panel, .cinema, .text-shelf-item, .interview-hero, .interview, .infographic { grid-template-columns: 1fr; }
   .interview-screen.portrait video { height: min(70vh, 640px); }
   .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

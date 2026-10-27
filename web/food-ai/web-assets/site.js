@@ -29,12 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // SVT interviews: one language switch for subtitles and transcript, click-to-seek, follow playback, search.
+  // Players with a transcript (SVT interviews, audio overview): optional language switch for subtitles and
+  // transcript, click-to-seek, follow playback, search.
   document.querySelectorAll("[data-clip]").forEach((clip) => {
-    const video = clip.querySelector("video");
+    const video = clip.querySelector("video, audio");
     const box = clip.querySelector(".cue-box");
     const query = clip.querySelector("[data-cue-search]");
-    let lang = clip.querySelector("[data-lang].active").dataset.lang;
+    const tab = clip.querySelector("[data-lang].active");
+    let lang = tab ? tab.dataset.lang : clip.querySelector("[data-cues]").dataset.cues;
     const list = () => clip.querySelector(`[data-cues="${lang}"]`);
 
     const filter = () => {

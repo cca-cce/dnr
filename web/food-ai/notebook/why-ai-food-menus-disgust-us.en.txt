@@ -1,0 +1,525 @@
+[0:00] You know, there is this deeply primal, I mean almost automatic
+[0:04] ritual we all go through when we walk into a new restaurant.
+[0:07] Oh, absolutely.
+[0:08] You look up at the menu board, you see a glowing, beautiful photograph of a burger
+[0:12] or like a steaming bowl of pasta, and your mouth immediately starts to water.
+[0:17] Right.
+[0:17] It's just biology at that point.
+[0:19] Exactly.
+[0:20] It's a biological guarantee.
+[0:21] You trust your eyes, your eyes tell your stomach what's coming,
+[0:24] and the social contract of dining is officially signed.
+[0:28] It is arguably one of the oldest forms of visual communication we have.
+[0:32] You see food, you desire food, you acquire it.
+[0:36] But lately, I mean you look a little closer at that menu
+[0:39] board and suddenly that primal ritual just totally shatters.
+[0:44] Yeah, things get weird.
+[0:45] Really weird.
+[0:46] The burger bun has the texture of like a reptile.
+[0:49] The pasta looks like perfectly arranged yellow yarn.
+[0:52] Oh, the yarn pasta is everywhere now.
+[0:55] It is.
+[0:55] And you realize with this creeping sense of
+[0:58] horror that the food you're looking at isn't food
+[1:01] at all it's what the internet has affectionately
+[1:03] dubbed AI food slop such a visceral term,
+[1:07] but so accurate right and to figure out why this visual catastrophe is suddenly
+[1:12] taking over the world Well, we've pulled together a wild stack of sources today.
+[1:16] It is quite the mix.
+[1:18] Yeah We are looking at a frustrated Stockholm food creator
+[1:21] on Instagram a highly engaged and honestly hilarious
+[1:25] Swedish reddit thread alongside global reporting from CNN,
+[1:29] The Guardian, and a piece from The New York Times.
+[1:32] Yeah, that New York Times piece was actually an interactive feature.
+[1:36] It was incredibly elusive during our research because it was
+[1:40] locked behind a publisher anti-bot Wall, ironically enough.
+[1:44] Which is just too perfect.
+[1:45] I know, right?
+[1:46] But it's titled alone, Why AI Food Slop Looks So Gross.
+[1:50] I mean, that sets the perfect stage for what
+[1:52] we are unraveling today in the deep dive.
+[1:54] It really does.
+[1:55] Because our mission today is to figure out why struggling
+[1:57] restaurant owners are willingly adopting these alien images.
+[2:01] Why our human brains react with such intense, physical disgust to them.
+[2:06] And what this bizarre trend means for the future of our trust in the food we buy.
+[2:11] It's a massive shift in how we interact with the culinary world.
+[2:14] Exactly.
+[2:15] So whether you are a massive foodie, tech enthusiast,
+[2:19] or just someone trying to grab a quick lunch.
+[2:21] Stick around.
+[2:22] We are about to completely change how you
+[2:25] look at the menus in your own neighborhood.
+[2:27] Because we are looking at a bizarre collision here.
+[2:31] It's not just a story about bad graphic design.
+[2:33] No, not at all.
+[2:34] It is a fundamental clash between cutting edge, generative technology,
+[2:39] really desperate business economics,
+[2:41] and honestly our most ancient evolutionary instincts.
+[2:45] Let's start with the visual reality of this phenomenon in the wild.
+[2:48] Because we talking about slightly over-edited photos here,
+[2:51] or someone going heavy on an Instagram filter.
+[2:54] Right, these aren't just touched up.
+[2:56] No, we are talking about absolute visual catastrophes.
+[3:00] Take Adaeze Onejeme.
+[3:01] She's a 20-year-old ad sales worker highlighted in our sources.
+[3:05] Yeah, the Hollywood Night Market story.
+[3:06] Exactly.
+[3:07] She was visiting a night market in Hollywood,
+[3:09] which is a place you go specifically for the vibrant food scene.
+[3:13] And she noticed what she called an AI flyer epidemic.
+[3:17] An epidemic.
+[3:17] Yeah, stall after stall, hawking fries and smoothies that just
+[3:22] had this too perfect rubbery sort of plastic aesthetic to them.
+[3:27] The texture is almost always the dead giveaway.
+[3:30] It really is.
+[3:30] Because generative AI models notoriously struggle
+[3:33] with the organic unpredictable chaos of real food.
+[3:37] I mean think about it, a real potato fry has a regular crispness, right?
+[3:41] Right, little burnt edges and stuff.
+[3:43] Exactly salt granules variations in color the
+[3:46] AI just smooths it all out into a uniform
+[3:49] rubbery cylinder But honestly rubbery fries
+[3:51] are genuinely the least offensive example.
+[3:53] We found for sure Let's talk about Sam Biddle
+[3:56] He's a tech reporter who took a photo at a New
+[3:58] York deli that went completely viral and for all
+[4:01] the wrong reasons I remember seeing this one.
+[4:04] It's burned into my brain.
+[4:05] It was a menu board advertising a shrimp scampi dish But when
+[4:10] you looked at the shrimp, they just, they weren't shrimp.
+[4:13] No, not at all.
+[4:14] There were these identical perfectly circular
+[4:16] striped donut rings lying on a bed of noodles.
+[4:20] Biddle literally compared them to cosmic monsters from an HP Lovecraft novel.
+[4:25] It's so funny, but also so true.
+[4:28] He called the whole image spiritually unsettling and cosmically unnerving.
+[4:32] I saw that photo and it is a profound failure of the AI generation process.
+[4:38] How does it even mess up that badly?
+[4:40] Well, the algorithm understands that shrimp have
+[4:43] stripes and they curl into a sea shape, right?
+[4:47] But it lacks the contextual understanding of what a crustacean actually is.
+[4:51] Right, it doesn't know it's a living animal.
+[4:53] Exactly.
+[4:54] So it just connects the ends and gives you a striped donut.
+[4:57] And the scary thing is this isn't an isolated one-off glitch.
+[5:01] Consider Jill Sennett, a nurse in Denver,
+[5:03] she went to a Jamaican barbecue pop-up at her hospital.
+[5:06] Oh this one genuinely made my stomach turn.
+[5:08] It's really rough The menu image for the meat
+[5:11] combo didn't look like slow-cooked pork or beef.
+[5:14] No, it looked awful It looked like dark glossy
+[5:17] stitched leather belts and The texture was
+[5:20] rendered in such a way that the meat appeared
+[5:22] to be crawling with tiny black beetles.
+[5:24] Oh It was incredibly unappetizing It's like being in a nightmare, isn't it?
+[5:29] The kind of dream where everything seems perfectly normal until you look closer and
+[5:34] you realize like the hot dog has six ends and the mustard is floating in midair.
+[5:38] It really is dream logic.
+[5:40] And speaking of hot dogs, we have to spend some
+[5:43] time on the Reddit thread from our sources.
+[5:46] Over on the r/sweden
+[5:47] subreddit, a user posted a photo from a street food counter
+[5:51] at a massive ICA Maxi supermarket in a town called Skellefteå.
+[5:55] This specific example is, it's just a master class
+[5:59] in AI hallucination and overwhelming visual clutter.
+[6:03] It's a mess.
+[6:03] It's not just the food that the AI got wrong,
+[6:06] the entire context of the image is deeply confused.
+[6:09] I am still struggling to understand how this got printed in a real store.
+[6:13] It's this animated fantasy-themed digital menu board.
+[6:17] The background is a busy landscape of like waterfalls and glowing lanterns.
+[6:21] For a hot dog stand?
+[6:23] Yeah, but the AI hallucinated these blatant
+[6:25] knockoff Pokémon characters into the food scene.
+[6:28] Just completely out of nowhere.
+[6:29] Yeah, there's a yellow creature that looks
+[6:31] like a mutated hybrid of Pikachu and Pichu
+[6:34] There is a fiery monkey resembling Infernape
+[6:37] and a blue penguin looking like Piplup
+[6:40] And on top of that the text has these bizarre
+[6:43] spelling errors, right instead of Chicago
+[6:45] broad for the hot dog bun It says Chicago
+[6:48] board the reddit commenters were absolutely
+[6:51] losing their minds over it I can imagine as though we're pointing out the terrifying
+[6:56] copyright nightmare of inadvertently stealing
+[6:58] the Nintendo's intellectual property While
+[7:00] others were just complaining that looking at the menu felt like staring at a chaotic
+[7:04] illegal online casino game The sheer scale of
+[7:08] the disconnect is what's so fascinating here.
+[7:10] What do you mean?
+[7:11] Well, you have a business owner whether it's a small hospital
+[7:14] pop-up in Denver or a massive supermarket chain in Sweden And they
+[7:18] are looking at these cosmic horrors They are looking at leather
+[7:21] belts and mutant casino Pokemon, and they are signing off on it.
+[7:25] Yeah hitting print They are looking at this and thinking,
+[7:28] yes, this will make people hungry.
+[7:31] This is an asset to my business.
+[7:33] I just cannot wrap my head around that logic.
+[7:35] I mean, if an AI menu makes a customer physically recoil,
+[7:39] how on earth is this considered a smart business move?
+[7:42] Why aren't owners just printing out a piece of paper with Times New Roman Text?
+[7:47] To understand that you have to look at the brutal realities
+[7:50] of the restaurant industry right now, it's tough.
+[7:53] How tough are we talking?
+[7:54] According to a 2026 report from the National
+[7:57] Restaurant Association, 42% of U.S.
+[8:00] operators failed to turn a profit in 2025.
+[8:04] 42%.
+[8:04] Wow.
+[8:05] Almost half.
+[8:05] That is insane.
+[8:06] The margins are razor thin.
+[8:09] Food costs are high, labor costs are high, and rent is just astronomical.
+[8:13] Owners are desperate to save money wherever possible.
+[8:16] Right.
+[8:16] So marketing is the first thing to get caught.
+[8:18] Exactly.
+[8:19] Exactly.
+[8:19] Hiring a professional food photographer can easily cost hundreds,
+[8:23] if not thousands of dollars for a single menu refresh.
+[8:26] That's why the NRA found that 26% of restaurant
+[8:28] owners are now using AI, primarily for marketing.
+[8:32] Okay, so it's a desperation play.
+[8:34] Yes.
+[8:35] So for an exhausted owner who is just trying to keep
+[8:37] the lights on and get a sign printed by Tuesday,
+[8:40] typing a prompt into ChatGPT isn't some malicious attempt to deceive the public.
+[8:45] It's a survival tactic.
+[8:46] That makes sense.
+[8:47] It's free.
+[8:48] It's fast.
+[8:48] And to an untrained eye, when you're stressed, it might look good enough.
+[8:52] And some of them are just doing it reluctantly, right?
+[8:55] Like, some owners actively love the aesthetic.
+[8:57] Oh, absolutely.
+[8:58] The sources highlight Nila Norero Salvatore, who owns Bella Cafe in San Francisco.
+[9:04] She used ChatGPT to design these incredibly
+[9:07] elaborate spaghetti Western-themed breakfast menus.
+[9:10] Which is a fun concept.
+[9:12] It is.
+[9:12] We're talking dishes named The Magnificent Seven and A Fistful of Dollars.
+[9:16] But they're all accompanied by these hyper glossy,
+[9:21] warm-toned AI generated photos of eggs
+[9:24] and bacon that look like oil paintings.
+[9:28] Very stylized.
+[9:29] Yeah, and she told reporters that experimenting with AI is fun and
+[9:32] she genuinely thinks it's a brilliant way to stand out and advertise.
+[9:35] The problem with that strategy though is the massive consumer backlash.
+[9:39] Diners aren't finding it fun, they are finding it insulting.
+[9:42] They really hate it.
+[9:43] and it is resulting in real-world financial
+[9:45] damage for the businesses that lean into it.
+[9:48] Take another San Francisco cafe mentioned in The Guardian, Grind & Unwind.
+[9:52] Oh, the vandalism story.
+[9:54] Yes, they put up a sign with AI-generated menu options.
+[9:57] Locals immediately identified the rubbery textures and the
+[10:00] surreal lighting as AI, and the storefront was vandalized.
+[10:04] Just because of the menu.
+[10:06] Yeah, someone took a spray can and painted the word
+[10:08] seriously in massive letters right over the AI signs.
+[10:11] The owner had to spend an estimated $700 just to clean and paint over the graffiti.
+[10:16] Which completely wipes out any money they saved
+[10:18] by not hiring a photographer in the first place.
+[10:21] I mean, the irony is just painful.
+[10:23] It really is a backfire.
+[10:25] Especially when you see the exact opposite
+[10:27] approach going totally viral for being authentic.
+[10:30] Right, the Wyoming story.
+[10:32] Yeah, a place called Chugwater Soda Fountain
+[10:34] in Wyoming posted a picture on Instagram.
+[10:36] It wasn't a polished photo at all.
+[10:37] It's just a piece of cardboard where they hand wrote a
+[10:40] pledge to never use AI in their marketing just a sharpie on
+[10:43] cardboard Exactly and that simple Scrawled cardboard sign
+[10:48] got two hundred thousand likes people are starving for
+[10:51] authenticity That contrast perfectly illustrates the disconnect
+[10:55] here Restaurant owners have been told for decades by
+[10:58] marketing gurus that people eat with their eyes first So
+[11:02] they feel immense pressure to have a highly visual menu.
+[11:04] Yeah, they feel like they need photos to survive But they are fundamentally
+[11:08] misunderstanding the psychology of how humans process images of food.
+[11:13] Actually, let me stop you there.
+[11:15] Because the psychology of this is where the deep dive gets really wild.
+[11:19] It gets deep.
+[11:20] Because the reaction from customers isn't just, oh, that's tacky graphic design.
+[11:24] I'm going to take my business elsewhere.
+[11:26] The reaction is visceral.
+[11:27] Very much so.
+[11:29] In that Swedish Reddit thread, multiple people literally
+[11:32] said looking at the menu made them want to throw up.
+[11:35] Why is a picture of a slightly plastic looking
+[11:38] piece of quiche triggering a biological gag reflex?
+[11:42] Well, it comes down to a very specific psychological
+[11:44] phenomenon intersecting with our evolutionary biology.
+[11:48] The first piece of the puzzle is the Uncanny Valley.
+[11:51] Okay, the Uncanny Valley.
+[11:53] Yeah, this was a concept introduced way back in
+[11:55] 1970 by a Japanese roboticist named Masahiro Mori.
+[11:59] I've heard of this, but it's almost always
+[12:01] applied to robots or bad CGI in movies, isn't it?
+[12:04] Like when a human face in a video game looks almost photorealistic,
+[12:08] but the eyes are completely dead, and it just gives you the creeps Exactly.
+[12:13] Mori observed that as a robot becomes more human-like, our empathy and
+[12:17] affinity toward it increases up to a specific point Okay, but right before it
+[12:23] reaches perfect realism, any slight imperfections make it look like a moving
+[12:27] corpse or a zombie That triggers a sudden violent plunge in our affinity.
+[12:32] That plunge is the Uncanny Valley.
+[12:35] That makes sense for faces.
+[12:37] But what researchers are now realizing is that the
+[12:40] Uncanny Valley absolutely applies to our food, too.
+[12:43] Alexander Diel, a psychologist at the University of Duisburg-Essen in Germany,
+[12:47] he conducted a peer-reviewed study on this in 2025.
+[12:50] And what did he find?
+[12:52] He found that viewers rated slightly imperfect
+[12:55] AI food images as significantly more uncanny and
+[12:59] less pleasant than either obviously fake cartoonish
+[13:02] food or highly realistic genuine photographs.
+[13:05] Okay, I think I see where this is going.
+[13:07] If I see an illustration of a hot dog on a retro diner menu,
+[13:11] my brain knows it's a drawing, so I'm fine.
+[13:14] Right.
+[13:14] If I see a real photo of a hot dog, I'm fine.
+[13:17] But if I see an AI hot dog that is 95% realistic but
+[13:21] has a weird rubbery sheen, my brain short-circuits.
+[13:25] Exactly.
+[13:25] You hit the valley.
+[13:26] But I'm still trying to figure out why the reaction is so much more
+[13:29] intense for food than, say, an AI picture of a couch with five legs.
+[13:34] That brings us to Diel's second major point, which is evolutionary disgust.
+[13:38] I mean, think about it, a chair with five legs can't kill you.
+[13:42] True.
+[13:42] But throughout human history, eating the wrong thing, like something rotten,
+[13:46] contaminated or poisonous, that was a death sentence.
+[13:49] Ah, of course.
+[13:50] So it's a defense mechanism.
+[13:51] It's a survival trait.
+[13:52] It's like a biological check engine light hardwired into our brains.
+[13:56] If you are foraging in the woods and you see an apple that is perfectly symmetrical,
+[14:00] but it has a slight unnatural neon glow to it,
+[14:04] our caveman brains don't think, wow, what a cool new species of apple.
+[14:08] No, definitely not.
+[14:09] Our brains scream poison, contamination.
+[14:12] Do not put that in your body.
+[14:14] That is an excellent analogy.
+[14:16] We have evolved a hypersensitive disgust
+[14:18] mechanism to guard against ingesting pathogens.
+[14:20] So, when we see an AI image where the lighting is unnatural
+[14:24] or the texture of the meat looks like stitched leather,
+[14:27] it bypasses our logical understanding that it's just a bad
+[14:30] digital image and directly triggers that ancient alarm system.
+[14:34] It thinks it's a pathogen.
+[14:35] Exactly.
+[14:36] Diel connects this to a concept called food neophobia,
+[14:39] which is the fear of unfamiliar foods.
+[14:41] In one of his 2026 studies, participants were
+[14:44] shown AI-generated food alongside real food.
+[14:47] Okay.
+[14:48] And even when they were told logically that
+[14:51] both foods were equally healthy and had the
+[14:53] exact same nutritional profile Their actual
+[14:56] desire to eat the AI food just plummeted.
+[14:59] So the brain literally says I don't recognize the cellular structure
+[15:02] of this weird glowing shrimp So I'm going to assume it's toxic.
+[15:06] That's exactly it.
+[15:08] So what starts as a restaurant owner just trying
+[15:10] to save 50 bucks on a flyer ends up directly
+[15:13] triggering their customer's deepest,
+[15:15] most primal survival instincts to avoid contamination.
+[15:19] It is a massive backfire on a biological level.
+[15:22] But that physical evolutionary disgust is really just the baseline reaction here.
+[15:27] There's more.
+[15:28] Yeah, there is a higher level cognitive issue at play which is arguably
+[15:32] even more damaging to the long-term survival of the restaurant industry.
+[15:35] And that is the breaking of the social contract.
+[15:38] You mean the trust between the person cooking the food and the person eating it.
+[15:42] Exactly.
+[15:43] When you hand over your money and ingest something a stranger
+[15:45] prepared behind closed doors, you are placing immense trust in them.
+[15:50] You are trusting them with your health.
+[15:51] That's a huge deal.
+[15:53] Traditionally, a photograph on a menu implied a fundamental promise.
+[15:57] It said, this dish actually exists.
+[15:59] We prepared it in our kitchen and we took a
+[16:02] picture of it to show you what you will get.
+[16:04] And AI breaks that promise.
+[16:06] A generated image completely breaks that promise.
+[16:08] It depicts food that has never existed in the physical world.
+[16:11] and diners are incredibly savvy to this deception now.
+[16:14] In the Reddit thread, this was the core of the debate.
+[16:17] People were arguing that if a restaurant is willing to
+[16:20] cut corners and fake the literal signage out front,
+[16:23] what other hidden shortcuts are they taking in the back where you can't see them?
+[16:27] That's the natural conclusion to draw.
+[16:29] Right, like are they skimping on the quality of the ingredients?
+[16:32] Are they ignoring health codes?
+[16:34] An AI image immediately signals to the consumer
+[16:38] that the establishment has low standards.
+[16:40] It really opens up a massive debate about false advertising.
+[16:44] In that same Swedish forum, commenters brought up Japan
+[16:48] as a contrasting model of how we might deal with this.
+[16:51] Oh yeah, I read about that.
+[16:52] Japan has incredibly strict consumer protection laws regarding food imagery.
+[16:56] Yeah, the picture on a menu or even on a snack package in a
+[17:00] convenience store legally has to match the real food exactly.
+[17:04] Down to the literal scale of the snack and
+[17:07] the specific placement of the ingredients.
+[17:08] It's very precise.
+[17:10] You can't even show a picture of sliced fruit on a juice
+[17:13] carton unless the product is 100% real fruit juice.
+[17:17] The commenters were arguing that we need those exact kinds
+[17:19] of regulations globally to wipe out AI slop overnight.
+[17:23] It certainly highlights how culturally accepted minor
+[17:26] deceptions have become in Western marketing, right?
+[17:28] True.
+[17:29] We're so used to fast food burgers looking plumper on TV than in the cardboard box.
+[17:33] But AI pushes that deception from a slight exaggeration into complete fabrication.
+[17:39] And the deception isn't always intentional.
+[17:41] Sometimes it is dangerously negligent.
+[17:44] Oh, so?
+[17:45] We have to consider the very real risk of AI hallucinating menu labels.
+[17:49] Oh, this was the absolute scariest part of the deep dive for me.
+[17:52] Imagine you are listening to this and you have
+[17:55] a severe peanut allergy or celiac disease.
+[17:59] You are relying on menu labels to keep you out of the emergency room.
+[18:02] The stakes are incredibly high.
+[18:04] Reddit users shared multiple instances where they found
+[18:07] AI-generated menus that had blindly slapped gluten-free,
+[18:11] nut-free, or vegan graphical badges onto dishes
+[18:13] that absolutely contain those allergens.
+[18:16] That is terrifying.
+[18:17] Why does the AI do that?
+[18:19] The AI algorithm doesn't know what a nut is, it just associates those specific buzz
+[18:24] words with the concept of good restaurant marketing and paste them onto the image.
+[18:28] And because the overwhelmed restaurant owners didn't carefully proof read
+[18:31] the AI's output for sending it to the printer They are putting up menus that
+[18:35] could literally send a customer into anaphylactic shock exactly if you have
+[18:39] a dietary restriction Spotting an AI image on a menu isn't just an eyesore.
+[18:43] It's a massive red flag that the owner entirely lacks quality
+[18:46] control It is a terrifying abdication of responsibility And
+[18:51] what makes navigating this even trickier for the average
+[18:53] consumer is that the line between a real photograph and an AI?
+[18:57] generation is getting aggressively blurry.
+[19:00] It's getting so hard to tell.
+[19:02] The Guardian piece mentioned that DoorDash is now actively
+[19:04] infusing AI tools into its platform for restaurant owners.
+[19:08] They offer tools to improve the presentation of a restaurant's existing photos,
+[19:12] like adjusting the lighting, fixing messy backgrounds, enhancing colors.
+[19:16] Which sounds helpful in theory, but where do you draw the line?
+[19:20] DoorDash does apply an AI enhanced label when a restaurant uses their tool.
+[19:25] The source material included an image of a
+[19:28] chicken katsu dish with this specific label.
+[19:31] But unlike the Lovecraftian shrimp or the stitched leather barbecue,
+[19:36] the chicken katsu looked completely plausible.
+[19:39] It perfectly illustrates how hard it is becoming
+[19:41] to tell the difference between a slightly
+[19:43] touched up photograph of a real meal and
+[19:45] something that has been synthetically altered.
+[19:48] That blurring of the line leads us to a really fascinating and
+[19:51] honestly somewhat disturbing We're being studied by Charles Spence.
+[19:55] He's the experimental psychology professor at Oxford, right?
+[19:58] Yes.
+[19:59] In 2024, he conducted research that found people actually
+[20:03] preferred AI-generated food images over real photographs of food.
+[20:07] Wait, really?
+[20:08] Yes.
+[20:08] But only up until the exact moment they were
+[20:10] explicitly told the images were generated by AI.
+[20:14] The moment the illusion was broken, the appeal totally dropped.
+[20:17] Let's unpack that.
+[20:19] Why did they prefer the AI images initially?
+[20:22] Is the algorithm just, I don't know, better at lighting?
+[20:26] It's far more manipulative than just lighting.
+[20:28] Spence's study is crucial because it reveals how
+[20:30] AI models are trained to make food look appealing.
+[20:33] The bots alter food in highly predictable ways based on human cravings.
+[20:37] Oh, I see.
+[20:38] When you prompt an AI to make food look delicious,
+[20:41] it inherently adds appealing fats.
+[20:44] It makes the burger patties look juicier and thicker.
+[20:46] It automatically adds a perfect glossy pat of
+[20:49] melting butter to a bowl of mashed potatoes.
+[20:52] It's hacking our brains.
+[20:53] It ramps up the saturation of the colors so vegetables look impossibly fresh.
+[20:58] It essentially weaponizes our biological cravings for high calorie foods.
+[21:02] Okay, so looking at Spence's research, here is a dystopian question for you.
+[21:08] I'm ready.
+[21:09] If generative AI is constantly nudging food images
+[21:12] to look glossier, fattier, and more indulgent
+[21:15] than reality ever could be, and consumers are
+[21:18] actively clicking on those hyperindulgent images,
+[21:21] are we going to see a feedback loop where real world chefs actually start altering
+[21:27] their physical recipes to live up to these impossible buttery hallucinations?
+[21:32] That's a great question.
+[21:33] Like, are we going to end up eating significantly
+[21:35] unhealthy food in real life just so the
+[21:38] physical dish doesn't disappoint a customer
+[21:40] who was drawn in by a fake picture on an app?
+[21:43] That is a very real, very pressing concern for the culinary world.
+[21:47] If the visual expectation for a dish is
+[21:49] permanently set by an algorithm that prioritizes
+[21:53] Hypersaturated fat-heavy aesthetics the physical
+[21:56] food will eventually have to evolve to meet
+[21:58] that impossible expectation That is so bleak
+[22:01] It alters the entire culinary landscape really
+[22:04] pushing us toward food that looks great on
+[22:06] a screen But it's terrible for our bodies.
+[22:08] It's astounding What starts as a struggling restaurant owner just trying to
+[22:13] save a few bucks on graphic design line creates this massive butterfly effect.
+[22:17] It touches everything.
+[22:19] It triggers our deepest evolutionary disgust.
+[22:22] It risks customer health with hallucinated allergen labels.
+[22:25] It shatters the foundational trust we have in the people feeding us.
+[22:29] And it could potentially make our actual physical food unhealthier in the long run.
+[22:34] It is a perfect storm of technological convenience,
+[22:37] clashing wildly with biological hardwiring and social trust.
+[22:40] Nancy Hopkins, the president of the International
+[22:43] Association of Culinary Professionals,
+[22:46] she offered some very grounded advice in the CNN piece we reviewed.
+[22:49] What did she say?
+[22:50] She pointed out that while AI is a fantastic tool for back
+[22:54] office restaurant work, you know, things like managing payroll,
+[22:57] organizing inventory or drafting schedules, using it to generate
+[23:01] food pictures basically guarantees customer disappointment.
+[23:05] As she put it, no one can deliver what that photo brings.
+[23:08] I think Jenny Frennberg the Stockholm food creator from our Instagram source
+[23:12] really summarized the feeling on the ground best Her reel was great.
+[23:16] It was she posted this reel where she was just walking
+[23:19] down a sunny street Looking at these surreal fake menus
+[23:22] in the windows of local cafes And she just made a simple
+[23:25] exasperated plead all the restaurateurs out there.
+[23:28] Just begging them to stop Yeah, she said please just skip the AI
+[23:33] keep it genuine keep it authentic a A real, maybe slightly imperfect
+[23:38] photo of a sandwich you actually made, or even just a chalkboard with
+[23:42] no photo at all, is infinitely better than a flawless, rubbery fake.
+[23:46] Authenticity is ultimately the only thing hungry patrons are searching for.
+[23:50] They want real food made by real people.
+[23:53] So to you listening, the next time you are deciding where to grab lunch or scrolling
+[23:58] through a delivery app late at night,
+[24:00] take a slightly closer look at that menu image.
+[24:03] check the texture of the fries check the perfect symmetry of the shrimp look
+[24:09] closely look out for the telltale signs of the uncanny valley identifying
+[24:14] the slop might just save your appetite I will leave you with one final thought
+[24:18] to mull over as you scrutinize those menus throughout this entire deep
+[24:21] dive we've established that we fundamentally reject AI food right now because
+[24:25] it's flawed right because it's rubbery we hate it because it has rubbery
+[24:29] textures It creates six-ended hot dogs and it triggers our biological check
+[24:33] engine light But the generative technology is advancing at lightning speed.
+[24:38] Oh boy What happens in three or five years when the AI gets
+[24:43] so incredibly good that it flawlessly replicates a meal?
+[24:47] What happens when the uncanny valley is finally conquered
+[24:49] and your brain can no longer detect the deception?
+[24:52] Oh, man I don't even want to think about how confusing that's going to
+[24:55] be Will the psychological betrayal feel even worse when you inevitably
+[24:59] discover that the mouthwatering, hyper-realistic meal you've been
+[25:03] eagerly waiting to eat never actually existed in the first place?
+[25:07] Will it hurt more simply because you were so perfectly fooled?
+[25:11] See, that brings us right back to the beginning.
+[25:13] The entire primal ritual of walking into a
+[25:16] restaurant is based on trusting what you see.
+[25:19] If we reach a point where we can't even trust our own eyes to tell our
+[25:21] stomachs what's real, The whole system of dining out breaks down completely.
+[25:25] That's a scary thought.
+[25:26] That is a wild, slightly terrifying thought to end on.
+[25:30] Thanks for joining us on this deep dive, everyone.
+[25:32] We will catch you next time.
