@@ -87,6 +87,22 @@ SVT_CLIPS = [
         ),
     },
 ]
+# SVT Nyheter's own Instagram reel of the story (svt/metadata.json "instagram"), shown with the archived reel on
+# videos.html. Swedish subtitles are burned into the picture, so only English and German get a track.
+SVT_INSTAGRAM = {
+    "id": "svtnyheter-instagram",
+    "title": "Restaurangernas AI-bilder på mat väcker ilska",
+    "programme": "SVT Nyheter on Instagram",
+    "length": "52 s",
+    "portrait": True,
+    "tracks": ["en", "de"],
+    "origin": "Original on Instagram",
+    "summary": (
+        "SVT Nyheter’s reel of the same story: street reactions, the comments that went viral (including Jenny "
+        "Frennberg’s reel and the Guardian article, both archived here), Nils Holmberg on the evolutionary account "
+        "of food disgust (0:26), and a food-truck owner who sees AI images as a cheap way to start."
+    ),
+}
 
 # AI-generated summaries (Gemini Notebook): an infographic and an audio overview; files in notebook/.
 NOTEBOOK_DIR = ROOT / "notebook"
@@ -271,6 +287,7 @@ def build_index() -> None:
     <div class="hero-actions">
       <a class="button primary" href="pages/svt.html">Watch both interviews</a>
       <a class="button secondary" href="pages/svt.html#sverige-live">Sverige Live segment · 6½ min</a>
+      <a class="button secondary" href="pages/videos.html#svtnyheter-instagram">On Instagram · 52 s + comments</a>
     </div>
     <p class="interview-langs">Subtitles in English, Svenska and Deutsch · searchable transcripts</p>
   </div>
@@ -280,7 +297,7 @@ def build_index() -> None:
 <section class="stats" aria-label="Archive at a glance">
   <div><strong>6</strong><span>linked sources</span></div>
   <div><strong>199</strong><span>Reddit feed entries</span></div>
-  <div><strong>48s</strong><span>playable social video</span></div>
+  <div><strong>2</strong><span>playable Instagram reels</span></div>
   <div><strong>7</strong><span>relevant visual assets</span></div>
 </section>
 
@@ -291,7 +308,7 @@ def build_index() -> None:
   </div>
   <div class="mode-grid">
     <a class="mode-card images-mode" href="pages/images.html"><span>01</span><h3>Images</h3><p>Menu boards, restaurant examples, thumbnails, and the Swedish post that prompted discussion.</p></a>
-    <a class="mode-card video-mode" href="pages/videos.html"><span>02</span><h3>Video</h3><p>Watch the archived Instagram reel locally with its full Swedish caption and source metadata.</p></a>
+    <a class="mode-card video-mode" href="pages/videos.html"><span>02</span><h3>Video</h3><p>Watch Jenny Frennberg’s reel and SVT Nyheter’s reel of the story, with subtitles and viewers’ comments.</p></a>
     <a class="mode-card text-mode" href="pages/texts.html"><span>03</span><h3>Texts</h3><p>Read reporting, source summaries, and the complete accessible Reddit discussion.</p></a>
   </div>
 </section>
@@ -408,7 +425,7 @@ def build_instagram_page() -> None:
       Your browser cannot play this video. <a href="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4', download=True)}">Download it instead.</a>
     </video>
   </div>
-  <div class="video-notes"><p class="kicker">Archived playback · 48 seconds · English + German subtitles</p><h2>{html.escape(meta.get('uploader', 'Instagram'))}</h2><p>{description}</p><p><a class="text-link" href="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4', download=True)}" download>Download MP4 ↓</a> · <a class="text-link" href="../instagram/transcript-en.txt">English transcript</a> · <a class="text-link" href="../instagram/transcript-de.txt">Deutsches Transkript</a></p></div>
+  <div class="video-notes"><p class="kicker">Archived playback · 48 seconds · English + German subtitles</p><h2>{html.escape(meta.get('uploader', 'Instagram'))}</h2><p>{description}</p><p><a class="text-link" href="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4', download=True)}" download>Download MP4 ↓</a> · <a class="text-link" href="../instagram/transcript-en.txt">English transcript</a> · <a class="text-link" href="../instagram/transcript-de.txt">Deutsches Transkript</a></p><p><a class="text-link" href="videos.html#svtnyheter-instagram">Quoted in SVT Nyheter’s Instagram reel →</a></p></div>
 </section>"""
     write(PAGES / "instagram.html", shell("Instagram reel", content, body_class="source-page"))
 
@@ -492,15 +509,38 @@ def build_images_page() -> None:
     write(PAGES / "images.html", shell("Images", content, body_class="collection-page"))
 
 
+def comment_highlights(info: dict) -> str:
+    """Static selection of Instagram comments (Swedish + English), linking to the full discussion."""
+    cards = "".join(
+        f'<blockquote class="ig-comment"><p lang="sv">{html.escape(c["text"])}</p><p class="ig-en">{html.escape(c["en"])}</p></blockquote>'
+        for c in info["comment_highlights"]
+    )
+    stats = info["engagement_at_retrieval"]
+    return f"""
+<section class="ig-comments" aria-labelledby="ig-comments-title">
+  <div class="ig-comments-head">
+    <p class="kicker">From the comments · {stats['comments']} comments · {stats['likes']:,} likes <span class="nowrap">(as of {stats['date']})</span></p>
+    <h2 id="ig-comments-title">What viewers said</h2>
+    <p>A selection of {len(info['comment_highlights'])} comments, quoted without usernames, with English translations. They echo the reel’s themes: disgust at “AI slop”, food that looks infested, and the restaurant owner’s claim that photography is not where the money matters most.</p>
+    <a class="button primary" href="{html.escape(info['url'])}" target="_blank" rel="noreferrer">Read all comments on Instagram ↗</a>
+  </div>
+  <div class="ig-comment-grid">{cards}</div>
+</section>"""
+
+
 def build_video_page() -> None:
     meta = load_meta("instagram")
+    svt = json.loads((SVT_DIR / "metadata.json").read_text(encoding="utf-8"))["instagram"]
     caption = html.escape(meta.get("description", "")).replace("\n", "<br>")
     content = f"""
-<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">Video archive</p><h1>A Swedish reaction,<br>preserved in the archive</h1><p class="dek">Jenny Frennberg’s 48-second Instagram reel turns the subject into a direct appeal for authentic restaurant imagery.</p></section>
+<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">Video archive</p><h1>A Swedish reaction,<br>preserved in the archive</h1><p class="dek">Jenny Frennberg’s 48-second Instagram reel turns the subject into a direct appeal for authentic restaurant imagery. Below it, <a href="#svtnyheter-instagram">SVT Nyheter’s own reel</a> of the story quotes hers, with a selection of viewers’ comments.</p></section>
 <section class="cinema">
   <div class="cinema-screen"><video controls preload="metadata" poster="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.jpg')}"><source src="{asset('instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4')}" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="../instagram/subtitles-en.vtt" default><track kind="subtitles" srclang="de" label="Deutsch" src="../instagram/subtitles-de.vtt"></video></div>
   <aside><p class="kicker">Archived reel · English + German subtitles</p><h2>“AI-bilder på menyn? Nej tack.”</h2><p>{caption}</p><p><a class="text-link" href="../instagram/transcript-en.txt">English transcript</a> · <a class="text-link" href="../instagram/transcript-de.txt">Deutsches Transkript</a></p><a class="button primary" href="instagram.html">Full source page</a></aside>
-</section>"""
+</section>
+{svt_clip(SVT_INSTAGRAM, svt)}
+{comment_highlights(svt)}
+<section class="source-section"><p class="text-detail">SVT Nyheter’s reel: {html.escape(svt['processing'])} © SVT; archived for research and commentary, not licensed for reuse. <a href="../svt/metadata.json">Metadata</a> · <a href="svt.html">Both SVT interviews →</a></p></section>"""
     write(PAGES / "videos.html", shell("Video", content, body_class="collection-page"))
 
 
@@ -532,12 +572,12 @@ def cue_list(vtt: Path, lang: str, *, hidden: bool = False) -> str:
     return f'<ol class="cue-list" data-cues="{lang}"{" hidden" if hidden else ""}>{items}</ol>'
 
 
-def svt_clip(clip: dict, meta: dict) -> str:
+def svt_clip(clip: dict, info: dict) -> str:
     cid = clip["id"]
-    info = next(c for c in meta["clips"] if c["id"] == cid)
+    track_langs = clip.get("tracks", [lang for lang, _ in SVT_LANGS])
     tracks = "".join(
         f'<track kind="subtitles" srclang="{lang}" label="{label}" src="../svt/{cid}.{lang}.vtt"{" default" if i == 0 else ""}>'
-        for i, (lang, label) in enumerate(SVT_LANGS)
+        for i, (lang, label) in enumerate((lang, label) for lang, label in SVT_LANGS if lang in track_langs)
     )
     tabs = "".join(
         f'<button type="button" data-lang="{lang}"' + (' class="active"' if i == 0 else "") + f">{label}</button>"
@@ -562,7 +602,7 @@ def svt_clip(clip: dict, meta: dict) -> str:
       <input type="search" placeholder="Search transcript" aria-label="Search transcript" data-cue-search>
     </div>
     <div class="cue-box">{lists}</div>
-    <p class="download-line"><a href="{html.escape(info['url'])}" target="_blank" rel="noreferrer">Original on SVT ↗</a> · Transcripts: {downloads}</p>
+    <p class="download-line"><a href="{html.escape(info['url'])}" target="_blank" rel="noreferrer">{clip.get('origin', 'Original on SVT')} ↗</a> · Transcripts: {downloads}</p>
   </div>
 </section>"""
 
@@ -571,7 +611,8 @@ def build_svt_page() -> None:
     meta = json.loads((SVT_DIR / "metadata.json").read_text(encoding="utf-8"))
     content = f"""
 <section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">SVT Helsingborg · 26 October 2026</p><h1>The interviews<br>with Joel Sund</h1><p class="dek">Two SVT pieces in which reporter Joel Sund talks to Nils Holmberg, researcher in communication at Lund University, about why AI-generated food images provoke such strong reactions. Choose a subtitle language; click any line of the transcript to jump there.</p></section>
-{''.join(svt_clip(clip, meta) for clip in SVT_CLIPS)}
+{''.join(svt_clip(clip, next(c for c in meta["clips"] if c["id"] == clip["id"])) for clip in SVT_CLIPS)}
+<section class="source-section"><p class="download-line"><a class="text-link" href="videos.html#svtnyheter-instagram">Also: SVT Nyheter’s 52-second Instagram reel of the story, with highlighted comments →</a></p></section>
 <section class="source-section"><p class="text-detail">{html.escape(meta['subtitles'])} Video {html.escape(meta['rights'])} <a href="../svt/metadata.json">Metadata</a> · <a href="../svt/content.txt">Swedish transcripts as text</a></p></section>"""
     write(PAGES / "svt.html", shell("SVT interviews", content, body_class="collection-page"))
 

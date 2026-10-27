@@ -251,3 +251,17 @@ main { overflow: hidden; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+
+/* Instagram comment highlights (videos.html), below SVT Nyheter's reel */
+.ig-comments { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(2rem, 5vw, 5rem); padding: clamp(3rem, 7vw, 6rem) clamp(1.1rem, 5vw, 5.5rem); color: var(--paper); background: var(--ink); color-scheme: dark; }
+.ig-comments .kicker { color: #f2bf4b; }
+.ig-comments h2 { margin: 0 0 1rem; font-family: var(--serif); font-size: clamp(2.2rem, 4vw, 4rem); font-weight: 400; line-height: 1; }
+.ig-comments-head p { color: #ddd5c7; }
+.ig-comments .button.primary { color: var(--ink); background: var(--paper); border-color: var(--paper); }
+.ig-comments .button.primary:hover { color: var(--paper); background: var(--tomato); border-color: var(--tomato); }
+.ig-comment-grid { columns: 2 260px; column-gap: 1rem; }
+.ig-comment { break-inside: avoid; display: inline-block; width: 100%; margin: 0 0 1rem; padding: 1rem 1.1rem; border-left: 3px solid var(--tomato); background: #2a2620; }
+.ig-comment p { margin: 0; }
+.ig-comment .ig-en { margin-top: .5rem; color: #a59d8f; font-size: .85rem; font-style: italic; }
+@media (max-width: 760px) { .ig-comments { grid-template-columns: 1fr; } }
+.nowrap { white-space: nowrap; }

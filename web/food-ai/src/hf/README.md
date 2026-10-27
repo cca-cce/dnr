@@ -35,6 +35,7 @@ File paths mirror the website layout, so a site path `X` is served at
 | `guardian/images/`, `cnn/images/`, `reddit/images/` | Images from the archived Guardian and CNN articles and the r/sweden post |
 | `svt/nyheter-helsingborg.mp4` / `.jpg` | SVT Nyheter Helsingborg, *Forskaren: Därför väcker AI-bilder på mat ilska* (2026-10-26, 1 min 14 s, 608×1080, H.264/AAC), interview with Nils Holmberg by Joel Sund, and a still |
 | `svt/sverige-live.mp4` / `.jpg` | Sverige Live, SVT1, 2026-10-26: the 6 min 30 s segment from Lund (1920×1080, H.264/AAC), and a still |
+| `svt/svtnyheter-instagram.mp4` / `.jpg` | SVT Nyheter's Instagram reel of the story, [instagram.com/p/De8hqPpBgUk](https://www.instagram.com/p/De8hqPpBgUk/) (2026-10-26, 52 s, 720×1280, H.264/AAC, Swedish subtitles burned in), and its cover image |
 | `notebook/ai-menu-imagery-infographic.png` / `.jpg` | *AI Menu Imagery: Why Fake Food Is Backfiring on Restaurants*, an infographic generated with Gemini Notebook (2752×1536 PNG, 1600 px JPG preview) |
 | `notebook/the-uncanny-menu.pdf`, `notebook/the-uncanny-menu/slide-NN.jpg` | *The Uncanny Menu*, a 15-slide AI-generated deck made with Gemini Notebook (image-only PDF, 1376×768 pt), and each slide as a 1600 px JPG |
 | `notebook/why-ai-food-menus-disgust-us.m4a` | *Why AI Food Menus Disgust Us*, an AI-generated audio overview made with Gemini Notebook (25 min 34 s, AAC) |
@@ -49,7 +50,7 @@ SHA-256 checksums for every file are listed in `web/food-ai/MANIFEST.sha256` in 
   (Jenny Frennberg) and the Reddit photo (u/Sensitive_Cream3920) remain the property of their owners.
   They are archived unchanged for research, criticism and commentary, with sources credited on the website.
   They are **not** licensed for reuse here.
-- The SVT clips in `svt/` are © SVT (Sveriges Television). They are archived for research and commentary by the
+- The SVT clips in `svt/`, including SVT Nyheter's Instagram reel, are © SVT (Sveriges Television). They are archived for research and commentary by the
   interviewee, with the original broadcasts linked on the website, and are **not** licensed for reuse here.
   Subtitles (Swedish, English, German) are served with the website from GitHub.
 - The files in `notebook/` are AI-generated with Google's Gemini Notebook and published by the archive's author as

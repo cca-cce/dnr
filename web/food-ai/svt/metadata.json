@@ -34,5 +34,55 @@
     }
   ],
   "subtitles": "Swedish transcribed locally with KBLab/kb-whisper-large (faster-whisper, word timestamps) and proofread; English and German translated from the corrected Swedish with the same cue timings.",
-  "rights": "© SVT. Archived for research and commentary; not licensed for reuse."
+  "rights": "© SVT. Archived for research and commentary; not licensed for reuse.",
+  "instagram": {
+    "id": "svtnyheter-instagram",
+    "title": "Restaurangernas AI-bilder på mat väcker ilska",
+    "programme": "SVT Nyheter on Instagram (@svtnyheter)",
+    "published": "2026-10-26",
+    "duration_s": 52.4,
+    "url": "https://www.instagram.com/p/De8hqPpBgUk/",
+    "video": "svtnyheter-instagram.mp4",
+    "poster": "svtnyheter-instagram.jpg",
+    "caption": "På sociala medier riktas kritik mot restauranger som har AI-bilder på menyn – där beskrivs de som \"äckliga, fula och ett brott mot mänskligheten\".\n\n\"Jag kommer aldrig gå till ett ställe som använder AI-bilder i marknadsföringen, man vet inte riktigt vad man får\", säger Tindra Svalö till SVT Nyheter Helsingborg.\n\nMen restaurangägarna själva anser att bilderna kan gynna verksamheten.\n\nSe mer via länken i vår profil.",
+    "caption_en": "On social media, restaurants with AI images on their menus are criticised, described as \"disgusting, ugly and a crime against humanity\". \"I will never go to a place that uses AI images in its marketing, you don't really know what you're getting,\" Tindra Svalö tells SVT Nyheter Helsingborg. But the restaurant owners themselves think the images can benefit their business.",
+    "quotes": "Quotes Jenny Frennberg's reel (archived on this site), the Guardian article, and a YouTube commentator; Nils Holmberg appears at 0:26-0:38.",
+    "processing": "Downloaded with yt-dlp without login (progressive H.264/AAC 720x1280 rendition rather than the VP9 1080p DASH stream, for browser compatibility); remuxed with faststart. Swedish subtitles are burned into the picture, so only English and German tracks are offered; the Swedish transcript follows the burned-in text and the audio.",
+    "engagement_at_retrieval": {
+      "date": "2026-10-27",
+      "likes": 3552,
+      "comments": 184
+    },
+    "comments_note": "Instagram exposed 15 of the 184 comments without login. A selection is quoted below and on the website without usernames; read the full discussion on Instagram.",
+    "comment_highlights": [
+      {
+        "text": "Vem går ens till ett ställe som använder ai-bilder??",
+        "en": "Who even goes to a place that uses AI images??"
+      },
+      {
+        "text": "Ew, vissa av bilderna ser ju bokstavligt talat ut som att de är fulla av mask/insekter 🙄🤢",
+        "en": "Ew, some of the pictures literally look like they're full of worms/insects 🙄🤢"
+      },
+      {
+        "text": "AI slop så är maten säkert slop också 😭",
+        "en": "AI slop, so the food is probably slop too 😭"
+      },
+      {
+        "text": "”Lägga pengar på någonting viktigare” aka fotografer, grafiska designers är inte viktiga? Ok lol",
+        "en": "“Put the money into something more important”, aka photographers and graphic designers aren't important? Ok lol"
+      },
+      {
+        "text": "”Lägga pengarna på nåt som är viktigare” Mannen hur är en fin bild på det du säljer inte det absolut viktigaste. First impressions mf",
+        "en": "“Put the money into something more important”: man, how is a nice picture of what you sell not the most important thing of all? First impressions"
+      },
+      {
+        "text": "Hur svårt är det att ta bilder på sin faktiska mat och skriva ut det på ett A4 ?",
+        "en": "How hard is it to take pictures of your actual food and print them on an A4?"
+      },
+      {
+        "text": "Hur AI-genererade bilder och texter kan väcka något annat än ilska är för mig ofattbart. Edit: Kom på en annan sak AI kan väcka: Berättigad avsky 🍽️",
+        "en": "How AI-generated images and texts can provoke anything other than anger is beyond me. Edit: thought of another thing AI can provoke: justified disgust 🍽️"
+      }
+    ]
+  }
 }
