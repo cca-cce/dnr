@@ -1,7 +1,7 @@
 {
   "source": "notebook",
   "kind": "AI-generated summaries",
-  "title": "Infographic and audio overview generated with Gemini Notebook",
+  "title": "Infographic, audio overview and slide deck generated with Gemini Notebook",
   "generator": "Google Gemini Notebook (watermark on the infographic; the audio was delivered as an AAC/DASH file encoded by Google)",
   "download_status": "complete: user-supplied files, 2026-10-27",
   "infographic": {
@@ -24,5 +24,76 @@
   "fact_check": {
     "26%": "CNN, citing the National Restaurant Association's annual report (cnn/content.txt).",
     "37%": "Not found in the archived sources or in references/diel2026ai.pdf; unverified."
+  },
+  "deck": {
+    "title": "The Uncanny Menu",
+    "subtitle": "Decoding the economics, psychology, and consumer backlash of generative AI in hospitality",
+    "file": "the-uncanny-menu.pdf",
+    "slides_dir": "the-uncanny-menu",
+    "pages": 15,
+    "page_size": "1376×768 pt, image-only (no text layer)",
+    "slides": [
+      {
+        "title": "The Uncanny Menu",
+        "text": "Title slide: “Decoding the economics, psychology, and consumer backlash of generative AI in hospitality.” Beside it, glossy AI-generated smoothies with a diagnostic note: impossible specular highlights, synthetic gloss signature detected."
+      },
+      {
+        "title": "Three drivers of the AI food slop epidemic",
+        "text": "1. The margin squeeze: 42% of US eateries are unprofitable, so the rush to generative AI marketing is driven by survival, not malice. 2. The biological rejection: humans are hardwired to reject uncanny food imagery as a defence against contamination. 3. The trust deficit: visual authenticity is a proxy for safety; AI signals cut corners."
+      },
+      {
+        "title": "Generative imagery escapes the internet to invade physical dining spaces",
+        "text": "A map pinned with three examples: San Francisco’s hyper-glossy spaghetti-western breakfast menu, Denver’s reptile-skin barbecue meat, and New York’s alien geometric shrimp rings."
+      },
+      {
+        "title": "The false promise of zero-cost graphic design",
+        "text": "The data (National Restaurant Association): 42% of US operators failed to turn a profit in 2025; 26% of restaurant owners use AI, mainly for marketing. The reality: a Denver barbecue pop-up manager who replaced his graphic designer with ChatGPT."
+      },
+      {
+        "title": "The anatomy of a generative defect",
+        "text": "An annotated AI food image: texture failures (stitched, leathery meat, reptile-skin bread, Play-Doh spaghetti), structural repetition (identical, repeating geometric forms), and over-saturated lighting with impossible highlights."
+      },
+      {
+        "title": "Modifying the uncanny valley for human appetite",
+        "text": "Mori’s 1970 curve applied to food: hand-drawn illustrations and authentic professional photography are pleasant, while slightly imperfect AI generation falls into the valley and is rated less pleasant than obviously fake food."
+      },
+      {
+        "title": "Survival mechanics trigger intense biological rejection of synthetic food",
+        "text": "Evolved disgust (a hypersensitivity to food that looks slightly off) and food neophobia (fear of unfamiliar foods). Result: even when diners rate AI food as nutritionally equal, their desire to eat it plummets."
+      },
+      {
+        "title": "The psychological contract of the menu is broken",
+        "text": "A styled photograph implies the dish exists and was prepared by a human hand; a generative image depicts food that has never existed. Consumer verdict: if they skimp on the signage, they probably skimp on the food."
+      },
+      {
+        "title": "The danger zone: hallucinating dietary tags",
+        "text": "The flaw: generative models add appealing badges such as gluten-free, nut-free or vegan. The reality: they are applied to dishes that contain those allergens. The fallout: owners print without checking, putting diners with coeliac disease or allergies at risk."
+      },
+      {
+        "title": "Case study: cultural backlash and hidden legal costs in Sweden",
+        "text": "The Skellefteå supermarket menu board with AI-hallucinated Nintendo-like characters and garbled text (“chicagobörd”), raising IP risk and an outcry online; and Stockholm food creator Jenny Frennberg’s plea: “Skip the AI… it becomes so much better and genuine.”"
+      },
+      {
+        "title": "The DoorDash dilemma: enhancement vs. deception",
+        "text": "DoorDash offers AI tools that adjust lighting, colour and backgrounds of real dish photos and labels them “AI-enhanced”. The grey area: the label itself creates scepticism, and even professionals struggle to tell enhancement from generation."
+      },
+      {
+        "title": "Will audiences habituate? The data suggests the opposite",
+        "text": "From 2023, when more than 60% of consumers reportedly could not tell AI food from photographs, to 2026, with vandalised AI café signs in San Francisco ($700 in graffiti removal). Charles Spence (Oxford): people prefer AI food images until they learn they are machine-made."
+      },
+      {
+        "title": "Diagnostic comparison: the strategic value of authenticity",
+        "text": "A table comparing generative AI slop (near-zero cost, severe trust deficit, “they are cutting corners everywhere”), high-end food styling (high cost, aspirational) and sun-bleached realism (low cost, maximum authenticity, “honest food, obsessive focus on taste”)."
+      },
+      {
+        "title": "As artificial perfection becomes ubiquitous, authenticity becomes a premium differentiator",
+        "text": "A pendulum from hyper-digital efficiency to analog authenticity. Proof point: Chugwater Soda Fountain in Wyoming went viral with over 200,000 likes for a hand-written cardboard pledge never to use AI images."
+      },
+      {
+        "title": "Strategic framework for hospitality in the generative era",
+        "text": "1. Keep AI back-of-house: inventory, scheduling, payroll. 2. Embrace the smartphone: a slightly unpolished photo of a real dish builds more trust than a flawless AI render. 3. Tell an honest story: real people and real stories win over artificial perfection."
+      }
+    ],
+    "note": "Slide images rendered from the PDF at its embedded resolution and scaled to 1600 px JPG; titles and descriptions transcribed from the slides for search and screen readers."
   }
 }

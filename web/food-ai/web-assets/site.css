@@ -185,6 +185,12 @@ main { overflow: hidden; }
 .fact-check { padding: 1.4rem; border: 1px solid var(--line); background: var(--white); }
 .fact-check p:not(.kicker) { margin: 0 0 1rem; font-size: .92rem; }
 .fact-check b { font-family: var(--serif); font-size: 1.6rem; font-weight: 400; }
+
+.deck { display: grid; gap: clamp(2.5rem, 6vw, 5rem); padding: clamp(2.5rem, 6vw, 5rem) clamp(1.1rem, 5vw, 5.5rem); }
+.slide { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(240px, .6fr); gap: clamp(1.2rem, 3vw, 3rem); align-items: center; margin: 0; scroll-margin-top: 80px; }
+.slide img { width: 100%; height: auto; border: 1px solid var(--line); box-shadow: 0 18px 45px rgba(45, 38, 24, .14); background: var(--white); }
+.slide h2 { margin: .2rem 0 .7rem; font-family: var(--serif); font-size: clamp(1.5rem, 2.2vw, 2.2rem); font-weight: 400; line-height: 1.05; letter-spacing: -.03em; }
+.slide p { margin: 0; color: var(--muted); font-size: .9rem; }
 .interview-side { display: flex; flex-direction: column; min-width: 0; }
 .interview-side .kicker { color: #f2bf4b; }
 .interview-side h2 { margin: 0 0 .8rem; font-family: var(--serif); font-size: clamp(2rem, 3.2vw, 3.3rem); font-weight: 400; line-height: 1; letter-spacing: -.035em; }
@@ -215,7 +221,7 @@ main { overflow: hidden; }
   .mode-grid, .source-grid { grid-template-columns: 1fr; }
   .mode-card, .source-card { min-height: 260px; border-right: 0; }
   .mode-card { border-bottom: 1px solid var(--line); }
-  .thesis-grid, .video-stage, .limitation-panel, .cinema, .text-shelf-item, .interview-hero, .interview, .infographic { grid-template-columns: 1fr; }
+  .thesis-grid, .video-stage, .limitation-panel, .cinema, .text-shelf-item, .interview-hero, .interview, .infographic, .slide { grid-template-columns: 1fr; }
   .interview-screen.portrait video { height: min(70vh, 640px); }
   .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

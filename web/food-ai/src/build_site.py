@@ -92,6 +92,7 @@ SVT_CLIPS = [
 NOTEBOOK_DIR = ROOT / "notebook"
 NOTEBOOK_INFOGRAPHIC = "notebook/ai-menu-imagery-infographic"   # .png full size, .jpg 1600 px preview
 NOTEBOOK_AUDIO = "notebook/why-ai-food-menus-disgust-us"         # .m4a, .en.vtt, .en.txt
+NOTEBOOK_DECK = "notebook/the-uncanny-menu"                      # .pdf, and the-uncanny-menu/slide-NN.jpg
 
 PDF_DIR = MEDIA / "pdf"
 REF_DIR = ROOT / "references"
@@ -252,6 +253,7 @@ def build_index() -> None:
       <a class="button secondary" href="#sources">Browse six sources</a>
       <a class="button secondary" href="{asset('pdf/food-ai-sourcebook.pdf', '')}" target="_blank" rel="noopener">Read the PDF book ↗</a>
       <a class="button secondary" href="pages/notebook.html">Infographic + audio overview</a>
+      <a class="button secondary" href="pages/slides.html">Slide deck: The Uncanny Menu</a>
     </div>
   </div>
   <div class="hero-collage" aria-label="Examples from the source archive">
@@ -579,7 +581,7 @@ def build_notebook_page() -> None:
     audio, info = meta["audio"], meta["infographic"]
     vtt = ROOT / f"{NOTEBOOK_AUDIO}.en.vtt"
     content = f"""
-<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">AI-generated summaries · Gemini Notebook</p><h1>The argument<br>in one picture</h1><p class="dek">An infographic and an audio overview ({audio['length']}) about AI-generated menu imagery, both generated with Google’s Gemini Notebook. They are machine-made summaries, shown here as companions to the archived sources, not as sources themselves.</p></section>
+<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">AI-generated summaries · Gemini Notebook</p><h1>The argument<br>in one picture</h1><p class="dek">An infographic and an audio overview ({audio['length']}) about AI-generated menu imagery, both generated with Google’s Gemini Notebook. They are machine-made summaries, shown here as companions to the archived sources, not as sources themselves.</p><p class="download-line"><a class="text-link" href="slides.html">The same tool’s slide deck: The Uncanny Menu →</a></p></section>
 <section class="source-section infographic">
   <figure>
     <a href="{asset(NOTEBOOK_INFOGRAPHIC + '.png')}" target="_blank" rel="noopener"><img src="{asset(NOTEBOOK_INFOGRAPHIC + '.jpg')}" width="1600" height="893" alt="{html.escape(info['alt'])}"></a>
@@ -606,6 +608,23 @@ def build_notebook_page() -> None:
   </div>
 </section>"""
     write(PAGES / "notebook.html", shell("Infographic and audio overview", content, body_class="collection-page"))
+
+
+def build_slides_page() -> None:
+    deck = json.loads((NOTEBOOK_DIR / "metadata.json").read_text(encoding="utf-8"))["deck"]
+    pdf = local(NOTEBOOK_DECK + ".pdf")
+    size = f" · {pdf.stat().st_size / 1e6:.0f} MB" if pdf.exists() else ""
+    slides = "".join(f"""
+<figure class="slide" id="slide-{n}">
+  <a href="{asset(f'{NOTEBOOK_DECK}/slide-{n:02d}.jpg')}" target="_blank" rel="noopener"><img loading="{'eager' if n == 1 else 'lazy'}" src="{asset(f'{NOTEBOOK_DECK}/slide-{n:02d}.jpg')}" width="1600" height="893" alt="{html.escape(s['title'] + '. ' + s['text'])}"></a>
+  <figcaption><span class="eyebrow">Slide {n} / {len(deck['slides'])}</span><h2>{html.escape(s['title'])}</h2><p>{html.escape(s['text'])}</p></figcaption>
+</figure>""" for n, s in enumerate(deck["slides"], 1))
+    content = f"""
+<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">AI-generated slide deck · Gemini Notebook · {len(deck['slides'])} slides</p><h1>{html.escape(deck['title'])}</h1><p class="dek">{html.escape(deck['subtitle'])}. A machine-made summary that draws on the archived sources; not every figure or quotation in it has been verified (see <a href="notebook.html">the figure check</a>).</p>
+<div class="hero-actions"><a class="button primary" href="{asset(NOTEBOOK_DECK + '.pdf')}" target="_blank" rel="noopener">Open the PDF{size} ↗</a><a class="button secondary" href="notebook.html">Infographic + audio overview</a></div></section>
+<section class="deck">{slides}</section>
+<section class="source-section"><p class="text-detail">{html.escape(deck['note'])} <a href="../notebook/metadata.json">Metadata</a> · <a href="../notebook/content.txt">All slide texts as plain text</a></p></section>"""
+    write(PAGES / "slides.html", shell(deck["title"], content, body_class="collection-page"))
 
 
 def excerpt(source: str, paragraphs: int = 2) -> str:
@@ -792,6 +811,7 @@ def main() -> None:
     build_video_page()
     build_svt_page()
     build_notebook_page()
+    build_slides_page()
     build_texts_page()
     build_references_page()
 

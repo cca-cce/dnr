@@ -7,7 +7,7 @@ The PDF is a three-page Swedish email thread preparing an SVT Nyheter Helsingbor
 Open [`index.html`](index.html) for the visual sourcebook. It provides:
 
 - The resulting SVT interviews with Joel Sund (SVT Nyheter Helsingborg and Sverige Live, 26 October 2026) on `pages/svt.html`, with English, Swedish and German subtitles and clickable, searchable transcripts.
-- An AI-generated infographic and a 25½-minute audio overview (Gemini Notebook) on `pages/notebook.html`, with a fact-check of the infographic's figures and a clickable, searchable transcript.
+- An AI-generated infographic and a 25½-minute audio overview (Gemini Notebook) on `pages/notebook.html`, with a fact-check of the infographic's figures and a clickable, searchable transcript; and the 15-slide AI-generated deck *The Uncanny Menu* on `pages/slides.html`, with each slide's text written out.
 - Overview cards and short summaries for all six sources.
 - Separate image, video, and text collections.
 - Full readable Guardian and CNN article pages.
@@ -25,7 +25,7 @@ The static site has no external software dependencies. Pages, text and subtitles
 | `guardian/` | The Guardian | Raw HTML, readable article text, metadata, article images | Complete |
 | `cnn/` | CNN | Raw HTML, readable article text, metadata, article images | Complete |
 | `instagram/` | Instagram reel by Jenny Frennberg | Raw HTML, merged MP4, thumbnail, yt-dlp metadata, readable description | Complete |
-| `notebook/` | AI-generated summaries made with Gemini Notebook (not one of the six links) | Infographic PNG with JPG preview, M4A audio overview, English WebVTT and `.txt` transcript, metadata, `content.txt` | Complete; transcript by Whisper small with names corrected against the archive, otherwise not proofread |
+| `notebook/` | AI-generated summaries made with Gemini Notebook (not one of the six links) | Infographic PNG with JPG preview, M4A audio overview, slide-deck PDF (`the-uncanny-menu.pdf`, image-only) with one JPG per slide, English WebVTT and `.txt` transcript, metadata, `content.txt` | Complete; transcript by Whisper small with names corrected against the archive, otherwise not proofread |
 | `svt/` | The SVT interviews themselves (not one of the six links) | Two MP4 clips with stills, WebVTT subtitles and `.txt` transcripts (`<clip>.<sv/en/de>.*`), metadata, Swedish transcripts in `content.txt` | Complete; Swedish transcribed with KBLab/kb-whisper-large and proofread, English and German translated with the same timings |
 | `tiktok/` | TikTok discovery page | Raw HTML and metadata | Page archived; discovery results require client-side/API loading and were not exposed in the response |
 | `reddit/` | r/sweden discussion | Raw page responses, Atom thread with the post and 198 comments, readable text, original attached image, metadata | Complete via Atom feed |
