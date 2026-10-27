@@ -1,0 +1,100 @@
+[0:00] ...dass Sie zu Hause dabei sind.
+[0:01] Aber jetzt geht es nach Lund.
+[0:03] Immer mehr Restaurants verwenden
+[0:06] KI-generierte Bilder von Gerichten auf ihren Speisekarten.
+[0:10] Nicht wahr, Joel Sund?
+[0:12] Viele sehen diese KI-generierten Speisekarten recht kritisch.
+[0:17] Wie sieht das aus?
+[0:21] Bei meiner Recherche habe ich Beispiele aus aller Welt gesehen.
+[0:25] In Schweden, in den meisten Städten, aber auch in Los Angeles,
+[0:29] New York, Südafrika, auf den Philippinen. Das ist etwas,
+[0:33] das gerade passiert und sich von der digitalen
+[0:36] Welt in die physische Welt, in die Gesellschaft, ausgebreitet hat.
+[0:39] Auf Speisekarten und Werbeflächen sieht man diese
+[0:43] KI-generierten Bilder von Essen, und das weckt sehr viele Emotionen.
+[0:47] Online wird diskutiert, das sei ein Verbrechen an der Menschheit.
+[0:52] Man sagt, es sei eklig, sehe nach Plastik aus, sehe nicht echt aus.
+[0:56] Es sei nicht appetitlich, sagen viele.
+[0:58] Es gibt also sehr große Diskussionen darüber.
+[1:02] Viele mögen diese Entwicklung nicht.
+[1:04] Aber hier geht es ja um Bilder,
+[1:06] es geht um Kommunikation, und ich habe einen Experten zu dem Thema dabei.
+[1:10] Nils Holmberg, Kommunikationsforscher an der Universität Lund.
+[1:15] Sie wissen viel mehr darüber.
+[1:17] Können Sie erzählen, warum diese Entwicklung gerade jetzt passiert?
+[1:21] Ja, es ist eine sehr spannende Entwicklung, und ich glaube, wir sehen das
+[1:24] gerade jetzt, weil es uns direkt in diese neue Ära der generativen KI wirft.
+[1:30] Wir können Text und Bild auf eine völlig
+[1:34] neue Art erzeugen, die vor vielleicht zwei Jahren nicht möglich war.
+[1:37] Ich glaube, sehr viele in verschiedenen Branchen,
+[1:41] verschiedenen Unternehmen, wollen das ausprobieren und sehen, ob sie etwas
+[1:45] Geld sparen können, indem sie professionelle Bilder generieren, statt
+[1:49] professionelle Fotos mit Fotografen usw. aufzunehmen.
+[1:53] Und sehen, ob sie damit durchkommen, ob die Kundschaft darauf reagiert.
+[1:57] In manchen Fällen funktionieren KI-generierte Bilder vielleicht.
+[2:02] In anderen Fällen vielleicht weniger gut.
+[2:05] Warum reagieren so viele so negativ auf KI-generierte Bilder von Essen?
+[2:10] Das ist auch sehr interessant.
+[2:13] Bilder von Essen sind ein besonderes Bildgenre.
+[2:18] Dafür gibt es verschiedene Erklärungen.
+[2:21] Eine Erklärung ist, dass Bilder von Essen tatsächlich funktionieren.
+[2:24] Wenn wir ein farbenfrohes Bild von einem Hamburger oder anderem Fast Food sehen,
+[2:30] bekommen wir vielleicht Hunger – es wirkt sich physiologisch auf uns aus.
+[2:36] Dass es funktioniert, bedeutet auch, dass es
+[2:39] bestimmte Regeln gibt, wie diese Bilder aussehen dürfen.
+[2:45] Sie dürfen nicht zu viel versprechen,
+[2:47] denn dann sind wir vielleicht vom Essen enttäuscht, das wir serviert bekommen.
+[2:53] Aber sie dürfen auch auf keinen Fall
+[2:55] unnatürlich sein oder kleine...
+[3:02] kleine Abweichungen vom echten Bild haben.
+[3:07] Dafür gibt es eine evolutionäre Erklärung.
+[3:11] Über lange Zeit hat sich der Mensch so entwickelt,
+[3:15] dass er lernt, kleine Fehler
+[3:18] im Essen zu sehen und zu erkennen, weil
+[3:21] unser Leben ganz einfach davon abhängt.
+[3:27] Essen wir schlechtes Essen, sterben wir.
+[3:29] Das wurde über Jahrmillionen gelernt.
+[3:34] Wenn wir KI-generiertes Essen sehen
+[3:38] und vielleicht etwas mit der Textur, der
+[3:41] Beleuchtung nicht stimmt oder kleine Fehler in
+[3:45] den Farben sind, reagieren wir stark darauf.
+[3:49] Es löst die Reaktion aus, dass mit dem Essen etwas nicht stimmt.
+[3:54] Wie geht es weiter?
+[3:56] Werden wir unsere Sicht auf KI-generierte Bilder ändern?
+[4:02] Ich glaube, wir werden uns in unserem
+[4:07] Verhältnis zu KI-generierten Essensbildern verändern.
+[4:11] Ich glaube, wir werden uns mehr an
+[4:16] KI-generierte Bilder und synthetische Medien insgesamt gewöhnen.
+[4:20] Eine denkbare Entwicklung ist also, dass wir
+[4:25] offener werden, wenn wir verstehen, wie die Technik funktioniert.
+[4:32] Eine andere denkbare Richtung ist, dass wir gerade bei Essensbildern
+[4:36] vielleicht auch weiterhin
+[4:39] echte Bilder haben wollen, wo es einfach
+[4:43] nicht reicht, KI-generierte Bilder zu verwenden.
+[4:46] Aber KI-generierte Bilder insgesamt sind, glaube ich, gekommen, um
+[4:50] zu bleiben – in vielen anderen Branchen und im Marketing.
+[4:54] Aber bei Essensbildern vielleicht eher fraglich.
+[4:59] Wenn man online die großen Diskussionen verfolgt,
+[5:02] in denen die Leute sehr hart mit diesen Bildern ins Gericht gehen,
+[5:06] dann ist vom Uncanny Valley die Rede.
+[5:08] Welche Rolle spielt das hier?
+[5:10] Das ist ein spannender Begriff, der viel in der Robotik
+[5:15] und KI-Forschung verwendet wird, wo sich gezeigt hat: Wenn man einen
+[5:18] Roboter baut, der einem Menschen einigermaßen ähnelt, dann führen
+[5:23] die Reaktionen menschlicher Nutzer dazu, dass man
+[5:27] mehr Vertrauen in diesen Roboter hat.
+[5:32] Das funktioniert ziemlich...
+[5:39] Es funktioniert so: Je ähnlicher etwas wird, desto
+[5:45] vertrauter wird es und desto mehr Vertrauen haben wir.
+[5:48] Bis zu einer gewissen Grenze – wenn es zu ähnlich wird und es nur winzige,
+[5:52] winzige Unterschiede gibt, bekommen wir plötzlich ein sehr starkes,
+[5:56] unheimliches Unbehagen gegenüber diesem Reiz.
+[6:02] Vielen Dank, Nils Holmberg.
+[6:04] Ich komme zurück ins Bild und bedanke mich.
+[6:07] Jovan, was sagst du zu den KI-Essensbildern?
+[6:11] Bekommst du Appetit oder nicht?
+[6:13] Danke, Joel.
+[6:14] Leider bekomme ich davon wohl keinen Appetit.
+[6:16] Ich hätte lieber echte Bilder und sehe, was ich auf den Teller bekomme.
+[6:22] Von der KI zur Wirklichkeit und zu Janicke.
+[6:26] Wir sprechen über das Wetter der Woche.

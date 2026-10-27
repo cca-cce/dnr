@@ -1,0 +1,38 @@
+{
+  "source": "svt",
+  "kind": "TV interviews",
+  "title": "SVT interviews with Nils Holmberg on AI-generated food images",
+  "publisher": "SVT (Sveriges Television)",
+  "reporter": "Joel Sund, SVT Nyheter Helsingborg",
+  "interviewee": "Nils Holmberg, researcher in communication, Lund University",
+  "download_status": "complete: two clips, subtitles in Swedish, English and German",
+  "url": "https://www.svt.se/nyheter/lokalt/helsingborg/forskaren-darfor-vacker-ai-bilder-pa-mat-ilska",
+  "clips": [
+    {
+      "id": "nyheter-helsingborg",
+      "title": "Forskaren: Därför väcker AI-bilder på mat ilska",
+      "programme": "SVT Nyheter Helsingborg (svt.se)",
+      "published": "2026-10-26",
+      "duration_s": 73.8,
+      "url": "https://www.svt.se/nyheter/lokalt/helsingborg/forskaren-darfor-vacker-ai-bilder-pa-mat-ilska",
+      "svt_id": "jkAk6AN",
+      "video": "nyheter-helsingborg.mp4",
+      "poster": "nyheter-helsingborg.jpg",
+      "processing": "Downloaded from SVT Play (H.264/AAC); pillarbox removed by cropping 1920x1080 to 608x1080 (re-encoded, CRF 19)."
+    },
+    {
+      "id": "sverige-live",
+      "title": "Sverige Live, 26 October 2026, 16:00 (segment)",
+      "programme": "Sverige Live, SVT1",
+      "published": "2026-10-26",
+      "duration_s": 390.0,
+      "url": "https://www.svtplay.se/video/j1q1knv/sverige-live-1/igar-16-00",
+      "segment": "00:03:07-00:09:37 of the broadcast",
+      "video": "sverige-live.mp4",
+      "poster": "sverige-live.jpg",
+      "processing": "Segment located with the broadcast's own live subtitles and cut with yt-dlp --download-sections (stream copy, faststart)."
+    }
+  ],
+  "subtitles": "Swedish transcribed locally with KBLab/kb-whisper-large (faster-whisper, word timestamps) and proofread; English and German translated from the corrected Swedish with the same cue timings.",
+  "rights": "© SVT. Archived for research and commentary; not licensed for reuse."
+}

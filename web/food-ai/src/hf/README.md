@@ -33,6 +33,8 @@ File paths mirror the website layout, so a site path `X` is served at
 | `references/diel2026ai.pdf` | Diel et al. (2026), *Scientific Reports* 16, 25521, doi:10.1038/s41598-026-66977-1 |
 | `instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4` / `.jpg` | The archived Instagram reel by Jenny Frennberg and its thumbnail |
 | `guardian/images/`, `cnn/images/`, `reddit/images/` | Images from the archived Guardian and CNN articles and the r/sweden post |
+| `svt/nyheter-helsingborg.mp4` / `.jpg` | SVT Nyheter Helsingborg, *Forskaren: Därför väcker AI-bilder på mat ilska* (2026-10-26, 1 min 14 s, 608×1080, H.264/AAC), interview with Nils Holmberg by Joel Sund, and a still |
+| `svt/sverige-live.mp4` / `.jpg` | Sverige Live, SVT1, 2026-10-26: the 6 min 30 s segment from Lund (1920×1080, H.264/AAC), and a still |
 
 SHA-256 checksums for every file are listed in `web/food-ai/MANIFEST.sha256` in the GitHub repository.
 
@@ -44,6 +46,9 @@ SHA-256 checksums for every file are listed in `web/food-ai/MANIFEST.sha256` in 
   (Jenny Frennberg) and the Reddit photo (u/Sensitive_Cream3920) remain the property of their owners.
   They are archived unchanged for research, criticism and commentary, with sources credited on the website.
   They are **not** licensed for reuse here.
+- The SVT clips in `svt/` are © SVT (Sveriges Television). They are archived for research and commentary by the
+  interviewee, with the original broadcasts linked on the website, and are **not** licensed for reuse here.
+  Subtitles (Swedish, English, German) are served with the website from GitHub.
 - The PDF editions are compilations of the material above, plus editorial descriptions, translations and summaries.
 
 Rights holders who want a file removed can open a discussion on this repository.

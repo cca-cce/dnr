@@ -28,4 +28,43 @@ document.addEventListener("DOMContentLoaded", () => {
       count.textContent = `${visible} ${visible === 1 ? "entry" : "entries"} shown`;
     });
   }
+
+  // SVT interviews: one language switch for subtitles and transcript, click-to-seek, follow playback, search.
+  document.querySelectorAll("[data-clip]").forEach((clip) => {
+    const video = clip.querySelector("video");
+    const box = clip.querySelector(".cue-box");
+    const query = clip.querySelector("[data-cue-search]");
+    let lang = clip.querySelector("[data-lang].active").dataset.lang;
+    const list = () => clip.querySelector(`[data-cues="${lang}"]`);
+
+    const filter = () => {
+      const q = query.value.trim().toLocaleLowerCase();
+      list().querySelectorAll("li").forEach((li) => { li.hidden = q && !li.textContent.toLocaleLowerCase().includes(q); });
+    };
+    const follow = () => {
+      const t = video.currentTime;
+      let now = null;
+      list().querySelectorAll("button").forEach((b) => {
+        const on = t >= +b.dataset.start && t < +b.dataset.end;
+        b.classList.toggle("now", on);
+        if (on) now = b;
+      });
+      // scroll only the transcript box; scrollIntoView would also scroll the page
+      if (now && !video.paused) box.scrollTo({ top: now.offsetTop - box.clientHeight / 2, behavior: "smooth" });
+    };
+    const setLang = (next) => {
+      lang = next;
+      clip.querySelectorAll("[data-lang]").forEach((tab) => tab.classList.toggle("active", tab.dataset.lang === lang));
+      clip.querySelectorAll("[data-cues]").forEach((ol) => { ol.hidden = ol.dataset.cues !== lang; });
+      [...video.textTracks].forEach((track) => { track.mode = track.language === lang ? "showing" : "disabled"; });
+      filter(); follow();
+    };
+
+    clip.querySelectorAll("[data-lang]").forEach((tab) => tab.addEventListener("click", () => setLang(tab.dataset.lang)));
+    clip.querySelectorAll("[data-start]").forEach((b) => b.addEventListener("click", () => {
+      video.currentTime = +b.dataset.start + 0.01; video.play();
+    }));
+    query.addEventListener("input", filter);
+    video.addEventListener("timeupdate", follow);
+  });
 });

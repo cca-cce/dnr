@@ -22,8 +22,10 @@ from pathlib import Path
 import fitz
 from PIL import Image
 
+from media import MEDIA, local
+
 SRC = Path(__file__).resolve().parent.parent
-OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else SRC / "pdf"
+OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else MEDIA / "pdf"
 PDF_OUT = OUT / "food-ai-sourcebook.pdf"
 TITLE = "Food and AI: A Sourcebook on AI-Generated Menu Imagery"
 KEYWORDS = "AI food images, menus, uncanny valley, disgust, restaurants, generative AI, Sweden, SVT"
@@ -303,7 +305,7 @@ reporting describes growing sensitivity and backlash. Restaurants have also begu
 def ch_guardian():
     m = meta("guardian")
     figs = "".join(
-        figure(f"figure-2-{i+1}", SRC / "guardian" / im["file"], "The Guardian", im["caption_or_alt"],
+        figure(f"figure-2-{i+1}", local("guardian/" + im["file"]), "The Guardian", im["caption_or_alt"],
                IMAGE_NOTES[f"guardian/{im['file']}"], f"guardian/{im['file']}")
         for i, im in enumerate(m["images"]))
     text = read("guardian/content.txt")
@@ -325,7 +327,7 @@ def ch_guardian():
 def ch_cnn():
     m = meta("cnn")
     figs = "".join(
-        figure(f"figure-3-{i+1}", SRC / "cnn" / im["file"], "CNN", im["caption_or_alt"],
+        figure(f"figure-3-{i+1}", local("cnn/" + im["file"]), "CNN", im["caption_or_alt"],
                IMAGE_NOTES[f"cnn/{im['file']}"], f"cnn/{im['file']}",
                cls="tall" if i == 0 else ("thumb" if i == 1 else ""))
         for i, im in enumerate(m["images"]))
@@ -427,7 +429,7 @@ spicy”) and is signed “Mandarin …”.</p>
   the street with the Swedish captions listed above. The second frame shows the AI-generated
   “MALATANG – Nu på buffén!” poster used as an example.</p></figcaption>
 </figure>
-{figure("figure-4-2", SRC / thumb, "Instagram", "Thumbnail for Jenny Frennberg’s reel about AI-generated menu images.",
+{figure("figure-4-2", local(thumb), "Instagram", "Thumbnail for Jenny Frennberg’s reel about AI-generated menu images.",
         IMAGE_NOTES[thumb], thumb, max_side=700, cls="thumbsmall")}
 </section>
 """
@@ -479,7 +481,7 @@ def ch_reddit():
 restaurants having AI-generated menus?</i> “Can’t people choose food without Pikachu looking
 on encouragingly? I understand if it’s for kids, but at restaurants with a mainly adult clientele
 surely you can sit down and make a menu yourself.”</p>
-{figure("figure-5-1", SRC / img, "Reddit r/sweden", m["images"][0]["caption_or_alt"], IMAGE_NOTES[img], img, cls="tall")}
+{figure("figure-5-1", local(img), "Reddit r/sweden", m["images"][0]["caption_or_alt"], IMAGE_NOTES[img], img, cls="tall")}
 
 <h3>5.2 Summary of the discussion (written for this book)</h3>
 <p>The thread centres on an AI-generated animated menu screen at the street-food counter of ICA
@@ -585,7 +587,7 @@ TikTok users coined the term “AI slop menus”, and that Adaeze Onejeme posted
 def appendices():
     rows = []
     for d in ["guardian", "cnn", "instagram", "reddit", "nytimes", "tiktok"]:
-        files = sorted(p.relative_to(SRC).as_posix() for p in (SRC / d).rglob("*") if p.is_file())
+        files = sorted({p.relative_to(root).as_posix() for root in (SRC, MEDIA) for p in (root / d).rglob("*") if p.is_file()})
         rows.append(f"<tr><td>{d}</td><td>{esc(meta(d)['url'])}</td><td>{'<br>'.join(esc(f) for f in files)}</td></tr>")
     return f"""
 <section>
@@ -687,7 +689,7 @@ dd { margin-left: 14pt; }
 
 
 def build_frames():
-    mp4 = SRC / "instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4"
+    mp4 = local("instagram/Video_by_jennyfrennberg-DeUPt1mIz5n.mp4")
     frames = []
     for t in FRAME_TIMES:
         png = subprocess.run(

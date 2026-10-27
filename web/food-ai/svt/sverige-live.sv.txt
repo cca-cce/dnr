@@ -1,0 +1,100 @@
+[0:00] Ni där hemma är med oss.
+[0:01] Men nu ska vi till Lund.
+[0:03] Allt fler restauranger använder sig av
+[0:06] AI-genererade bilder på maträtter på sina menyer.
+[0:10] Eller hur, Joel Sund?
+[0:12] Många är rätt så kritiska till det här med AI-genererade menyer.
+[0:17] Hur ser det ut?
+[0:21] När jag har tittat på det här har jag sett exempel från runtom i världen.
+[0:25] I Sverige, i de flesta städer, men också i Los Angeles,
+[0:29] New York, Sydafrika, Filippinerna. Det här är en grej
+[0:33] som pågår just nu, som har spridit sig från den digitala
+[0:36] världen till den fysiska världen, till samhället.
+[0:39] På restaurangernas menyer och reklamplatser ser man de här
+[0:43] AI-genererade bilderna på mat, och det väcker väldigt mycket känslor.
+[0:47] Online ser man diskussioner om att det är ett brott mot mänskligheten.
+[0:52] Man säger att det är äckligt, att det ser plastigt ut, att det inte ser verkligt ut.
+[0:56] Det är inte aptitligt, säger många.
+[0:58] Så det pågår väldigt stora diskussioner om det här.
+[1:02] Det är många som inte tycker om den här utvecklingen.
+[1:04] Men det här handlar ju om bilder,
+[1:06] det handlar om kommunikation, och jag har med mig en expert på det här ämnet.
+[1:10] Det är Nils Holmberg, som är forskare i kommunikation vid Lunds universitet.
+[1:15] Du kan mycket mer om det här.
+[1:17] Skulle inte du bara kunna berätta om varför den här utvecklingen sker just nu?
+[1:21] Jo, men det är en jättespännande utveckling, och jag tror att vi ser det här
+[1:24] just nu för att det kastar oss rakt in i den här nya utvecklingen med generativ AI.
+[1:30] Det är möjligt för oss att skapa text och bild på ett helt
+[1:34] nytt sätt som inte var möjligt för kanske två år sedan.
+[1:37] Jag tror att det är väldigt många inom olika branscher,
+[1:41] olika verksamheter, som vill testa det här och se om man kan spara lite
+[1:45] pengar kanske på att generera professionella bilder i stället för att ta
+[1:49] professionella bilder med hjälp av fotografer och så vidare.
+[1:53] Och se om man kommer undan med det, om konsumenterna reagerar på det.
+[1:57] I vissa fall tror jag kanske att det fungerar med AI-genererade bilder.
+[2:02] I andra fall kanske lite mindre bra.
+[2:05] Varför reagerar så många så negativt på AI-genererade bilder på mat?
+[2:10] Det är också jätteintressant.
+[2:13] Bilder på mat är en speciell genre av bilder.
+[2:18] Det finns olika förklaringar till det.
+[2:21] En förklaring är att bilder på mat faktiskt fungerar.
+[2:24] När vi ser en färgstark bild på en hamburgare eller annan snabbmat
+[2:30] kanske vi blir hungriga, så det påverkar oss fysiologiskt.
+[2:36] Att det fungerar innebär också att det finns
+[2:39] vissa regler för hur de här bilderna får se ut.
+[2:45] De får inte lova för mycket,
+[2:47] för då kanske vi blir besvikna på den maten vi får in sen.
+[2:53] Men de får heller inte på nåt sätt
+[2:55] vara onaturliga eller ha små...
+[3:02] små skillnader från den riktiga bilden.
+[3:07] Det finns en evolutionär förklaring till det här.
+[3:11] Under lång tid har människan utvecklats
+[3:15] för att lära sig att se och känna
+[3:18] igen små felaktigheter i mat, för att
+[3:21] vårt liv helt enkelt är beroende av det.
+[3:27] Äter vi dålig mat, så dör vi.
+[3:29] Det här har lärts in under årmiljoner.
+[3:34] När vi ser AI-genererad mat,
+[3:38] och det kanske är nåt fel i texturen, i
+[3:41] ljussättningen eller små felaktigheter i
+[3:45] färgerna, så reagerar vi starkt på det.
+[3:49] Det triggar responsen att nåt är fel med maten.
+[3:54] Hur blir det framåt?
+[3:56] Kommer vi att förändra vår syn på AI-genererade bilder?
+[4:02] Jag tror att vi kommer att förändras i vårt
+[4:07] förhållande till AI-genererade matbilder.
+[4:11] Jag tror att vi kommer att bli mer vana vid
+[4:16] AI-genererade bilder och syntetiska medier överlag.
+[4:20] Så en utveckling man kan tänka sig är att vi kommer att bli mer
+[4:25] accepterande i och med att vi förstår hur tekniken fungerar.
+[4:32] En annan tänkbar inriktning är att just matbilder
+[4:36] kanske är nånting som vi också fortsättningsvis
+[4:39] kommer att vilja ha riktiga bilder på, där det helt
+[4:43] enkelt inte riktigt duger med AI-genererade bilder.
+[4:46] Men AI-genererade bilder som helhet tror jag är här för att
+[4:50] stanna inom en massa andra branscher och inom marknadsföring.
+[4:54] Men kanske lite tveksamt när det gäller just matbilder.
+[4:59] Tittar man online på de stora diskussionerna,
+[5:02] där folk är väldigt hårda mot de här bilderna,
+[5:06] så pratar man om uncanny valley.
+[5:08] Hur spelar det in i just det här?
+[5:10] Det är ett spännande begrepp, och det används mycket inom robotik
+[5:15] och AI-forskning, där det har visat sig att om man kan bygga en
+[5:18] robot som är någorlunda lik en människa, så innebär mänskliga
+[5:23] användares responser att man får
+[5:27] mer förtroende för den här roboten.
+[5:32] Det här fungerar ganska så...
+[5:39] Det fungerar som så att ju mer likt nånting blir, desto
+[5:45] mer familjärt blir det och desto mer förtroende får vi.
+[5:48] Till en viss gräns – när det blir för likt och det bara är små,
+[5:52] små skillnader, då får vi plötsligt en väldigt stor,
+[5:56] uncanny olustkänsla inför det här stimulit.
+[6:02] Tusen tack, Nils Holmberg.
+[6:04] Jag kommer tillbaka in i bild och tackar.
+[6:07] Jovan, vad säger du om AI-matbilderna?
+[6:11] Blir du sugen på mat eller inte?
+[6:13] Tack, Joel.
+[6:14] Tyvärr blir jag nog inte sugen på mat.
+[6:16] Jag vill nog gärna ha riktiga bilder och se det jag får på tallriken.
+[6:22] Från AI till verkligheten och Janicke.
+[6:26] Veckans väder ska vi prata om.

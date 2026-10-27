@@ -14,8 +14,8 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from media import MEDIA, ROOT, is_media
 
-ROOT = Path(__file__).resolve().parent.parent
 USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
@@ -114,8 +114,8 @@ def article_images(soup: BeautifulSoup, source: str) -> list[tuple[str, str]]:
 
 
 def download_images(source: str, items: list[tuple[str, str]]) -> list[dict[str, str]]:
-    output_dir = ROOT / source / "images"
-    output_dir.mkdir(exist_ok=True)
+    output_dir = MEDIA / source / "images"
+    output_dir.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
     records: list[dict[str, str]] = []
@@ -171,8 +171,8 @@ def process_instagram() -> dict:
             "duration_seconds": info.get("duration"),
             "timestamp": info.get("timestamp"),
             "download_status": "complete",
-            "media_files": sorted(p.name for p in directory.glob("*.mp4")),
-            "thumbnail_files": sorted(p.name for p in directory.glob("*.jpg")),
+            "media_files": sorted(p.name for p in (MEDIA / "instagram").glob("*.mp4")),
+            "thumbnail_files": sorted(p.name for p in (MEDIA / "instagram").glob("*.jpg")),
             "subtitle_files": sorted(p.name for p in directory.glob("*.vtt")),
             "transcript_files": sorted(p.name for p in directory.glob("transcript-*.txt")),
         }
@@ -267,12 +267,16 @@ def process_limited_sources() -> list[dict]:
 
 
 def write_manifest() -> None:
-    lines = []
-    for path in sorted(ROOT.rglob("*")):
-        if not path.is_file() or path.name == "MANIFEST.sha256":
-            continue
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        lines.append(f"{digest}  {path.relative_to(ROOT)}")
+    """Checksums for the whole archive: text files from the repo, binary media from the local mirror (same paths)."""
+    files = {}
+    for root, want_media in ((ROOT, False), (MEDIA, True)):
+        for path in root.rglob("*"):
+            rel = path.relative_to(root)
+            if (path.is_file() and is_media(rel) == want_media and "__pycache__" not in rel.parts
+                    and not (root == MEDIA and rel.parts[0].startswith("."))):   # hf download's .cache/
+                files[rel] = path
+    files.pop(Path("MANIFEST.sha256"), None)
+    lines = [f"{hashlib.sha256(files[rel].read_bytes()).hexdigest()}  {rel}" for rel in sorted(files)]
     (ROOT / "MANIFEST.sha256").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

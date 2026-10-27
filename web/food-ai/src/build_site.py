@@ -10,16 +10,16 @@ import re
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parent.parent
+from media import HF_DATASET, MEDIA, ROOT, is_media, local
+
 PAGES = ROOT / "pages"
 ASSETS = ROOT / "web-assets"
 
 # Binary media are served from the Hugging Face dataset repo, whose paths mirror
-# this archive (see src/publish_assets.sh). FOOD_AI_LOCAL_ASSETS=1 builds with
-# relative links to the local copies instead, for offline preview.
-HF_DATASET = "nils-holmberg/food-ai"
+# this archive (see src/media.py and src/publish_assets.sh). FOOD_AI_LOCAL_ASSETS=1
+# builds relative links instead, for an offline preview served with
+# rangeserver.py --overlay web/food-ai=/data/media/food-ai (media come from the mirror).
 ASSET_BASE = f"https://huggingface.co/datasets/{HF_DATASET}/resolve/main/"
-REMOTE_SUFFIXES = {".mp4", ".jpg", ".pdf"}
 LOCAL_ASSETS = os.environ.get("FOOD_AI_LOCAL_ASSETS") == "1"
 
 SUMMARIES = {
@@ -60,7 +60,35 @@ SOURCE_LABELS = {
 
 SOURCE_ORDER = ["guardian", "cnn", "instagram", "reddit", "tiktok", "nytimes"]
 
-PDF_DIR = ROOT / "pdf"
+# The two SVT pieces (26 October 2026) the archive was compiled for; files in svt/ (see svt/metadata.json).
+SVT_DIR = ROOT / "svt"
+SVT_LANGS = [("en", "English"), ("sv", "Svenska"), ("de", "Deutsch")]
+SVT_CLIPS = [
+    {
+        "id": "nyheter-helsingborg",
+        "title": "Forskaren: Därför väcker AI-bilder på mat ilska",
+        "programme": "SVT Nyheter Helsingborg",
+        "length": "1 min 14 s",
+        "portrait": True,
+        "summary": (
+            "A short vertical piece for svt.se: why we are evolutionarily alert to food that looks slightly wrong, "
+            "why food images affect us physiologically, and how technology acceptance may soften reactions over time."
+        ),
+    },
+    {
+        "id": "sverige-live",
+        "title": "Sverige Live: live from Lund",
+        "programme": "Sverige Live, SVT1",
+        "length": "6 min 30 s",
+        "portrait": False,
+        "summary": (
+            "A live segment from Lund with Joel Sund: why restaurants try generated images now, why food is a special "
+            "genre, the evolutionary account of disgust, the uncanny valley, and whether we will get used to it."
+        ),
+    },
+]
+
+PDF_DIR = MEDIA / "pdf"
 REF_DIR = ROOT / "references"
 BIB_FILE = REF_DIR / "food-ai.bib"
 
@@ -105,7 +133,7 @@ PDF_EDITIONS = [
 
 def asset(path: str, prefix: str = "../", *, download: bool = False) -> str:
     """URL for an archive file: the HF dataset copy for binary media, else a relative link."""
-    if LOCAL_ASSETS or Path(path).suffix.lower() not in REMOTE_SUFFIXES:
+    if LOCAL_ASSETS or not is_media(path):
         return prefix + path
     return ASSET_BASE + path + ("?download=true" if download else "")
 
@@ -139,6 +167,7 @@ def shell(title: str, content: str, *, prefix: str = "../", body_class: str = ""
       <span>Food / AI <em>Sourcebook</em></span>
     </a>
     <nav aria-label="Primary navigation">
+      <a href="{prefix}pages/svt.html">Interviews</a>
       <a href="{prefix}pages/images.html">Images</a>
       <a href="{prefix}pages/videos.html">Video</a>
       <a href="{prefix}pages/texts.html">Texts</a>
@@ -192,6 +221,10 @@ def pdf_card(filename: str, kind: str, title: str, summary: str) -> str:
 def build_index() -> None:
     cards = "\n".join(source_card(source) for source in SOURCE_ORDER)
     pdf_cards = "\n".join(pdf_card(*edition) for edition in PDF_EDITIONS if (PDF_DIR / edition[0]).exists())
+    svt_stills = "".join(
+        f"""<a class="still{' portrait' if clip['portrait'] else ''}" href="pages/svt.html#{clip['id']}"><img src="{asset(f"svt/{clip['id']}.jpg", '')}" alt="Still from {html.escape(clip['title'])}"><span>{html.escape(clip['programme'])} · {clip['length']}</span></a>"""
+        for clip in SVT_CLIPS
+    )
     if BIB_FILE.exists():
         pdf_cards += f"""
 <article class="source-card">
@@ -220,6 +253,20 @@ def build_index() -> None:
     <figure class="tile tile-small"><img src="{asset('cnn/images/image-01.jpg', '')}" alt="Uncanny generated shrimp food image"><figcaption>Shrimp scampi · CNN source</figcaption></figure>
     <figure class="tile tile-tall"><img src="{asset('reddit/images/image-01.jpg', '')}" alt="AI-generated restaurant menu shared on Reddit"><figcaption>Swedish discussion · Reddit</figcaption></figure>
   </div>
+</section>
+
+<section class="interview-hero" aria-labelledby="interview-title">
+  <div class="interview-copy">
+    <p class="kicker">On air · SVT Helsingborg · 26 October 2026</p>
+    <h2 id="interview-title">The interviews <span>with Joel Sund</span></h2>
+    <p class="dek">The sourcebook was compiled to prepare two SVT pieces. Reporter Joel Sund asks Nils Holmberg, researcher in communication at Lund University, why AI-generated food images make so many people angry: in a short clip for SVT Nyheter Helsingborg and in a live segment on Sverige Live.</p>
+    <div class="hero-actions">
+      <a class="button primary" href="pages/svt.html">Watch both interviews</a>
+      <a class="button secondary" href="pages/svt.html#sverige-live">Sverige Live segment · 6½ min</a>
+    </div>
+    <p class="interview-langs">Subtitles in English, Svenska and Deutsch · searchable transcripts</p>
+  </div>
+  <div class="interview-stills">{svt_stills}</div>
 </section>
 
 <section class="stats" aria-label="Archive at a glance">
@@ -449,6 +496,77 @@ def build_video_page() -> None:
     write(PAGES / "videos.html", shell("Video", content, body_class="collection-page"))
 
 
+def vtt_cues(path: Path) -> list[tuple[float, float, str]]:
+    """(start, end, text) for each cue of a WebVTT file."""
+    def seconds(stamp: str) -> float:
+        h, m, s = stamp.strip().split(" ")[0].split(":")
+        return int(h) * 3600 + int(m) * 60 + float(s)
+    cues = []
+    for block in re.split(r"\n{2,}", path.read_text(encoding="utf-8").strip()):
+        lines = block.splitlines()
+        timing = next((i for i, line in enumerate(lines) if "-->" in line), None)
+        if timing is not None:
+            start, end = lines[timing].split("-->")
+            cues.append((seconds(start), seconds(end), " ".join(lines[timing + 1:])))
+    return cues
+
+
+def clock(t: float) -> str:
+    return f"{int(t) // 60}:{int(t) % 60:02d}"
+
+
+def svt_clip(clip: dict, meta: dict) -> str:
+    cid = clip["id"]
+    info = next(c for c in meta["clips"] if c["id"] == cid)
+    tracks = "".join(
+        f'<track kind="subtitles" srclang="{lang}" label="{label}" src="../svt/{cid}.{lang}.vtt"{" default" if i == 0 else ""}>'
+        for i, (lang, label) in enumerate(SVT_LANGS)
+    )
+    tabs = "".join(
+        f'<button type="button" data-lang="{lang}"' + (' class="active"' if i == 0 else "") + f">{label}</button>"
+        for i, (lang, label) in enumerate(SVT_LANGS)
+    )
+    lists = "".join(
+        f'<ol class="cue-list" data-cues="{lang}"{"" if i == 0 else " hidden"}>'
+        + "".join(
+            f'<li><button type="button" data-start="{start:.2f}" data-end="{end:.2f}"><time>{clock(start)}</time><span>{html.escape(text)}</span></button></li>'
+            for start, end, text in vtt_cues(SVT_DIR / f"{cid}.{lang}.vtt")
+        )
+        + "</ol>"
+        for i, (lang, _) in enumerate(SVT_LANGS)
+    )
+    downloads = " · ".join(f'<a href="../svt/{cid}.{lang}.txt">{label} (.txt)</a>' for lang, label in SVT_LANGS)
+    return f"""
+<section class="interview" id="{cid}" data-clip>
+  <div class="interview-screen{' portrait' if clip['portrait'] else ''}">
+    <video controls preload="metadata" playsinline poster="{asset(f'svt/{cid}.jpg')}">
+      <source src="{asset(f'svt/{cid}.mp4')}" type="video/mp4">{tracks}
+      Your browser cannot play this video. <a href="{asset(f'svt/{cid}.mp4', download=True)}">Download it instead.</a>
+    </video>
+  </div>
+  <div class="interview-side">
+    <p class="kicker">{html.escape(clip['programme'])} · {html.escape(info['published'])} · {clip['length']}</p>
+    <h2>{html.escape(clip['title'])}</h2>
+    <p>{html.escape(clip['summary'])}</p>
+    <div class="cue-tools">
+      <div class="lang-tabs" role="group" aria-label="Subtitle and transcript language">{tabs}</div>
+      <input type="search" placeholder="Search transcript" aria-label="Search transcript" data-cue-search>
+    </div>
+    <div class="cue-box">{lists}</div>
+    <p class="download-line"><a href="{html.escape(info['url'])}" target="_blank" rel="noreferrer">Original on SVT ↗</a> · Transcripts: {downloads}</p>
+  </div>
+</section>"""
+
+
+def build_svt_page() -> None:
+    meta = json.loads((SVT_DIR / "metadata.json").read_text(encoding="utf-8"))
+    content = f"""
+<section class="collection-hero"><a class="back-link" href="../index.html">← Home</a><p class="kicker">SVT Helsingborg · 26 October 2026</p><h1>The interviews<br>with Joel Sund</h1><p class="dek">Two SVT pieces in which reporter Joel Sund talks to Nils Holmberg, researcher in communication at Lund University, about why AI-generated food images provoke such strong reactions. Choose a subtitle language; click any line of the transcript to jump there.</p></section>
+{''.join(svt_clip(clip, meta) for clip in SVT_CLIPS)}
+<section class="source-section"><p class="text-detail">{html.escape(meta['subtitles'])} Video {html.escape(meta['rights'])} <a href="../svt/metadata.json">Metadata</a> · <a href="../svt/content.txt">Swedish transcripts as text</a></p></section>"""
+    write(PAGES / "svt.html", shell("SVT interviews", content, body_class="collection-page"))
+
+
 def excerpt(source: str, paragraphs: int = 2) -> str:
     text = (ROOT / source / "content.txt").read_text(encoding="utf-8")
     blocks = [re.sub(r"^#+\s*", "", b.strip()) for b in re.split(r"\n\s*\n", text) if b.strip()]
@@ -585,7 +703,7 @@ def bib_note(entry: dict[str, str], keys: set[str]) -> str:
 
 def bib_links(entry: dict[str, str]) -> str:
     links = []
-    if entry.get("file") and (REF_DIR / entry["file"]).exists():
+    if entry.get("file") and local("references/" + entry["file"]).exists():
         links.append(f'<a href="{asset("references/" + entry["file"])}" target="_blank" rel="noopener">Full text (PDF) ↗</a>')
     if entry.get("doi"):
         doi = entry["doi"]
@@ -631,6 +749,7 @@ def main() -> None:
     build_limited_page("nytimes")
     build_images_page()
     build_video_page()
+    build_svt_page()
     build_texts_page()
     build_references_page()
 

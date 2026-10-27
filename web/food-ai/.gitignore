@@ -1,5 +1,7 @@
 # Binary media are hosted on https://huggingface.co/datasets/nils-holmberg/food-ai
-# (upload with src/publish_assets.sh); local copies stay on disk for builds.
+# (upload with src/publish_assets.sh). The local copies live outside the repo, in the
+# mirror /data/media/food-ai (see src/media.py); these rules are a safety net.
 *.mp4
 *.jpg
 *.pdf
+__pycache__/
