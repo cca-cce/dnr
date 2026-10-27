@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MEDIA = Path(os.environ.get("FOOD_AI_MEDIA", "/data/media/food-ai"))
-MEDIA_SUFFIXES = {".mp4", ".m4a", ".jpg", ".png", ".pdf"}
+MEDIA_SUFFIXES = {".mp4", ".m4a", ".jpg", ".png", ".pdf", ".svg", ".ico"}
 HF_DATASET = "nils-holmberg/food-ai"
 
 

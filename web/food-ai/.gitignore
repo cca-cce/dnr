@@ -6,4 +6,6 @@
 *.pdf
 *.png
 *.m4a
+*.svg
+*.ico
 __pycache__/

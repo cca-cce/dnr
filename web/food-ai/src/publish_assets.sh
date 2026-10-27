@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Upload the site's binary media (MP4, M4A, JPG, PNG, PDF) and the dataset card to the
+# Upload the site's binary media (MP4, M4A, JPG, PNG, PDF; SVG/ICO logo and favicons) and the dataset card to the
 # Hugging Face dataset repo that the website embeds them from.
 #
 # The media are kept outside the git repo, in a local mirror of the dataset
@@ -18,7 +18,8 @@ MEDIA="${FOOD_AI_MEDIA:-/data/media/food-ai}"
 
 hf repos create "$REPO" --type dataset --public --exist-ok
 hf upload "$REPO" "$MEDIA" . --type dataset \
-  --include "*.mp4" --include "*.m4a" --include "*.jpg" --include "*.png" --include "*.pdf" --exclude ".cache/*" \
+  --include "*.mp4" --include "*.m4a" --include "*.jpg" --include "*.png" --include "*.pdf" \
+  --include "*.svg" --include "*.ico" --exclude ".cache/*" \
   --commit-message "Sync site media"
 hf upload "$REPO" "$ROOT/src/hf/README.md" README.md --type dataset \
   --commit-message "Update dataset card"

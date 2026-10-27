@@ -22,10 +22,10 @@ button, input { font: inherit; }
 
 .skip-link { position: fixed; top: .75rem; left: .75rem; z-index: 100; padding: .6rem .9rem; background: var(--ink); color: white; transform: translateY(-200%); }
 .skip-link:focus { transform: none; }
-.topbar { position: sticky; top: 0; z-index: 20; min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: .8rem clamp(1.1rem, 4vw, 4rem); border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(14px); }
+.topbar { position: sticky; top: 0; z-index: 20; min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: .8rem clamp(1.1rem, 4vw, 4rem); border-bottom: 1px solid #3a352d; color: var(--paper); background: color-mix(in srgb, var(--ink) 94%, transparent); backdrop-filter: blur(14px); color-scheme: dark; }   /* same dark as the video sections */
 .brand { display: flex; align-items: center; gap: .7rem; font-weight: 750; text-decoration: none; letter-spacing: -.02em; }
 .brand em { font-family: var(--serif); font-weight: 400; }
-.brand-mark { display: grid; place-items: center; width: 2.35rem; aspect-ratio: 1; border-radius: 50%; color: var(--paper); background: var(--tomato); font-size: .72rem; letter-spacing: .04em; }
+.brand-mark { display: block; width: 2.35rem; height: 2.35rem; border-radius: 22%; }   /* site author's logo (brand/avatar-256.svg on HF) */
 .topbar nav { display: flex; gap: clamp(.8rem, 3vw, 2rem); font-size: .88rem; font-weight: 700; }
 .topbar nav a { text-decoration: none; }
 .topbar nav a:hover { color: var(--tomato); }

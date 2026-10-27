@@ -177,7 +177,9 @@ def shell(title: str, content: str, *, prefix: str = "../", body_class: str = ""
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A sourcebook about AI-generated food imagery in menus and advertising.">
   <title>{html.escape(title)} · Food / AI Sourcebook</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23dc4f32'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Arial' font-size='19' font-weight='700' fill='white'%3EF/A%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="{asset('brand/favicon.ico', prefix)}" sizes="16x16 32x32">
+  <link rel="icon" href="{asset('brand/avatar-256.svg', prefix)}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{asset('brand/avatar-favicon-180.png', prefix)}">
   <link rel="stylesheet" href="{prefix}web-assets/site.css">
   <script defer src="{prefix}web-assets/site.js"></script>
 </head>
@@ -185,7 +187,7 @@ def shell(title: str, content: str, *, prefix: str = "../", body_class: str = ""
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="topbar">
     <a class="brand" href="{prefix}index.html" aria-label="Food and AI Sourcebook home">
-      <span class="brand-mark" aria-hidden="true">F/A</span>
+      <img class="brand-mark" src="{asset('brand/avatar-256.svg', prefix)}" alt="" width="38" height="38">
       <span>Food / AI <em>Sourcebook</em></span>
     </a>
     <nav aria-label="Primary navigation">

@@ -39,6 +39,7 @@ File paths mirror the website layout, so a site path `X` is served at
 | `notebook/ai-menu-imagery-infographic.png` / `.jpg` | *AI Menu Imagery: Why Fake Food Is Backfiring on Restaurants*, an infographic generated with Gemini Notebook (2752×1536 PNG, 1600 px JPG preview) |
 | `notebook/the-uncanny-menu.pdf`, `notebook/the-uncanny-menu/slide-NN.jpg` | *The Uncanny Menu*, a 15-slide AI-generated deck made with Gemini Notebook (image-only PDF, 1376×768 pt), and each slide as a 1600 px JPG |
 | `notebook/why-ai-food-menus-disgust-us.m4a` | *Why AI Food Menus Disgust Us*, an AI-generated audio overview made with Gemini Notebook (25 min 34 s, AAC) |
+| `brand/avatar-256.svg`, `brand/favicon.ico`, `brand/avatar-favicon-{32,180,192}.png` | The archive author's logo, used in the website's navigation bar and as its favicon |
 
 SHA-256 checksums for every file are listed in `web/food-ai/MANIFEST.sha256` in the GitHub repository.
 
@@ -55,6 +56,7 @@ SHA-256 checksums for every file are listed in `web/food-ai/MANIFEST.sha256` in 
   Subtitles (Swedish, English, German) are served with the website from GitHub.
 - The files in `notebook/` are AI-generated with Google's Gemini Notebook and published by the archive's author as
   machine-made summaries; they may contain errors (the website fact-checks the infographic's figures).
+- The logo in `brand/` belongs to the archive's author (Nils Holmberg) and is not licensed for reuse.
 - The PDF editions are compilations of the material above, plus editorial descriptions, translations and summaries.
 
 Rights holders who want a file removed can open a discussion on this repository.
